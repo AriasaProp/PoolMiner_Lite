@@ -10,8 +10,8 @@ uint32_t mineblock(uint32_t, char*, char*, char*, char*, char*);
 void hashblock(uint32_t, char*, char*, char*, char*, char*, uint32_t*);
 void bits_to_difficulty(uint32_t , uint32_t*);
 //util
-void print_bytes(const unsigned char *, size_t, bool);
-void print_bytes_reversed(const unsigned char *, size_t, bool);
+void print_bytes(const unsigned char *, size_t, bool = true);
+void print_bytes_reversed(const unsigned char *, size_t, bool = true);
 uint32_t Reverse32(uint32_t);
 unsigned char* hexstr_to_char(const char*);
 void hexstr_to_intarray(const char*, uint32_t*);
@@ -146,7 +146,7 @@ uint32_t mineblock(uint32_t noncestart, char* version, char* prevhash,
 
 //util
 
-void print_bytes(const unsigned char *data, size_t dataLen, bool format = true) {
+void print_bytes(const unsigned char *data, size_t dataLen, bool format) {
     for(size_t i = 0; i < dataLen; ++i) {
         std::cout << std::hex << std::setw(2) << (int)data[i];
         if (format) {
@@ -156,7 +156,7 @@ void print_bytes(const unsigned char *data, size_t dataLen, bool format = true) 
     std::cout << std::endl;
 }
 
-void print_bytes_reversed(const unsigned char *data, size_t dataLen, bool format = true) {
+void print_bytes_reversed(const unsigned char *data, size_t dataLen, bool format) {
     for(size_t i = dataLen; i > 0; i--) {
         std::cout << std::hex << std::setw(2) << (int)data[i - 1];
         if (format) {

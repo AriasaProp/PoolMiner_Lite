@@ -12,14 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3.5.2
       - name: Gradle Test Core
-        if: ${{ contains(github.event.head_commit.added, 'core/') || contains(github.event.head_commit.modified, 'core/') }}
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4
           arguments: ":core:test"
 
       - name: Gradle Test Android
-        if: ${{ contains(github.event.head_commit.added, 'android/') || contains(github.event.head_commit.modified, 'android/') }}
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4

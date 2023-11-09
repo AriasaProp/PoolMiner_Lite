@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <color name="btnMine_startLighten">#0044FF</color>
+    <color name="btnMine_startDarken">#00209C</color>
+    <color name="btnMine_startDisable">#6000209C</color>
+    
+    <color name="btnMine_stopLighten">#FC0000</color>
+    <color name="btnMine_stopDarken">#9A0000</color>
+    <color name="btnMine_stopDisable">#609A0000</color>
+    
+    <color name="opositeTransparent">#50FFFFFF</color>
+    <color name="oposite">#FFFFFF</color>
+    <color name="base">#000000</color>
+    
+    <color name="background_start">#00B000</color>
+    <color name="background_end">#000000</color>
+</resources>

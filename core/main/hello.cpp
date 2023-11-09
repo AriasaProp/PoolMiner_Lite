@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include "PoolMiner_Lite.h"
+#include "PoolMiner_Lite.hpp"
 
 std::string PoolMiner_Lite::Greeter::greeting() {
     return std::string("Hello, World!");

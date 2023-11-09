@@ -1,0 +1,21 @@
+<resources>
+    <style name="BaseTheme" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">#FF0F0F0F</item>
+        <item name="android:colorPrimary">#FFFFFFFF</item>
+        <item name="android:colorPrimaryDark">#FF333333</item>
+        <item name="android:colorAccent">#FF259024</item>
+        <item name="android:textColor">#FF050505</item>
+    </style>
+
+    <style name="AppTheme" parent="BaseTheme">
+        <item name="android:windowBackground">@drawable/main_background</item>
+    </style>
+    
+    <style name="OwnSeekBar" parent="Widget.AppCompat.SeekBar">
+        <item name="android:progressDrawable">@drawable/seekbar_progress_style</item>
+        <item name="android:thumb">@drawable/seekbar_thumb</item>
+        <item name="android:splitTrack">false</item>
+    </style>
+    
+    
+</resources>

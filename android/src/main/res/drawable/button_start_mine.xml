@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" >
+        <shape  android:shape="rectangle">
+            <solid android:color="@color/btnMine_startDisable" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item
+        android:state_enabled="true"
+        android:state_pressed="false" >
+        <shape>
+            <gradient
+                android:angle="270"
+                android:centerX="0.5"
+                android:centerY="0.8"
+                android:startColor="@color/btnMine_startLighten"
+                android:centerColor="@color/btnMine_startLighten"
+                android:endColor="@color/btnMine_startDarken" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item
+        android:state_enabled="true"
+        android:state_pressed="true" >
+        <shape>
+            <solid android:color="@color/btnMine_startDarken" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</selector>

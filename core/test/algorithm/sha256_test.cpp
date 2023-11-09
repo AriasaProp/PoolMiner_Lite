@@ -1,4 +1,4 @@
-#include "sha256.hpp"
+#include "../algorithm/sha256.hpp"
 #include <iostream>
 #include <iomanip>
 #include <cstring>

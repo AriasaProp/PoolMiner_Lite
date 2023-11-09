@@ -16,7 +16,7 @@ android {
         applicationId 'com.ariasaproject.poolminerlite'
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 0
+        versionCode 1
         versionName 'v0.0.0'
         signingConfig signingConfigs.mainSign
         multiDexEnabled true

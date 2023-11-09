@@ -6,15 +6,15 @@
 #include <cstdint>
 
 //miner
-uint32_t mineblock(uint32_t noncestart, char* version, char* prevhash, char* merkle_root, char* time, char* nbits);
-void hashblock(uint32_t nonce, char* version, char* prevhash, char* merkle_root, char* time, char* nbits, uint32_t* result);
-void bits_to_difficulty(uint32_t bits, uint32_t* difficulty);
+uint32_t mineblock(uint32_t, char*, char*, char*, char*, char*);
+void hashblock(uint32_t, char*, char*, char*, char*, char*, uint32_t*);
+void bits_to_difficulty(uint32_t , uint32_t*);
 //util
-void print_bytes(const unsigned char *data, size_t dataLen, bool format = true);
-void print_bytes_reversed(const unsigned char *data, size_t dataLen, bool format = true);
-uint32_t Reverse32(uint32_t value);
-unsigned char* hexstr_to_char(const char* hexstr);
-void hexstr_to_intarray(const char* hexstr, uint32_t* outputloc);
+void print_bytes(const unsigned char *, size_t, bool);
+void print_bytes_reversed(const unsigned char *, size_t, bool);
+uint32_t Reverse32(uint32_t);
+unsigned char* hexstr_to_char(const char*);
+void hexstr_to_intarray(const char*, uint32_t*);
 
 bool algorithm_mining_sha256_test()
 {

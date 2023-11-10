@@ -9,15 +9,28 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+        ifcore: ${{ steps.filter.outputs.ifcore }}
+        ifandroid: ${{ steps.filter.outputs.ifandroid }}
     steps:
-      - uses: actions/checkout@v3.5.2
+      - name: Checkout
+        uses: actions/checkout@v3.5.2
+      - name: Filter Changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+              ifcore: 'core/**'
+              ifandroid: 'android/**'
       - name: Gradle Test Core
+        if: ${{ needs.paths-filter.outputs.ifcore }}
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4
           arguments: :core:test
 
       - name: Gradle Test Android
+        if: ${{ needs.paths-filter.outputs.ifandroid }}
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4

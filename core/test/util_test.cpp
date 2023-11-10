@@ -1,10 +1,9 @@
+#include <iostream>
 #include "util.hpp"
 
 bool number_test () {
-
-  std::cout << num.getHex () << std::endl;
-  std::cout << num.getBinary () << std::endl;
-  std::cout << num.getDecimal () << std::endl;
-
+  
+  std::cout << "Util test is empty" << std::endl;
+  
   return true;
 }

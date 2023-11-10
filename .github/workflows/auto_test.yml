@@ -15,10 +15,10 @@ jobs:
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4
-          arguments: ":core:test"
+          arguments: :core:test
 
       - name: Gradle Test Android
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4
-          arguments: ":android:test"
+          arguments: :android:test

@@ -29,10 +29,41 @@ public class MainActivity extends AppCompatActivity {
     static {
         System.loadLibrary("ext");
     }
+ 
+    MinerService.LocalBinder dataService = null;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
- 
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            dataService = (MinerService.LocalBinder) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, MinerService.class);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (dataService != null) {
+            unbindService(serviceConnection);
+            dataService = null;
+        }
+    }
+
+
 }

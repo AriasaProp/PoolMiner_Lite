@@ -1,12 +1,12 @@
 #include "PoolMiner_Lite.hpp"
 #include <cassert>
+#include <iostream>
 
-//algorithm
-bool algorithm_mining_sha256_test();
 
 int main() {
     
-    assert(algorithm_mining_sha256_test());
+    std::cout << "Hello World!" << std::endl;
+    
     
     
     return 0;

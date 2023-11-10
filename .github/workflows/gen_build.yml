@@ -1,0 +1,26 @@
+name: Generate Build Application
+
+on:
+  workflow_dispatch:
+      build_type:
+        default: 'debug'
+        required: true
+        options:
+          - debug
+          - release
+        type: choice
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.5.2
+      - name: Build Android APK
+        uses: gradle/gradle-build-action@v2.4.2
+        with:
+          gradle-version: 8.4
+          arguments: :android:build -P${{ inputs.build_type }}
+      - uses: actions/upload-artifact@v3.1.2
+        with:
+          name: android-${{ inputs.build_type }}
+          path: ${{ github.workspace }}/android/build/outputs/apk/${{ inputs.build_type }}/android-${{ inputs.build_type }}.apk

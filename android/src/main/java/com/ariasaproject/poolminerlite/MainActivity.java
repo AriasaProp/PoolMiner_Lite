@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             sb_cpu.setProgress(ints[0]); // old
         } else {
             logList = new ArrayList<ConsoleItem>(MAX_LOG_COUNT);
+            logList.add(new ConsoleItem(1, "Hello user!"));
             SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
             et_serv.setText(settings.getString(PREF_URL, DEFAULT_URL));
             et_port.setText(String.valueOf(settings.getInt(PREF_PORT, DEFAULT_PORT)));
@@ -130,18 +131,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         final Window window = getWindow();
         cb_screen_awake.setChecked((window.getAttributes().flags & FLAG_KEEP_SCREEN_ON) != 0);
         cb_screen_awake.setOnCheckedChangeListener(
-                (cb, check) -> {
-                    if (check) {
-                        window.addFlags(FLAG_KEEP_SCREEN_ON);
-                    } else {
-                        window.clearFlags(FLAG_KEEP_SCREEN_ON);
-                    }
-                });
+        (cb, check) -> {
+            if (check) window.addFlags(FLAG_KEEP_SCREEN_ON);
+            else window.clearFlags(FLAG_KEEP_SCREEN_ON);
+        });
         // log Adapter
         final RecyclerView cv = (RecyclerView) findViewById(R.id.console_view);
         cv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        adpt =
-                new Adapter<ConsoleItemHolder>() {
+        adpt = new Adapter<ConsoleItemHolder>() {
                     final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
 
                     @Override
@@ -152,8 +149,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
                     @Override
                     public void onBindViewHolder(ConsoleItemHolder holder, int position) {
-                        ConsoleItem c = logList.get(position);
-                        holder.bindLog(c.time, c.msg);
+                        holder.bindLog(logList.get(position));
                     }
 
                     @Override
@@ -204,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
+        dataService = null;
     }
     
     
@@ -281,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                             tv_rr.setText(String.format("%03d", (long)msg.obj));
                             break;
                         case MSG_UPDATE_CONSOLE:
-                            logList.add(new ConsoleItem((String)msg.obj));
+                            logList.add(msg.arg2, new ConsoleItem((String)msg.obj));
                             adpt.notifyDataSetChanged();
                             break;
                     }
@@ -375,25 +372,49 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             msg = itemView.findViewById(R.id.text2);
         }
 
-        public void bindLog(String t, String m) {
-            time.setText(t);
-            msg.setText(m);
+        public void bindLog(ConsoleItem ci) {
+            int id;
+            switch (ci.color) {
+                default:
+                case 0:
+                    id = R.color.console_text_debug;
+                    break;
+                case 1:
+                    id = R.color.console_text_info;
+                    break;
+                case 2:
+                    id = R.color.console_text_success;
+                    break;
+                case 3:
+                    id = R.color.console_text_warning;
+                    break;
+                case 4:
+                    id = R.color.console_text_error;
+                    break;
+            }
+            time.setTextColor(getResources().getColor(id));
+            msg.setTextColor(getResources().getColor(id));
+            time.setText(ci.time);
+            msg.setText(ci.msg);
         }
     }
     private static final DateFormat logDateFormat = new SimpleDateFormat("[HH:mm:ss] ");
     public static class ConsoleItem extends Object implements Parcelable {
         public final String time, msg;
+        public final int color;
 
-        public ConsoleItem(String m) {
+        public ConsoleItem(int c, String m) {
             time = logDateFormat.format(new Date());
             msg = m;
+            color = 0;
         }
 
         protected ConsoleItem(Parcel in) {
-            String[] strings = new String[2];
+            String[] strings = new String[3];
             in.readStringArray(strings);
             time = strings[0];
             msg = strings[1];
+            color = Integer.parseInt(strings[2]);
         }
 
         public static final Parcelable.Creator<ConsoleItem> CREATOR =
@@ -413,10 +434,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         public int describeContents() {
             return 0;
         }
-
+        
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeStringArray(new String[] {time, msg});
+            dest.writeStringArray(new String[] {time, msg, String.valueOf(color)}); // Tambahkan nilai warna ke dalam array
         }
     }
     
@@ -462,6 +483,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public static final String DEFAULT_PASS = "1234";
 
     public static final int DEFAULT_PORT = 3333;
+    
     //unit hash
     public static final String[] UnitHash = new String[]{
       "Hash",

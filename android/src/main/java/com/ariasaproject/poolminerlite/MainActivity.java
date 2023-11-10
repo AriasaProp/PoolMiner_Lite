@@ -328,7 +328,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                     break;
             }
-            return true;
         }
     };
     
@@ -427,6 +426,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     AppCompatButton btn_startmine, btn_stopmine;
     AppCompatSeekBar sb_cpu;
     AppCompatCheckBox cb_screen_awake;
+
+
+    // key bundles in temporary safe
+    private static final String KEYBUNDLE_CONSOLE = "bundle_console";
+    private static final String KEYBUNDLE_TEXTS = "bundle_texts";
+    private static final String KEYBUNDLE_INTS = "bundle_ints";
 
     // Message id for all Handler
     static final int MSG_UPDATE = 1;

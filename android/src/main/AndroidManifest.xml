@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".MyService"
+            android:name=".MinerService"
             android:enabled="true"
             android:exported="false">
         </service>

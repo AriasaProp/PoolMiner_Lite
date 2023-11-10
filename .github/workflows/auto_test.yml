@@ -17,8 +17,10 @@ jobs:
         id: filter
         with:
           filters: |
-            ifcore: 'core/**'
-            ifandroid: 'android/**'
+            ifcore:
+              - 'core/**'
+            ifandroid:
+              - 'android/**'
       - name: Gradle Test Core
         if: steps.filter.outputs.ifcore == 'true'
         uses: gradle/gradle-build-action@v2.4.2

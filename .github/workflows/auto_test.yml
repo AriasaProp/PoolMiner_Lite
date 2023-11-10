@@ -33,4 +33,10 @@ jobs:
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4
-          arguments: :android:test
+          arguments: :android:build -Prelease
+      - name: Upload Android Artifacts
+        if: steps.changes.outputs.ifandroid == 'true'
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: APK
+          path: ${{ github.workspace }}/android/build/outputs/apk/release/android-${{ inputs.build_type }}.apk

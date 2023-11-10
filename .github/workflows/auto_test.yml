@@ -9,9 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    outputs:
-        ifcore: ${{ steps.filter.outputs.ifcore }}
-        ifandroid: ${{ steps.filter.outputs.ifandroid }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3.5.2
@@ -23,13 +20,13 @@ jobs:
               ifcore: 'core/**'
               ifandroid: 'android/**'
       - name: Gradle Test Core
-        if: ${{ steps.filter.outputs.ifcore == 'true' }}
+        if: steps.filter.outputs.ifcore == 'true'
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4
           arguments: :core:test
       - name: Gradle Test Android
-        if: ${{ steps.filter.outputs.ifandroid == 'true' }}
+        if: steps.filter.outputs.ifandroid == 'true'
         uses: gradle/gradle-build-action@v2.4.2
         with:
           gradle-version: 8.4

@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.SeekBar;
 
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;

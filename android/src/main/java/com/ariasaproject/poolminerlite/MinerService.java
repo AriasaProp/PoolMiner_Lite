@@ -3,6 +3,7 @@ package com.ariasaproject.poolminerlite;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Binder;
 
 public class MinerService extends Service {
     LocalBinder local = new LocalBinder();
@@ -27,7 +28,7 @@ public class MinerService extends Service {
         super.onDestroy();
     }
     
-    public static class LocalBinder extends IBinder {
+    public static class LocalBinder extends Binder {
         public int State;
         protected LocalBinder() {}
     }

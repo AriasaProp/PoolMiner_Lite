@@ -28,6 +28,7 @@ public class MinerService extends Service {
     }
     
     public static class LocalBinder extends IBinder {
+        public int State;
         protected LocalBinder() {}
     }
 }

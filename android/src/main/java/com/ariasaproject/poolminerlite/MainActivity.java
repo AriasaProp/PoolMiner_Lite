@@ -42,7 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection {
+public class MainActivity extends AppCompatActivity implements ServiceConnection, Handler.Callback {
     static {
         System.loadLibrary("ext");
     }
@@ -255,7 +255,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         unbindService(this);
     }
     int mainStateCurrent = -1;
-    final Handler.Callback sHC = (msg) -> {
+    @Override
+    public boolean handleMessage(Message msg) {
         switch (msg.what) {
             default:
                 return false;
@@ -331,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
         return true;
     };
-    final Handler sH = new Handler(Looper.getMainLooper(), sHC);
+    final Handler sH = new Handler(Looper.getMainLooper(), this);
     
     // button function
     public void toStartMining(View v) {

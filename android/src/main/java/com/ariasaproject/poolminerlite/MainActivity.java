@@ -57,18 +57,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        Intent intent = new Intent(this, MinerService.class);
-        bindService(intent, this, Context.BIND_AUTO_CREATE);
-        boolean serviceWasRunning = false;
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (MinerService.class.getName().equals(service.service.getClassName())) {
-                serviceWasRunning = true;
-                break;
-            }
-        }
-        if (!serviceWasRunning)
-            startService(intent);
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
         status_container = (ViewGroup) findViewById(R.id.status_container);
@@ -163,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         cv.setAdapter(adpt);
         // check feature
         checkBatteryOptimizations();
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE));
+        bindService(new Intent(this, MinerService.class), this, Context.BIND_AUTO_CREATE);
     }
     private static final int REQUEST_BATTERY_OPTIMIZATIONS = 1001;
     private void checkBatteryOptimizations() {
@@ -199,6 +187,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (MinerService.class.getName().equals(service.service.getClassName())) {
+                sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING));
+                return;
+            }
+        }
     }
 
     @Override
@@ -249,9 +244,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isFinishing()) {
-            stopService(new Intent(this, MinerService.class));
-        }
         unbindService(this);
     }
     int mainStateCurrent = -1;
@@ -295,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         btn_stopmine.setEnabled(false);
                         btn_startmine.setVisibility(View.VISIBLE);
                         btn_startmine.setEnabled(true);
-                        tv_s.setText("000");
+                        tv_s.setText("000,00 Hash/Sec");
                         // enable all user Input
                         input_container.setVisibility(View.VISIBLE);
                         status_container.setVisibility(View.GONE);
@@ -358,6 +350,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.putString(PREF_PASS, pass);
         editor.putInt(PREF_CPU_USAGE, sb_cpu.getProgress());
         editor.commit();
+        
+        startService(new Intent(this, MinerService.class));
 
         sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Started Mining!"), 5000);
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING, 0), 5000);
@@ -368,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP, 0));
         sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopping Mining!"));
         //mService.stopMining();
+        stopService(new Intent(this, MinerService.class));
         
         sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopped Mining!"), 5000);
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE, 0), 5000);

@@ -143,7 +143,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            android:layout_gravity="right"
             android:text="0,000 Hash/Sec" />
         <androidx.appcompat.widget.AppCompatTextView
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
@@ -163,6 +163,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="5dp"
             android:textColor="@android:color/holo_green_dark"
+            android:layout_gravity="right"
             android:text="000" />
         <androidx.appcompat.widget.AppCompatTextView
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
@@ -184,6 +185,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="5dp"
             android:textColor="@android:color/holo_red_dark"
+            android:layout_gravity="right"
             android:text="000" />
         <androidx.appcompat.widget.AppCompatTextView
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"

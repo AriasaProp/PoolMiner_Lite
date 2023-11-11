@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 return true;
             }
         }
+        return false;
     }
 
     @Override

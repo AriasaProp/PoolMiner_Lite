@@ -120,7 +120,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             sb_cpu.setProgress(ints[0]); // old
         } else {
             logList = new ArrayList<ConsoleItem>(MAX_LOG_COUNT);
+            logList.add(new ConsoleItem(0, "Hello user!"));
             logList.add(new ConsoleItem(1, "Hello user!"));
+            logList.add(new ConsoleItem(2, "Hello user!"));
+            logList.add(new ConsoleItem(3, "Hello user!"));
+            logList.add(new ConsoleItem(4, "Hello user!"));
             SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
             et_serv.setText(settings.getString(PREF_URL, DEFAULT_URL));
             et_port.setText(String.valueOf(settings.getInt(PREF_PORT, DEFAULT_PORT)));
@@ -278,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                             tv_rr.setText(String.format("%03d", (long)msg.obj));
                             break;
                         case MSG_UPDATE_CONSOLE:
-                            logList.add(msg.arg2, new ConsoleItem((String)msg.obj));
+                            logList.add(new ConsoleItem(msg.arg2, (String)msg.obj));
                             adpt.notifyDataSetChanged();
                             break;
                     }

@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintWidth_percent="0.8"
-            app:helperText="@string/helpertext_server"
+            app:helperText="@string/mtxt_helperinputserver"
             app:helperTextTextColor="@android:color/holo_red_dark"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -36,7 +36,7 @@
                 android:id="@+id/port_container"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:helperText="@string/helpertext_port"
+                app:helperText="@string/mtxt_helperinputport"
                 app:helperTextTextColor="@android:color/holo_red_dark"
                 app:layout_constraintWidth_percent="0.2"
                 app:layout_constraintStart_toEndOf="@id/server_container"
@@ -134,7 +134,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/show_userInput"
             app:layout_constraintStart_toStartOf="parent"
-            android:text="@string/status_textview_speed" />
+            android:text="@string/mtxt_labelspeed" />
         <androidx.appcompat.widget.AppCompatTextView
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:id="@+id/speed_tv"
@@ -222,7 +222,7 @@
         app:layout_constraintTop_toBottomOf="@id/status_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/checkbox_keepscreenawake" />
+        android:text="@string/mtxt_labelkeepscreenawake" />
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_startmine"
         android:layout_width="match_parent"
@@ -233,7 +233,7 @@
         app:layout_constraintTop_toBottomOf="@id/settings_checkBox_keepscreenawake"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/button_startmine" />
+        android:text="@string/mbtn_startmine" />
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_stopmine"
         android:layout_width="match_parent"
@@ -245,7 +245,7 @@
         app:layout_constraintTop_toBottomOf="@id/button_startmine"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/button_stopmine" />
+        android:text="@string/mbtn_stopmine" />
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/console_label"
         android:layout_width="wrap_content"

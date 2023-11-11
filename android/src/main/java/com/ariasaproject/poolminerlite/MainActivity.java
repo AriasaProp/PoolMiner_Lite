@@ -67,9 +67,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 break;
             }
         }
-        if (!serviceWasRunning) {
+        if (!serviceWasRunning)
             startService(intent);
-        }
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
         status_container = (ViewGroup) findViewById(R.id.status_container);
@@ -255,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
         unbindService(this);
     }
-    
+    int mainStateCurrent = -1;
     final Handler sH = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -288,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                     break;
                 case MSG_STATE:
+                    if (mainStateCurrent == msg.arg1) break;
                     switch (msg.arg1) {
                         default:
                         case MSG_STATE_NONE:
@@ -328,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                             status_container.setVisibility(View.VISIBLE);
                             break;
                     }
+                    mainStateCurrent = msg.arg1;
                     break;
             }
         }
@@ -335,6 +336,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     
     // button function
     public void toStartMining(View v) {
+        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTART));
+        sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Starting Mining!"));
         String url = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
         int port = Integer.parseInt(sb.append(et_port.getText()).toString());
@@ -355,15 +358,17 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.putInt(PREF_CPU_USAGE, sb_cpu.getProgress());
         editor.commit();
 
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTART));
+        sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Started Mining!"), 5000);
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING), 5000);
         //mService.startMining(url, port, user, pass, sb_cpu.getProgress());
     }
 
     public void toStopMining(View v) {
+        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP));
+        sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopping Mining!"));
         //mService.stopMining();
         
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP));
+        sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopped Mining!"), 5000);
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE), 5000);
     }
     
@@ -411,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         public ConsoleItem(int c, String m) {
             time = logDateFormat.format(new Date());
             msg = m;
-            color = 0;
+            color = c;
         }
 
         protected ConsoleItem(Parcel in) {

@@ -188,8 +188,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (MinerService.class.getName().equals(service.service.getClassName())) {
+        for (RunningServiceInfo rsi : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (MinerService.class.getName().equals(rsi.service.getClassName())) {
                 sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING));
                 return;
             }

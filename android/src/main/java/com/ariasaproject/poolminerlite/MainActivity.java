@@ -255,84 +255,82 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         unbindService(this);
     }
     int mainStateCurrent = -1;
-    final Handler sH = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                default:
-                    break;
-                case MSG_UPDATE:
-                    switch (msg.arg1) {
-                        default:
-                            break;
-                        case MSG_UPDATE_SPEED:
-                            float hash_speed = (float)msg.obj;
-                            int unit_step = 0;
-                            while (unit_step < UnitHash.length && hash_speed > 1000.0f) {
-                                hash_speed /= 1000.0f;
-                                unit_step++;
-                            }
-                            tv_s.setText(String.format("%.3f %s/Sec", hash_speed, UnitHash[unit_step]));
-                            break;
-                        case MSG_UPDATE_ACCEPTED:
-                            tv_ra.setText(String.format("%03d", (long)msg.obj));
-                            break;
-                        case MSG_UPDATE_REJECTED:
-                            tv_rr.setText(String.format("%03d", (long)msg.obj));
-                            break;
-                        case MSG_UPDATE_CONSOLE:
-                            logList.add(new ConsoleItem(msg.arg2, (String)msg.obj));
-                            adpt.notifyDataSetChanged();
-                            break;
-                    }
-                    break;
-                case MSG_STATE:
-                    if (mainStateCurrent == msg.arg1) break;
-                    switch (msg.arg1) {
-                        default:
-                        case MSG_STATE_NONE:
-                            btn_stopmine.setVisibility(View.GONE);
-                            btn_stopmine.setEnabled(false);
-                            btn_startmine.setVisibility(View.VISIBLE);
-                            btn_startmine.setEnabled(true);
-                            tv_s.setText("000");
-                            // enable all user Input
-                            input_container.setVisibility(View.VISIBLE);
-                            status_container.setVisibility(View.GONE);
-                            break;
-                        case MSG_STATE_ONSTART:
-                            btn_stopmine.setVisibility(View.GONE);
-                            btn_stopmine.setEnabled(false);
-                            btn_startmine.setVisibility(View.VISIBLE);
-                            btn_startmine.setEnabled(false);
-                            // disable all user Input
-                            input_container.setVisibility(View.GONE);
-                            status_container.setVisibility(View.VISIBLE);
-                            break;
-                        case MSG_STATE_RUNNING:
-                            btn_stopmine.setVisibility(View.VISIBLE);
-                            btn_stopmine.setEnabled(true);
-                            btn_startmine.setVisibility(View.GONE);
-                            btn_startmine.setEnabled(false);
-                            // disable all user Input
-                            input_container.setVisibility(View.GONE);
-                            status_container.setVisibility(View.VISIBLE);
-                            break;
-                        case MSG_STATE_ONSTOP:
-                            btn_stopmine.setVisibility(View.VISIBLE);
-                            btn_stopmine.setEnabled(false);
-                            btn_startmine.setVisibility(View.GONE);
-                            btn_startmine.setEnabled(false);
-                            // disable all user Input
-                            input_container.setVisibility(View.GONE);
-                            status_container.setVisibility(View.VISIBLE);
-                            break;
-                    }
-                    mainStateCurrent = msg.arg1;
-                    break;
-            }
+    final Handler sH = new Handler(Looper.getMainLooper(), (msg) -> {
+        switch (msg.what) {
+            default:
+                return false;
+            case MSG_UPDATE:
+                switch (msg.arg1) {
+                    default:
+                        break;
+                    case MSG_UPDATE_SPEED:
+                        float hash_speed = (float)msg.obj;
+                        int unit_step = 0;
+                        while (unit_step < UnitHash.length && hash_speed > 1000.0f) {
+                            hash_speed /= 1000.0f;
+                            unit_step++;
+                        }
+                        tv_s.setText(String.format("%.3f %s/Sec", hash_speed, UnitHash[unit_step]));
+                        break;
+                    case MSG_UPDATE_ACCEPTED:
+                        tv_ra.setText(String.format("%03d", (long)msg.obj));
+                        break;
+                    case MSG_UPDATE_REJECTED:
+                        tv_rr.setText(String.format("%03d", (long)msg.obj));
+                        break;
+                    case MSG_UPDATE_CONSOLE:
+                        logList.add(new ConsoleItem(msg.arg2, (String)msg.obj));
+                        adpt.notifyDataSetChanged();
+                        break;
+                }
+                break;
+            case MSG_STATE:
+                if (mainStateCurrent == msg.arg1) break;
+                switch (msg.arg1) {
+                    default:
+                    case MSG_STATE_NONE:
+                        btn_stopmine.setVisibility(View.GONE);
+                        btn_stopmine.setEnabled(false);
+                        btn_startmine.setVisibility(View.VISIBLE);
+                        btn_startmine.setEnabled(true);
+                        tv_s.setText("000");
+                        // enable all user Input
+                        input_container.setVisibility(View.VISIBLE);
+                        status_container.setVisibility(View.GONE);
+                        break;
+                    case MSG_STATE_ONSTART:
+                        btn_stopmine.setVisibility(View.GONE);
+                        btn_stopmine.setEnabled(false);
+                        btn_startmine.setVisibility(View.VISIBLE);
+                        btn_startmine.setEnabled(false);
+                        // disable all user Input
+                        input_container.setVisibility(View.GONE);
+                        status_container.setVisibility(View.VISIBLE);
+                        break;
+                    case MSG_STATE_RUNNING:
+                        btn_stopmine.setVisibility(View.VISIBLE);
+                        btn_stopmine.setEnabled(true);
+                        btn_startmine.setVisibility(View.GONE);
+                        btn_startmine.setEnabled(false);
+                        // disable all user Input
+                        input_container.setVisibility(View.GONE);
+                        status_container.setVisibility(View.VISIBLE);
+                        break;
+                    case MSG_STATE_ONSTOP:
+                        btn_stopmine.setVisibility(View.VISIBLE);
+                        btn_stopmine.setEnabled(false);
+                        btn_startmine.setVisibility(View.GONE);
+                        btn_startmine.setEnabled(false);
+                        // disable all user Input
+                        input_container.setVisibility(View.GONE);
+                        status_container.setVisibility(View.VISIBLE);
+                        break;
+                }
+                mainStateCurrent = msg.arg1;
+                break;
         }
-    };
+        return true;
+    });
     
     // button function
     public void toStartMining(View v) {

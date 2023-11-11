@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         unbindService(this);
     }
     int mainStateCurrent = -1;
-    final Handler sH = new Handler(Looper.getMainLooper(), (msg) -> {
+    final Handler.Callback sHC = (msg) -> {
         switch (msg.what) {
             default:
                 return false;
@@ -330,7 +330,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 break;
         }
         return true;
-    });
+    };
+    final Handler sH = new Handler(Looper.getMainLooper(), sHC);
     
     // button function
     public void toStartMining(View v) {

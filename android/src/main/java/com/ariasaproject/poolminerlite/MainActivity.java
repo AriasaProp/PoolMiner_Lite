@@ -358,6 +358,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     public void toStopMining(View v) {
         //mService.stopMining();
+        
         sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP));
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE), 5000);
     }

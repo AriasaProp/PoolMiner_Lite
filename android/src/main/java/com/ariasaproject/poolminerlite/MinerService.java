@@ -26,22 +26,28 @@ public class MinerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                NOTIFICATION_TITLE,
-                NotificationManager.IMPORTANCE_DEFAULT
+        if (intent.getAction().equals(Constants.SERVICE_START_MINE)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    NOTIFICATION_TITLE,
+                    NotificationManager.IMPORTANCE_DEFAULT
+                );
+                NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                notificationManager.createNotificationChannel(channel);
+            }
+            startForeground(NOTIFICATION_ID,
+            new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .setContentTitle(NOTIFICATION_TITLE)
+                .setContentText("Service is running in the foreground")
+                .build()
             );
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+        } else if (intent.getAction().equals(Constants.SERVICE_STOP_MINE)) {
+            stopForeground(true);
+            stopSelfResult(startId);
         }
-        startForeground(NOTIFICATION_ID,
-        new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher_foreground)
-            .setContentTitle(NOTIFICATION_TITLE)
-            .setContentText("Service is running in the foreground")
-            .build()
-        );
+        
         return START_STICKY;
     }
 

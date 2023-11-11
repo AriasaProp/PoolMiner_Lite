@@ -1,4 +1,4 @@
-package com.ariasaproject.poolminerlite.MainApplication;
+package com.ariasaproject.poolminerlite;
 
 import android.app.Application;
 import android.content.res.Configuration;

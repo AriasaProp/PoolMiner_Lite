@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE), 5000);
     }
     
-    public static class ConsoleItemHolder extends RecyclerView.ViewHolder {
+    private class ConsoleItemHolder extends RecyclerView.ViewHolder {
         private AppCompatTextView time;
         private AppCompatTextView msg;
 

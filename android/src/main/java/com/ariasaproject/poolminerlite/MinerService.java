@@ -58,6 +58,8 @@ public class MinerService extends Service {
 
     @Override
     public void onDestroy() {
+        stopForeground(true);
+        stopSelfResult(startId);
         super.onDestroy();
     }
     

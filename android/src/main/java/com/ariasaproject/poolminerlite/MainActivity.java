@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         // check feature
         checkBatteryOptimizations();
         bindService(new Intent(this, MinerService.class), this, Context.BIND_AUTO_CREATE);
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, isServiceRunning() ? MSG_STATE_NONE));
+        sH.sendMessage(sH.obtainMessage(MSG_STATE, isServiceRunning() ? MSG_STATE_NONE : MSG_STATE_RUNNING, 0));
     }
     private static final int REQUEST_BATTERY_OPTIMIZATIONS = 1001;
     private void checkBatteryOptimizations() {
@@ -357,7 +357,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.putInt(PREF_CPU_USAGE, sb_cpu.getProgress());
         editor.commit();
         
-        startService(new Intent(this, MinerService.class));
+        Intent intent = new Intent(this, MinerService.class);
+        intent.setAction(Constants.SERVICE_START_MINE);
+        startService(intent);
 
         sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Started Mining!"), 5000);
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING, 0), 5000);

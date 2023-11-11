@@ -289,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 if (mainStateCurrent == msg.arg1) break;
                 switch (msg.arg1) {
                     default:
+                        break;
                     case MSG_STATE_NONE:
                         btn_stopmine.setVisibility(View.GONE);
                         btn_stopmine.setEnabled(false);
@@ -336,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     
     // button function
     public void toStartMining(View v) {
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTART));
+        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTART, 0));
         sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Starting Mining!"));
         String url = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
@@ -359,17 +360,17 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.commit();
 
         sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Started Mining!"), 5000);
-        sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING), 5000);
+        sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING, 0), 5000);
         //mService.startMining(url, port, user, pass, sb_cpu.getProgress());
     }
 
     public void toStopMining(View v) {
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP));
+        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP, 0));
         sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopping Mining!"));
         //mService.stopMining();
         
         sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopped Mining!"), 5000);
-        sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE), 5000);
+        sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE, 0), 5000);
     }
     
     private class ConsoleItemHolder extends RecyclerView.ViewHolder {

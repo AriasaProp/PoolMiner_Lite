@@ -57,11 +57,11 @@ public class MinerService extends Service {
                     NOTIFICATION_TITLE,
                     NotificationManager.IMPORTANCE_DEFAULT
                 );
-                NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                NotificationManager notificationManager = MinerService.this.getSystemService(NotificationManager.class);
                 notificationManager.createNotificationChannel(channel);
             }
             MinerService.this.startForeground(NOTIFICATION_ID,
-            new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            new NotificationCompat.Builder(MinerService.this, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setContentTitle(NOTIFICATION_TITLE)
                 .setContentText("Service is running in the foreground")

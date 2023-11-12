@@ -149,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         // check feature
         checkBatteryOptimizations();
         bindService(new Intent(this, MinerService.class), this, Context.BIND_AUTO_CREATE);
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, isServiceRunning() ? MSG_STATE_NONE : MSG_STATE_RUNNING, 0));
     }
     private static final int REQUEST_BATTERY_OPTIMIZATIONS = 1001;
     private void checkBatteryOptimizations() {
@@ -185,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
+        sH.sendMessage(sH.obtainMessage(MSG_STATE, dataService.isRunning() ? MSG_STATE_RUNNING : MSG_STATE_NONE, 0));
     }
 
     @Override

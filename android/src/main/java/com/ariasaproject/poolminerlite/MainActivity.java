@@ -1,7 +1,5 @@
 package com.ariasaproject.poolminerlite;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +35,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -189,23 +186,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
     }
-    private boolean isServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (RunningServiceInfo rsi : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (MinerService.class.getName().equals(rsi.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
+        dataService.StopMine();
         dataService = null;
-        if (isServiceRunning()) {
-            stopService(new Intent(this, MinerService.class));
-        }
-        
     }
     
     
@@ -358,9 +343,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.putInt(PREF_CPU_USAGE, sb_cpu.getProgress());
         editor.commit();
         
-        Intent intent = new Intent(this, MinerService.class);
-        intent.setAction(Constants.SERVICE_START_MINE);
-        startService(intent);
+        dataService.StartMine();
 
         sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Started Mining!"), 5000);
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING, 0), 5000);
@@ -371,9 +354,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP, 0));
         sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopping Mining!"));
         //mService.stopMining();
-        Intent intent = new Intent(this, MinerService.class);
-        intent.setAction(Constants.SERVICE_STOP_MINE);
-        startService(intent);
+        dataService.StopMine();
         
         sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopped Mining!"), 5000);
         sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE, 0), 5000);

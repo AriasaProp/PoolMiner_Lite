@@ -68,6 +68,7 @@ public class MinerService extends Service {
                 .build()
             );
             running = true;
+            return true;
         }
         public boolean isRunning() {
             return running;

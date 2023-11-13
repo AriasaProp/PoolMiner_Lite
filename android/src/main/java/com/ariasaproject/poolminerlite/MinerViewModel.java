@@ -22,7 +22,7 @@ public class MinerViewModel extends AndroidViewModel {
     Observer<Float> spdObs;
     Observer<Boolean> rsltObs;
     Observer<Integer> stObs;
-    Observer<Float> logObs;
+    Observer<ConsoleItem> logObs;
     
     public void registerObs(LifecycleOwner lo, Observer<Float> _spdObs, Observer<Boolean> _rsltObs, Observer<Integer> _stObs, Observer<ConsoleItem> _logObs) {
         spdObs = _spdObs;

@@ -10,7 +10,8 @@ import android.app.NotificationManager;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.annotation.Keep;
 
 public class MinerService extends Service {
     LocalBinder local = new LocalBinder();
@@ -36,21 +37,45 @@ public class MinerService extends Service {
 
     @Override
     public void onDestroy() {
-        stopForeground(true);
-        stopSelf();
+        local.StopMine();
         super.onDestroy();
     }
+    @Keep
+    private void updateSpeed (float speed) {
+        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
+        intent.putExtra(Constants.EXTRA_MINER_SPEED, speed);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+    @Keep
+    private void updateResult (boolean result) {
+        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
+        intent.putExtra(Constants.EXTRA_MINER_RESULT, result);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+    @Keep
+    private void updateState (int state) {
+        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
+        intent.putExtra(Constants.EXTRA_MINER_STATE, state);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+    
+    @Keep
+    private void sendMessageConsole (int lvl, String msg) {
+        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
+        intent.putExtra(Constants.EXTRA_MINER_LOG, new ConsoleItem(lvl, msg));
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+    
+    private native void nativeStart(String[] strings, int[] ints);
+    private native boolean nativeRunning();
+    private native void nativeStop();
     
     public class LocalBinder extends Binder {
         public int State;
-        protected boolean running;
-        protected LocalBinder() {
-            running = false;
-        }
+        protected LocalBinder() {}
         
-        
-        public boolean StartMine() {
-            if (running) StopMine();
+        public void StartMine() {
+            if (MinerService.this.nativeRunning()) StopMine();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel channel = new NotificationChannel(
                     NOTIFICATION_CHANNEL_ID,
@@ -67,18 +92,20 @@ public class MinerService extends Service {
                 .setContentText("Service is running in the foreground")
                 .build()
             );
-            running = true;
-            return true;
+            MinerService.this.nativeStart(new String[]{"text1", "text2", "text3", "text4"}, new int[]{80,1,9,9});
         }
         public boolean isRunning() {
-            return running;
+            return MinerService.this.nativeRunning();
         }
         public void StopMine() {
-            if (!running) return;
+            if (!MinerService.this.nativeRunning()) return;
+            MinerService.this.nativeStop();
             MinerService.this.stopForeground(true);
             MinerService.this.stopSelf();
-            running = false;
         }
     }
 }
+
+
+
 

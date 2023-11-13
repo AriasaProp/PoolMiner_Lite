@@ -1,8 +1,10 @@
 package com.ariasaproject.poolminerlite;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -11,8 +13,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.StrictMode;
 import android.provider.Settings;
@@ -30,14 +30,12 @@ import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, Handler.Callback {
     static {
@@ -54,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // receiver from MinerService
+        IntentFilter filter = new IntentFilter(Constants.INTENT_COMUNICATION_EVENT);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, filter);
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
         status_container = (ViewGroup) findViewById(R.id.status_container);
@@ -237,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onDestroy() {
         super.onDestroy();
         unbindService(this);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
     int mainStateCurrent = -1;
     @Override
@@ -344,9 +346,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.commit();
         
         dataService.StartMine();
-
-        sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Started Mining!"), 5000);
-        sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_RUNNING, 0), 5000);
         //mService.startMining(url, port, user, pass, sb_cpu.getProgress());
     }
 
@@ -356,8 +355,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         //mService.stopMining();
         dataService.StopMine();
         
-        sH.sendMessageDelayed(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopped Mining!"), 5000);
-        sH.sendMessageDelayed(sH.obtainMessage(MSG_STATE, MSG_STATE_NONE, 0), 5000);
     }
     
     private class ConsoleItemHolder extends RecyclerView.ViewHolder {
@@ -396,48 +393,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             msg.setText(ci.msg);
         }
     }
-    private static final DateFormat logDateFormat = new SimpleDateFormat("[HH:mm:ss] ");
-    public static class ConsoleItem extends Object implements Parcelable {
-        public final String time, msg;
-        public final int color;
-
-        public ConsoleItem(int c, String m) {
-            time = logDateFormat.format(new Date());
-            msg = m;
-            color = c;
-        }
-
-        protected ConsoleItem(Parcel in) {
-            String[] strings = new String[3];
-            in.readStringArray(strings);
-            time = strings[0];
-            msg = strings[1];
-            color = Integer.parseInt(strings[2]);
-        }
-
-        public static final Parcelable.Creator<ConsoleItem> CREATOR =
-                new Parcelable.Creator<ConsoleItem>() {
-                    @Override
-                    public ConsoleItem createFromParcel(Parcel in) {
-                        return new ConsoleItem(in);
-                    }
-
-                    @Override
-                    public ConsoleItem[] newArray(int size) {
-                        return new ConsoleItem[size];
-                    }
-                };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-        
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeStringArray(new String[] {time, msg, String.valueOf(color)}); // Tambahkan nilai warna ke dalam array
-        }
-    }
     
     ViewGroup input_container, status_container;
     AppCompatTextView tv_s, tv_ra, tv_rr, tv_info;
@@ -446,7 +401,25 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     AppCompatButton btn_startmine, btn_stopmine;
     AppCompatSeekBar sb_cpu;
     AppCompatCheckBox cb_screen_awake;
-
+    
+    //receiver 
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.hasExtra(Constants.EXTRA_MINER_SPEED)) {
+                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_SPEED, 0, (Float)intent.getFloatExtra(Constants.EXTRA_MINER_SPEED)));
+            }
+            if (intent.hasExtra(Constants.EXTRA_MINER_RESULT)) {
+                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_RESULT, 0, (Boolean)intent.getBooleanExtra(Constants.EXTRA_MINER_RESULT)));
+            }
+            if (intent.hasExtra(Constants.EXTRA_MINER_STATE)) {
+                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_STATE, intent.getIntExtra(Constants.EXTRA_MINER_STATE, 0), 0));
+            }
+            if (intent.hasExtra(Constants.EXTRA_MINER_LOG)) {
+                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, intent.getParcelableExtra(Constants.EXTRA_MINER_LOG, ConsoleItem.class));
+            }
+        }
+    };
 
     // key bundles in temporary safe
     private static final String KEYBUNDLE_CONSOLE = "bundle_console";
@@ -495,3 +468,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
       "YHash",
     };
 }
+
+
+
+
+
+
+
+
+
+
+

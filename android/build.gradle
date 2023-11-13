@@ -55,6 +55,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.11'
     
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }

@@ -204,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             default:
                 break;
             case MSG_STATE_NONE:
+                logList.add(new ConsoleItem(0, "No Mining!"));
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.VISIBLE);
@@ -214,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 status_container.setVisibility(View.GONE);
                 break;
             case MSG_STATE_ONSTART:
+                logList.add(new ConsoleItem(0, "Starting Mining!"));
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.VISIBLE);
@@ -226,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 tv_rr.setText("000");
                 break;
             case MSG_STATE_RUNNING:
+                logList.add(new ConsoleItem(0, "Started Mining!"));
                 accepted_result = rejected_result = 0;
                 tv_ra.setText("000");
                 tv_rr.setText("000");
@@ -238,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 status_container.setVisibility(View.VISIBLE);
                 break;
             case MSG_STATE_ONSTOP:
+                logList.add(new ConsoleItem(0, "Stoping Mining!"));
                 btn_stopmine.setVisibility(View.VISIBLE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.GONE);
@@ -247,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 status_container.setVisibility(View.VISIBLE);
                 break;
         }
+        adpt.notifyDataSetChanged();
         mainStateCurrent = state;
     }
 
@@ -331,8 +336,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     // button function
     public void toStartMining(View v) {
         updateState(MSG_STATE_ONSTART);
-        logList.add("Starting Mining!");
-        adpt.notifyDataSetChanged();
         String url = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
         int port = Integer.parseInt(sb.append(et_port.getText()).toString());
@@ -359,7 +362,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     public void toStopMining(View v) {
         updateState(MSG_STATE_ONSTOP);
-        logList.add("Stoping Mining!");
         dataService.StopMine();
     }
     

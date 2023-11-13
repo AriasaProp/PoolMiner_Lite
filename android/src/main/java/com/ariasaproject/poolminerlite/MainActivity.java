@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
     }
     
-    private updateState(int state) {
+    private void updateState(int state) {
         if (mainStateCurrent == state) return;
         switch (state) {
             default:

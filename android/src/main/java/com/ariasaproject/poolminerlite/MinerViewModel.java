@@ -12,14 +12,11 @@ import androidx.lifecycle.Observer;
 public class MinerViewModel extends AndroidViewModel {
     protected MutableLiveData<Float> Miner_Speed = new MutableLiveData(0.0f);
     protected MutableLiveData<Boolean> Miner_Result = new MutableLiveData();
-    protected MutableLiveData<Float> Miner_State = new MutableLiveData(0);
+    protected MutableLiveData<Integer> Miner_State = new MutableLiveData(0);
     protected MutableLiveData<ConsoleItem> Miner_Log = new MutableLiveData();
 
     public MinerViewModel(@NonNull Application application) {
         super(application);
-    }
-    public int getCounter() {
-        return counter;
     }
     
     Observer<Float> spdObs;
@@ -40,10 +37,10 @@ public class MinerViewModel extends AndroidViewModel {
     }
     
     public void unregisterObs() {
-        Miner_Speed.removeObserve(spdObs);
-        Miner_Result.removeObserve(rsltObs);
-        Miner_State.removeObserve(stObs);
-        Miner_Log.removeObserve(logObs);
+        Miner_Speed.removeObserver(spdObs);
+        Miner_Result.removeObserver(rsltObs);
+        Miner_State.removeObserver(stObs);
+        Miner_Log.removeObserver(logObs);
     }
     
     public void postSpeed(float speed) {

@@ -23,26 +23,26 @@ public class MinerViewModel extends AndroidViewModel {
     }
     
     Observer<Float> spdObs;
-    Observer<Float> rsltObs;
-    Observer<Float> intObs;
+    Observer<Boolean> rsltObs;
+    Observer<Integer> stObs;
     Observer<Float> logObs;
     
-    public void registerObs(LifecycleOwner lo, Observer<Float> _spdObs, Observer<Boolean> _rsltObs, Observer<Integer> _intObs, Observer<ConsoleItem> _logObs) {
+    public void registerObs(LifecycleOwner lo, Observer<Float> _spdObs, Observer<Boolean> _rsltObs, Observer<Integer> _stObs, Observer<ConsoleItem> _logObs) {
         spdObs = _spdObs;
         rsltObs = _rsltObs;
-        intObs = _intObs;
+        stObs = _stObs;
         logObs = _logObs;
         
         Miner_Speed.observe(lo, spdObs);
         Miner_Result.observe(lo, rsltObs);
-        Miner_State.observe(lo, intObs);
+        Miner_State.observe(lo, stObs);
         Miner_Log.observe(lo, logObs);
     }
     
     public void unregisterObs() {
         Miner_Speed.removeObserve(spdObs);
         Miner_Result.removeObserve(rsltObs);
-        Miner_State.removeObserve(intObs);
+        Miner_State.removeObserve(stObs);
         Miner_Log.removeObserve(logObs);
     }
     

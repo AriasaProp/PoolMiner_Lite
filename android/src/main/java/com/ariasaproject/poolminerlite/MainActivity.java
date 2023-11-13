@@ -8,7 +8,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.os.IBinder;
 import android.os.Looper;
@@ -36,7 +35,7 @@ import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection, Handler.Callback {
+public class MainActivity extends AppCompatActivity implements ServiceConnection {
     static {
         System.loadLibrary("ext");
     }
@@ -189,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         switch (state) {
             default:
                 break;
-            case MSG_STATE_NONE:
+            case MINE_STATE_NONE:
                 logList.add(new ConsoleItem(0, "No Mining!"));
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
@@ -200,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 input_container.setVisibility(View.VISIBLE);
                 status_container.setVisibility(View.GONE);
                 break;
-            case MSG_STATE_ONSTART:
+            case MINE_STATE_ONSTART:
                 logList.add(new ConsoleItem(0, "Starting Mining!"));
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
@@ -213,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 tv_ra.setText("000");
                 tv_rr.setText("000");
                 break;
-            case MSG_STATE_RUNNING:
+            case MINE_STATE_RUNNING:
                 logList.add(new ConsoleItem(0, "Started Mining!"));
                 accepted_result = rejected_result = 0;
                 tv_ra.setText("000");
@@ -226,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 input_container.setVisibility(View.GONE);
                 status_container.setVisibility(View.VISIBLE);
                 break;
-            case MSG_STATE_ONSTOP:
+            case MINE_STATE_ONSTOP:
                 logList.add(new ConsoleItem(0, "Stoping Mining!"));
                 btn_stopmine.setVisibility(View.VISIBLE);
                 btn_stopmine.setEnabled(false);
@@ -263,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
-        updateState(MSG_STATE_NONE);
+        updateState(MINE_STATE_NONE);
     }
 
     @Override
@@ -321,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     int mainStateCurrent = -1;
     // button function
     public void toStartMining(View v) {
-        updateState(MSG_STATE_ONSTART);
+        updateState(MINE_STATE_ONSTART);
         String url = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
         int port = Integer.parseInt(sb.append(et_port.getText()).toString());
@@ -347,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     public void toStopMining(View v) {
-        updateState(MSG_STATE_ONSTOP);
+        updateState(MINE_STATE_ONSTOP);
         dataService.StopMine();
     }
     
@@ -401,20 +400,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private static final String KEYBUNDLE_TEXTS = "bundle_texts";
     private static final String KEYBUNDLE_INTS = "bundle_ints";
 
-    // Message id for all Handler
-    static final int MSG_UPDATE = 1;
-    static final int MSG_STATE = 2;
+    public static final int MINE_STATE_NONE = 0;
+    public static final int MINE_STATE_ONSTART = 1;
+    public static final int MINE_STATE_RUNNING = 2;
+    public static final int MINE_STATE_ONSTOP = 3;
 
-    public static final int MSG_STATE_NONE = 0;
-    public static final int MSG_STATE_ONSTART = 1;
-    public static final int MSG_STATE_RUNNING = 2;
-    public static final int MSG_STATE_ONSTOP = 3;
-
-    public static final int MSG_UPDATE_SPEED = 1;
-    public static final int MSG_UPDATE_ACCEPTED = 2;
-    public static final int MSG_UPDATE_REJECTED = 3;
-    public static final int MSG_UPDATE_STATUS = 4;
-    public static final int MSG_UPDATE_CONSOLE = 5;
     // preferences name
     public static final String PREF_URL = "URL";
     public static final String PREF_PORT = "PORT";

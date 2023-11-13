@@ -44,6 +44,10 @@ void MinerService_OnUnload(JNIEnv *) {
 static jobject local_globalRef;
 static uint32_t active_worker = 0;
 static bool doingjob = false;
+static uint32_t port = 80;
+static uint8_t thread_use = 1;
+static pthread_t *workers = nullptr;
+
 
 void *doWork(void *params) {
   uint32_t startNonce = *((uint32_t*)params);
@@ -69,10 +73,6 @@ void *doWork(void *params) {
   pthread_mutex_unlock (&_mtx);
   return 0;
 }
-
-static uint32_t port = 80;
-static uint8_t thread_use = 1;
-static pthread_t *workers = nullptr;
 
 void *prepareToStart(void *) {
   pthread_mutex_lock (&_mtx);
@@ -118,7 +118,7 @@ void *cleanToStop(void *) {
 JNIF(void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   jint* integers = env->GetIntArrayElements(i, nullptr);
   port = (uint32_t)integers[0];
-  threads_use = (uint8_t)integers[1];
+  thread_use = (uint8_t)integers[1];
   env->ReleaseIntArrayElements(i, integers, JNI_ABORT);
   
   jstring jserverName = (jstring)env->GetObjectArrayElement(s, 0);
@@ -130,7 +130,7 @@ JNIF(void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   env->ReleaseStringUTFChars(jauth_user, auth_user);
   
   jstring jauth_pass = (jstring)env->GetObjectArrayElement(s, 2);
-  const char* auth_user = env->GetStringUTFChars(jauth_pass, 0);
+  const char* auth_pass = env->GetStringUTFChars(jauth_pass, 0);
   env->ReleaseStringUTFChars(jauth_pass, auth_pass);
   
   local_globalRef = env->NewGlobalRef (o);
@@ -154,7 +154,7 @@ JNIF(jboolean, nativeRunning) (JNIEnv *, jobject) {
   pthread_mutex_unlock (&_mtx);
   return r;
 }
-JNIF(void, nativeStop) (JNIEnv *env, jobject o) {
+JNIF(void, nativeStop) (JNIEnv *, jobject) {
   //send state for mine was stop
   pthread_t stopping;
   pthread_attr_t attr;

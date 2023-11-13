@@ -1,6 +1,5 @@
 package com.ariasaproject.poolminerlite;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,10 +29,10 @@ import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
+import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
 
@@ -46,15 +45,58 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private final StringBuilder sb = new StringBuilder();
     private static final int MAX_LOG_COUNT = 50;
     private ArrayList<ConsoleItem> logList;
+    private int accpted_result, rejected_result;
     Adapter adpt;
-    
+switch (msg.arg1) {
+    default:
+        break;
+    case MSG_UPDATE_SPEED:
+        break;
+    case MSG_UPDATE_ACCEPTED:
+        break;
+}
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // receiver from MinerService
-        IntentFilter filter = new IntentFilter(Constants.INTENT_COMUNICATION_EVENT);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, filter);
+        ((MainApplication)getApplication).getMinerViewModel().registerObs(this, 
+            new Observer<Float>() {
+                @Override
+                void onChanged(Float speed) {
+                    int unit_step = 0;
+                    while (unit_step < UnitHash.length && speed > 1000.0f) {
+                        speed /= 1000.0f;
+                        unit_step++;
+                    }
+                    tv_s.setText(String.format("%.3f %s/Sec", speed, UnitHash[unit_step]));
+                }
+            },
+            new Observer<Boolean>() {
+                @Override
+                void onChanged(Boolean result) {
+                    //nothing
+                    if (result) {
+                        tv_ra.setText(String.format("%03d", ++accepted_result));
+                    } else {
+                        tv_rr.setText(String.format("%03d", ++rejected_result));
+                    }
+                }
+            },
+            new Observer<Integer>() {
+                @Override
+                void onChanged(Integer state) {
+                    updateState(state);
+                }
+            },
+            new Observer<ConsoleItem>() {
+                @Override
+                void onChanged(ConsoleItem log) {
+                    logList.add(log);
+                    adpt.notifyDataSetChanged();
+                }
+            }
+            
+        );
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
         status_container = (ViewGroup) findViewById(R.id.status_container);
@@ -162,6 +204,58 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             startActivityForResult(intent, REQUEST_BATTERY_OPTIMIZATIONS);
         }
     }
+    
+    private updateState(int state) {
+        if (mainStateCurrent == state) return;
+        switch (state) {
+            default:
+                break;
+            case MSG_STATE_NONE:
+                btn_stopmine.setVisibility(View.GONE);
+                btn_stopmine.setEnabled(false);
+                btn_startmine.setVisibility(View.VISIBLE);
+                btn_startmine.setEnabled(true);
+                tv_s.setText("000,00 Hash/Sec");
+                // enable all user Input
+                input_container.setVisibility(View.VISIBLE);
+                status_container.setVisibility(View.GONE);
+                break;
+            case MSG_STATE_ONSTART:
+                btn_stopmine.setVisibility(View.GONE);
+                btn_stopmine.setEnabled(false);
+                btn_startmine.setVisibility(View.VISIBLE);
+                btn_startmine.setEnabled(false);
+                // disable all user Input
+                input_container.setVisibility(View.GONE);
+                status_container.setVisibility(View.VISIBLE);
+                accepted_result = rejected_result = 0;
+                tv_ra.setText("000");
+                tv_rr.setText("000");
+                break;
+            case MSG_STATE_RUNNING:
+                accepted_result = rejected_result = 0;
+                tv_ra.setText("000");
+                tv_rr.setText("000");
+                btn_stopmine.setVisibility(View.VISIBLE);
+                btn_stopmine.setEnabled(true);
+                btn_startmine.setVisibility(View.GONE);
+                btn_startmine.setEnabled(false);
+                // disable all user Input
+                input_container.setVisibility(View.GONE);
+                status_container.setVisibility(View.VISIBLE);
+                break;
+            case MSG_STATE_ONSTOP:
+                btn_stopmine.setVisibility(View.VISIBLE);
+                btn_stopmine.setEnabled(false);
+                btn_startmine.setVisibility(View.GONE);
+                btn_startmine.setEnabled(false);
+                // disable all user Input
+                input_container.setVisibility(View.GONE);
+                status_container.setVisibility(View.VISIBLE);
+                break;
+        }
+        mainStateCurrent = state;
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -185,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, dataService.isRunning() ? MSG_STATE_RUNNING : MSG_STATE_NONE, 0));
+        updateState(MSG_STATE_NONE);
     }
 
     @Override
@@ -238,93 +332,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onDestroy() {
         super.onDestroy();
         unbindService(this);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        ((MainApplication)getApplication).getMinerViewModel().unregisterObs();
     }
     int mainStateCurrent = -1;
-    @Override
-    public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            default:
-                return false;
-            case MSG_UPDATE:
-                switch (msg.arg1) {
-                    default:
-                        break;
-                    case MSG_UPDATE_SPEED:
-                        float hash_speed = (float)msg.obj;
-                        int unit_step = 0;
-                        while (unit_step < UnitHash.length && hash_speed > 1000.0f) {
-                            hash_speed /= 1000.0f;
-                            unit_step++;
-                        }
-                        tv_s.setText(String.format("%.3f %s/Sec", hash_speed, UnitHash[unit_step]));
-                        break;
-                    case MSG_UPDATE_ACCEPTED:
-                        tv_ra.setText(String.format("%03d", (long)msg.obj));
-                        break;
-                    case MSG_UPDATE_REJECTED:
-                        tv_rr.setText(String.format("%03d", (long)msg.obj));
-                        break;
-                    case MSG_UPDATE_CONSOLE:
-                        logList.add(new ConsoleItem(msg.arg2, (String)msg.obj));
-                        adpt.notifyDataSetChanged();
-                        break;
-                }
-                break;
-            case MSG_STATE:
-                if (mainStateCurrent == msg.arg1) break;
-                switch (msg.arg1) {
-                    default:
-                        break;
-                    case MSG_STATE_NONE:
-                        btn_stopmine.setVisibility(View.GONE);
-                        btn_stopmine.setEnabled(false);
-                        btn_startmine.setVisibility(View.VISIBLE);
-                        btn_startmine.setEnabled(true);
-                        tv_s.setText("000,00 Hash/Sec");
-                        // enable all user Input
-                        input_container.setVisibility(View.VISIBLE);
-                        status_container.setVisibility(View.GONE);
-                        break;
-                    case MSG_STATE_ONSTART:
-                        btn_stopmine.setVisibility(View.GONE);
-                        btn_stopmine.setEnabled(false);
-                        btn_startmine.setVisibility(View.VISIBLE);
-                        btn_startmine.setEnabled(false);
-                        // disable all user Input
-                        input_container.setVisibility(View.GONE);
-                        status_container.setVisibility(View.VISIBLE);
-                        break;
-                    case MSG_STATE_RUNNING:
-                        btn_stopmine.setVisibility(View.VISIBLE);
-                        btn_stopmine.setEnabled(true);
-                        btn_startmine.setVisibility(View.GONE);
-                        btn_startmine.setEnabled(false);
-                        // disable all user Input
-                        input_container.setVisibility(View.GONE);
-                        status_container.setVisibility(View.VISIBLE);
-                        break;
-                    case MSG_STATE_ONSTOP:
-                        btn_stopmine.setVisibility(View.VISIBLE);
-                        btn_stopmine.setEnabled(false);
-                        btn_startmine.setVisibility(View.GONE);
-                        btn_startmine.setEnabled(false);
-                        // disable all user Input
-                        input_container.setVisibility(View.GONE);
-                        status_container.setVisibility(View.VISIBLE);
-                        break;
-                }
-                mainStateCurrent = msg.arg1;
-                break;
-        }
-        return true;
-    };
-    final Handler sH = new Handler(Looper.getMainLooper(), this);
-    
     // button function
     public void toStartMining(View v) {
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTART, 0));
-        sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Starting Mining!"));
+        updateState(MSG_STATE_ONSTART);
+        logList.add("Starting Mining!");
+        adpt.notifyDataSetChanged();
         String url = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
         int port = Integer.parseInt(sb.append(et_port.getText()).toString());
@@ -350,11 +365,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     public void toStopMining(View v) {
-        sH.sendMessage(sH.obtainMessage(MSG_STATE, MSG_STATE_ONSTOP, 0));
-        sH.sendMessage(sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, "Stopping Mining!"));
-        //mService.stopMining();
+        updateState(MSG_STATE_ONSTOP);
+        logList.add("Stoping Mining!");
         dataService.StopMine();
-        
     }
     
     private class ConsoleItemHolder extends RecyclerView.ViewHolder {
@@ -402,25 +415,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     AppCompatSeekBar sb_cpu;
     AppCompatCheckBox cb_screen_awake;
     
-    //receiver 
-    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra(Constants.EXTRA_MINER_SPEED)) {
-                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_SPEED, 0, (Float)intent.getFloatExtra(Constants.EXTRA_MINER_SPEED)));
-            }
-            if (intent.hasExtra(Constants.EXTRA_MINER_RESULT)) {
-                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_RESULT, 0, (Boolean)intent.getBooleanExtra(Constants.EXTRA_MINER_RESULT)));
-            }
-            if (intent.hasExtra(Constants.EXTRA_MINER_STATE)) {
-                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_STATE, intent.getIntExtra(Constants.EXTRA_MINER_STATE, 0), 0));
-            }
-            if (intent.hasExtra(Constants.EXTRA_MINER_LOG)) {
-                MainActivity.this.sH.sendMessage(MainActivity.this.sH.obtainMessage(MSG_UPDATE, MSG_UPDATE_CONSOLE, 0, intent.getParcelableExtra(Constants.EXTRA_MINER_LOG, ConsoleItem.class));
-            }
-        }
-    };
-
     // key bundles in temporary safe
     private static final String KEYBUNDLE_CONSOLE = "bundle_console";
     private static final String KEYBUNDLE_TEXTS = "bundle_texts";

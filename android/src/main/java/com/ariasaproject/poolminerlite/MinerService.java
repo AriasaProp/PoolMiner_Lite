@@ -10,10 +10,10 @@ import android.app.NotificationManager;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.annotation.Keep;
 
 public class MinerService extends Service {
+    MinerViewModel mVM;
     LocalBinder local = new LocalBinder();
     private static final int NOTIFICATION_ID = 1;
     private static final String NOTIFICATION_CHANNEL_ID = "notif_miner";
@@ -23,6 +23,7 @@ public class MinerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mVM = ((MainApplication)getApplication()).getMinerViewModel();
     }
 
     @Override
@@ -42,28 +43,20 @@ public class MinerService extends Service {
     }
     @Keep
     private void updateSpeed (float speed) {
-        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
-        intent.putExtra(Constants.EXTRA_MINER_SPEED, speed);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        mVM.postSpeed(speed);
     }
     @Keep
     private void updateResult (boolean result) {
-        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
-        intent.putExtra(Constants.EXTRA_MINER_RESULT, result);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        mVM.postResult(result);
     }
     @Keep
     private void updateState (int state) {
-        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
-        intent.putExtra(Constants.EXTRA_MINER_STATE, state);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        mVM.postResult(state);
     }
     
     @Keep
     private void sendMessageConsole (int lvl, String msg) {
-        Intent intent = new Intent(Constants.INTENT_COMUNICATION_EVENT);
-        intent.putExtra(Constants.EXTRA_MINER_LOG, new ConsoleItem(lvl, msg));
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        mVM.postLog(new ConsoleItem(lvl, msg));
     }
     
     private native void nativeStart(String[] strings, int[] ints);

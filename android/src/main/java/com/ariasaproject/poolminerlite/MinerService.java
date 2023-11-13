@@ -11,6 +11,8 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.annotation.Keep;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.LifecycleOwner;
 
 public class MinerService extends Service {
     MinerViewModel mVM;

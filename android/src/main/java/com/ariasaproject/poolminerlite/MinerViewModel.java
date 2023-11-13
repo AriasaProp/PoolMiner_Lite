@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.LifecycleOwner;
 
 public class MinerViewModel extends AndroidViewModel {
     protected MutableLiveData<Float> Miner_Speed = new MutableLiveData(0.0f);

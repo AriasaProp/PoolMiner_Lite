@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.Observer;
 
 public class MinerViewModel extends AndroidViewModel {
     protected MutableLiveData<Float> Miner_Speed = new MutableLiveData(0.0f);
@@ -54,8 +55,8 @@ public class MinerViewModel extends AndroidViewModel {
     public void postState(int state) {
         Miner_State.postValue(state);
     }
-    public void postLog(ConsoleItem log) {
-        Miner_Log.postValue(log);
+    public void postLog(int lvl, String log) {
+        Miner_Log.postValue(new ConsoleItem(lvl, log));
     }
 }
 

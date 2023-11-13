@@ -2,13 +2,15 @@ package com.ariasaproject.poolminerlite;
 
 import android.app.Application;
 import android.content.res.Configuration;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory;
 
 public class MainApplication extends Application {
     private MinerViewModel minerViewModel;
     @Override
     public void onCreate() {
         super.onCreate();
-        minerViewModel = new ViewModelProvider.AndroidViewModelFactory(this).create(MinerViewModel.class);
+        minerViewModel = new AndroidViewModelFactory(this).create(MinerViewModel.class);
     }
 
     @Override

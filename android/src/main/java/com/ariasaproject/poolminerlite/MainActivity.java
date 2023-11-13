@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ((MainApplication)getApplication).getMinerViewModel().registerObs(this, 
+        ((MainApplication)getApplication()).getMinerViewModel().registerObs(this, 
             (speed) -> {
                 int unit_step = 0;
                 while (unit_step < UnitHash.length && speed > 1000.0f) {
@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onDestroy() {
         super.onDestroy();
         unbindService(this);
-        ((MainApplication)getApplication).getMinerViewModel().unregisterObs();
+        ((MainApplication)getApplication()).getMinerViewModel().unregisterObs();
     }
     int mainStateCurrent = -1;
     // button function

@@ -53,12 +53,12 @@ public class MinerService extends Service {
     }
     @Keep
     private void updateState (int state) {
-        mVM.postResult(state);
+        mVM.postState(state);
     }
     
     @Keep
     private void sendMessageConsole (int lvl, String msg) {
-        mVM.postLog(new ConsoleItem(lvl, msg));
+        mVM.postLog(lvl, msg);
     }
     
     private native void nativeStart(String[] strings, int[] ints);

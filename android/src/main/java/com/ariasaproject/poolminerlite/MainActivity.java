@@ -47,14 +47,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private ArrayList<ConsoleItem> logList;
     private int accpted_result, rejected_result;
     Adapter adpt;
-switch (msg.arg1) {
-    default:
-        break;
-    case MSG_UPDATE_SPEED:
-        break;
-    case MSG_UPDATE_ACCEPTED:
-        break;
-}
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private final StringBuilder sb = new StringBuilder();
     private static final int MAX_LOG_COUNT = 50;
     private ArrayList<ConsoleItem> logList;
-    private int accpted_result, rejected_result;
+    private int accepted_result, rejected_result;
     Adapter adpt;
     
     @Override
@@ -53,42 +53,28 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ((MainApplication)getApplication).getMinerViewModel().registerObs(this, 
-            new Observer<Float>() {
-                @Override
-                void onChanged(Float speed) {
-                    int unit_step = 0;
-                    while (unit_step < UnitHash.length && speed > 1000.0f) {
-                        speed /= 1000.0f;
-                        unit_step++;
-                    }
-                    tv_s.setText(String.format("%.3f %s/Sec", speed, UnitHash[unit_step]));
+            (speed) -> {
+                int unit_step = 0;
+                while (unit_step < UnitHash.length && speed > 1000.0f) {
+                    speed /= 1000.0f;
+                    unit_step++;
+                }
+                tv_s.setText(String.format("%.3f %s/Sec", speed, UnitHash[unit_step]));
+            },
+            (result) -> {
+                if (result) {
+                    tv_ra.setText(String.format("%03d", ++accepted_result));
+                } else {
+                    tv_rr.setText(String.format("%03d", ++rejected_result));
                 }
             },
-            new Observer<Boolean>() {
-                @Override
-                void onChanged(Boolean result) {
-                    //nothing
-                    if (result) {
-                        tv_ra.setText(String.format("%03d", ++accepted_result));
-                    } else {
-                        tv_rr.setText(String.format("%03d", ++rejected_result));
-                    }
-                }
+            (state) -> {
+                updateState(state);
             },
-            new Observer<Integer>() {
-                @Override
-                void onChanged(Integer state) {
-                    updateState(state);
-                }
-            },
-            new Observer<ConsoleItem>() {
-                @Override
-                void onChanged(ConsoleItem log) {
-                    logList.add(log);
-                    adpt.notifyDataSetChanged();
-                }
+            (log) -> {
+                logList.add(log);
+                adpt.notifyDataSetChanged();
             }
-            
         );
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);

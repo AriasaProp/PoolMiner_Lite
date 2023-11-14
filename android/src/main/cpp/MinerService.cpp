@@ -1,5 +1,8 @@
 #include <jni.h>
 #include <pthread.h>
+#include <string>
+#include <cstring>
+#include <unistd.h>
 
 #define STATE_NONE 0
 #define STATE_ONSTART 1

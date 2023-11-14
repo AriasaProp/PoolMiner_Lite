@@ -43,7 +43,7 @@ bool MinerService_OnLoad(JNIEnv *env) {
   );
   mineRunning = false;
 }
-void MinerService_OnUnload(JNIEnv *) {
+void MinerService_OnUnload(JNIEnv *env) {
   env->DeleteGlobalRef (local_globalRef);
   local_globalRef = NULL;
   updateSpeed = NULL;

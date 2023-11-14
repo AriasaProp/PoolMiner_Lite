@@ -55,7 +55,7 @@ static pthread_attr_t thread_attr; // make attribute for detached pthread
 void *doWork(void *params) {
   pthread_mutex_lock (&_mtx);
   ++active_worker;
-  bool loop = doingJob;
+  bool loop = doingjob;
   pthread_mutex_unlock (&_mtx);
   uint32_t startNonce = *((uint32_t*)params);
   uint32_t nonce = startNonce;
@@ -68,7 +68,7 @@ void *doWork(void *params) {
       global_jvm->DetachCurrentThread ();
     }
     pthread_mutex_lock (&_mtx);
-    loop = doingJob;
+    loop = doingjob;
     pthread_mutex_unlock (&_mtx);
     nonce += thread_use;
   }

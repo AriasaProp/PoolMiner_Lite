@@ -291,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     protected void onResume() {
+        super.onResume();
         ((MainApplication)getApplication()).getMinerViewModel().registerObs(this, 
             (speed) -> {
                 int unit_step = 0;
@@ -316,8 +317,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             }
         );
     }
+    
     @Override
     protected void onPause() {
+        super.onPause();
         ((MainApplication)getApplication()).getMinerViewModel().unregisterObs();
     }
 

@@ -48,9 +48,9 @@ static jobject local_globalRef;
 static uint32_t active_worker = 0;
 static bool doingjob = false;
 static uint32_t port = 80;
-static uint8_t thread_use = 1;
+static uint8_t thread_use;
 static pthread_t *workers = nullptr;
-
+static pthread_attr_t thread_attr; // make attribute for detached pthread
 
 void *doWork(void *params) {
   uint32_t startNonce = *((uint32_t*)params);
@@ -70,9 +70,10 @@ void *doWork(void *params) {
     if (!doingjob) break;
     pthread_mutex_unlock (&_mtx);
     nonce += thread_use;
-  } while (nonce < startNonce);
+  } while (nonce > startNonce);
   pthread_mutex_lock (&_mtx);
   --active_worker;
+  pthread_cond_broadcast(&_cond);
   pthread_mutex_unlock (&_mtx);
   return 0;
 }
@@ -82,13 +83,9 @@ void *prepareToStart(void *) {
   doingjob = true;
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
-  pthread_attr_t attr;
-  pthread_attr_init (&attr);
-  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
   for (size_t i = 0; i < thread_use; ++i) {
-    pthread_create (workers + i, &attr, doWork, (void *)&i);
+    pthread_create (workers + i, &thread_attr, doWork, (void *)&i);
   }
-  pthread_attr_destroy (&attr);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
     env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
@@ -138,18 +135,16 @@ JNIF(void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   
   local_globalRef = env->NewGlobalRef (o);
   pthread_t starting;
-  pthread_attr_t attr;
-  pthread_attr_init (&attr);
-  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+  pthread_attr_init (&thread_attr);
+  pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
   pthread_mutex_lock (&_mtx);
-  if (pthread_create (&starting, &attr, prepareToStart, 0) != 0) {
+  if (pthread_create (&starting, &thread_attr, prepareToStart, 0) != 0) {
     doingjob = false;
     env->CallVoidMethod (o, updateState, STATE_NONE);
   } else {
     mineRunning = true;
   }
   pthread_mutex_unlock (&_mtx);
-  pthread_attr_destroy (&attr);
 }
 JNIF(jboolean, nativeRunning) (JNIEnv *, jobject) {
   pthread_mutex_lock (&_mtx);
@@ -160,11 +155,8 @@ JNIF(jboolean, nativeRunning) (JNIEnv *, jobject) {
 JNIF(void, nativeStop) (JNIEnv *, jobject) {
   //send state for mine was stop
   pthread_t stopping;
-  pthread_attr_t attr;
-  pthread_attr_init (&attr);
-  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-  pthread_create (&stopping, &attr, cleanToStop, 0);
-  pthread_attr_destroy (&attr);
+  pthread_create (&stopping, &thread_attr, cleanToStop, 0);
+  pthread_attr_destroy (&thread_attr);
 }
 
 

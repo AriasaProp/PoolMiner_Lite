@@ -87,7 +87,7 @@ public class MinerService extends Service {
                 .setContentText("Service is running in the foreground")
                 .build()
             );
-            MinerService.this.nativeStart(new String[]{"text1", "text2", "text3", "text4"}, new int[]{80,1,9,9});
+            MinerService.this.nativeStart(new String[]{"text1", "text2", "text3", "text4"}, new int[]{80,3,9,9});
         }
         public boolean isRunning() {
             return MinerService.this.nativeRunning();

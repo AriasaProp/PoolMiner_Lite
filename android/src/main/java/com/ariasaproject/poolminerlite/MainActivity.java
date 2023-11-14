@@ -51,30 +51,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ((MainApplication)getApplication()).getMinerViewModel().registerObs(this, 
-            (speed) -> {
-                int unit_step = 0;
-                while (unit_step < UnitHash.length && speed > 1000.0f) {
-                    speed /= 1000.0f;
-                    unit_step++;
-                }
-                tv_s.setText(String.format("%.3f %s/Sec", speed, UnitHash[unit_step]));
-            },
-            (result) -> {
-                if (result) {
-                    tv_ra.setText(String.format("%03d", ++accepted_result));
-                } else {
-                    tv_rr.setText(String.format("%03d", ++rejected_result));
-                }
-            },
-            (state) -> {
-                updateState(state);
-            },
-            (log) -> {
-                logList.add(log);
-                adpt.notifyDataSetChanged();
-            }
-        );
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
         status_container = (ViewGroup) findViewById(R.id.status_container);
@@ -310,12 +286,45 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             sb_cpu.setProgress(ints[0]); // old
         }
     }
+    
+    
+
+    @Override
+    protected void onResume() {
+        ((MainApplication)getApplication()).getMinerViewModel().registerObs(this, 
+            (speed) -> {
+                int unit_step = 0;
+                while (unit_step < UnitHash.length && speed > 1000.0f) {
+                    speed /= 1000.0f;
+                    unit_step++;
+                }
+                tv_s.setText(String.format("%.3f %s/Sec", speed, UnitHash[unit_step]));
+            },
+            (result) -> {
+                if (result) {
+                    tv_ra.setText(String.format("%03d", ++accepted_result));
+                } else {
+                    tv_rr.setText(String.format("%03d", ++rejected_result));
+                }
+            },
+            (state) -> {
+                updateState(state);
+            },
+            (log) -> {
+                logList.add(log);
+                adpt.notifyDataSetChanged();
+            }
+        );
+    }
+    @Override
+    protected void onPause() {
+        ((MainApplication)getApplication()).getMinerViewModel().unregisterObs();
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindService(this);
-        ((MainApplication)getApplication()).getMinerViewModel().unregisterObs();
     }
     int mainStateCurrent = -1;
     // button function

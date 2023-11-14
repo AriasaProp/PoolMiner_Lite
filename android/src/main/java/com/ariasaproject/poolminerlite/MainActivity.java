@@ -238,7 +238,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
-        updateState(MINE_STATE_NONE);
     }
 
     @Override
@@ -292,7 +291,19 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     protected void onResume() {
         super.onResume();
-        ((MainApplication)getApplication()).getMinerViewModel().registerObs(this, 
+        MinerViewModel mvm = ((MainApplication)getApplication()).getMinerViewModel();
+        float speedHash = mvm.getSpeed();
+        if (speedHash != null) {
+            int unit_step = 0;
+            while (unit_step < UnitHash.length && speedHash > 1000.0f) {
+                speedHash /= 1000.0f;
+                unit_step++;
+            }
+            tv_s.setText(String.format("%.3f %s/Sec", speedHash, UnitHash[unit_step]));
+        }
+        int mineState = mvm.getState();
+        if (mineState != null) updateState(mineState);
+        mvm.registerObs(this, 
             (speed) -> {
                 int unit_step = 0;
                 while (unit_step < UnitHash.length && speed > 1000.0f) {
@@ -308,9 +319,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     tv_rr.setText(String.format("%03d", ++rejected_result));
                 }
             },
-            (state) -> {
-                updateState(state);
-            },
+            (state) -> updateState(state),
             (log) -> {
                 logList.add(log);
                 adpt.notifyDataSetChanged();

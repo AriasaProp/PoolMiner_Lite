@@ -53,12 +53,13 @@ static pthread_t *workers = nullptr;
 static pthread_attr_t thread_attr; // make attribute for detached pthread
 
 void *doWork(void *params) {
-  uint32_t startNonce = *((uint32_t*)params);
-  uint32_t nonce = startNonce;
   pthread_mutex_lock (&_mtx);
   ++active_worker;
+  bool loop = doingJob;
   pthread_mutex_unlock (&_mtx);
-  do {
+  uint32_t startNonce = *((uint32_t*)params);
+  uint32_t nonce = startNonce;
+  while (loop && nonce >= startNonce) {
     sleep(2);
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
@@ -67,10 +68,16 @@ void *doWork(void *params) {
       global_jvm->DetachCurrentThread ();
     }
     pthread_mutex_lock (&_mtx);
-    if (!doingjob) break;
+    loop = doingJob;
     pthread_mutex_unlock (&_mtx);
     nonce += thread_use;
-  } while (nonce > startNonce);
+  }
+  JNIEnv *env;
+  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+    std::string messageN = "Native workers was done number at " + std::to_string(nonce);
+    env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
+    global_jvm->DetachCurrentThread ();
+  }
   pthread_mutex_lock (&_mtx);
   --active_worker;
   pthread_cond_broadcast(&_cond);
@@ -83,7 +90,7 @@ void *prepareToStart(void *) {
   doingjob = true;
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
-  for (size_t i = 0; i < thread_use; ++i) {
+  for (uint32_t i = 0; i < thread_use; ++i) {
     pthread_create (workers + i, &thread_attr, doWork, (void *)&i);
   }
   JNIEnv *env;
@@ -98,7 +105,7 @@ void *cleanToStop(void *) {
   if (!active_worker || !workers || !doingjob) return 0;
   pthread_mutex_lock (&_mtx);
   doingjob = false;
-  while (active_worker > 0)
+  while (active_worker)
     pthread_cond_wait (&_cond, &_mtx);
   pthread_mutex_unlock (&_mtx);
   delete[] workers;

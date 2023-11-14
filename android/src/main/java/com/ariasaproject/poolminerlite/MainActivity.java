@@ -293,16 +293,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         super.onResume();
         MinerViewModel mvm = ((MainApplication)getApplication()).getMinerViewModel();
         float speedHash = mvm.getSpeed();
-        if (speedHash != null) {
-            int unit_step = 0;
-            while (unit_step < UnitHash.length && speedHash > 1000.0f) {
-                speedHash /= 1000.0f;
-                unit_step++;
-            }
-            tv_s.setText(String.format("%.3f %s/Sec", speedHash, UnitHash[unit_step]));
+        int unit_step = 0;
+        while (unit_step < UnitHash.length && speedHash > 1000.0f) {
+            speedHash /= 1000.0f;
+            unit_step++;
         }
-        int mineState = mvm.getState();
-        if (mineState != null) updateState(mineState);
+        tv_s.setText(String.format("%.3f %s/Sec", speedHash, UnitHash[unit_step]));
+        updateState(mvm.getState());
         mvm.registerObs(this, 
             (speed) -> {
                 int unit_step = 0;

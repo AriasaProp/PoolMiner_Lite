@@ -42,8 +42,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
  
     MinerService.LocalBinder dataService = null;
     private final StringBuilder sb = new StringBuilder();
-    private static final int MAX_LOG_COUNT = 50;
-    private ArrayList<ConsoleItem> logList;
+    private ConsoleItem.Lists logList;
     private int accepted_result, rejected_result;
     Adapter adpt;
     
@@ -87,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         // checkbox
         cb_screen_awake = (AppCompatCheckBox) findViewById(R.id.settings_checkBox_keepscreenawake);
         if (savedInstanceState != null) {
-            logList = savedInstanceState.getParcelableArrayList(KEYBUNDLE_CONSOLE);
+            logList = savedInstanceState.getParcelable(KEYBUNDLE_CONSOLE);
             CharSequence[] texts = savedInstanceState.getCharSequenceArray(KEYBUNDLE_TEXTS);
             tv_s.setText(texts[0]);
             tv_ra.setText(texts[1]);
@@ -250,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(KEYBUNDLE_CONSOLE, logList);
+        outState.putParcelable(KEYBUNDLE_CONSOLE, logList);
         CharSequence[] texts = new CharSequence[8];
         texts[0] = tv_s.getText();
         texts[1] = tv_ra.getText();
@@ -270,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
-            logList = savedInstanceState.getParcelableArrayList(KEYBUNDLE_CONSOLE);
+            logList = savedInstanceState.getParcelable(KEYBUNDLE_CONSOLE);
             adpt.notifyDataSetChanged();
             CharSequence[] texts = savedInstanceState.getCharSequenceArray(KEYBUNDLE_TEXTS);
             tv_s.setText(texts[0]);
@@ -341,11 +340,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     // button function
     public void toStartMining(View v) {
         updateState(MINE_STATE_ONSTART);
-        int[] dati = new int[4];
-        dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
-        sb.setLength(0);
-        dati[1] = sb_cpu.getProgress();
-        
         String[] dats = new String[4];
         dats[0] = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
@@ -353,6 +347,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         sb.setLength(0);
         dats[2] = sb.append(et_pass.getText()).toString();
         sb.setLength(0);
+        
+        int[] dati = new int[4];
+        dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
+        sb.setLength(0);
+        dati[1] = sb_cpu.getProgress();
+        
         tv_showInput.setText(
                 String.format(
                         "server = %s:%d \nauth = %s:%s\nuse %d threads",

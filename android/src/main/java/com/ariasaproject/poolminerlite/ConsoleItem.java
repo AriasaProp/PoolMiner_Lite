@@ -7,7 +7,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ConsoleItem extends Object implements Parcelable {
+public class ConsoleItem {
     private static final DateFormat logDateFormat = new SimpleDateFormat("[HH:mm:ss] ");
     
     public final String time, msg;
@@ -19,35 +19,75 @@ public class ConsoleItem extends Object implements Parcelable {
         msg = m;
         color = c;
     }
-
-    protected ConsoleItem(Parcel in) {
-        String[] strings = new String[3];
-        in.readStringArray(strings);
-        time = strings[0];
-        msg = strings[1];
-        color = Integer.parseInt(strings[2]);
-    }
-
-    public static final Parcelable.Creator<ConsoleItem> CREATOR =
-            new Parcelable.Creator<ConsoleItem>() {
-                @Override
-                public ConsoleItem createFromParcel(Parcel in) {
-                    return new ConsoleItem(in);
-                }
-
-                @Override
-                public ConsoleItem[] newArray(int size) {
-                    return new ConsoleItem[size];
-                }
-            };
-
-    @Override
-    public int describeContents() {
-        return 0;
+    protected ConsoleItem(String t, String m, int c) {
+        time = t;
+        msg = m;
+        color = c;
     }
     
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringArray(new String[] {time, msg, String.valueOf(color)}); // Tambahkan nilai warna ke dalam array
+    
+    public static class Lists extends Object implements Parcelable {
+        private static final int MAX_LOG_COUNT = 50;
+        private final ConsoleItem[] logs = new ConsoleItem[MAX_LOG_COUNT];
+        
+        protected Lists() {}
+        protected Lists(Parcel in) {
+            String[] strings = new String[3*MAX_LOG_COUNT];
+            in.readStringArray(strings);
+            for (int i = 0; i < MAX_LOG_COUNT; ++i) {
+                logs[i] = new ConsoleItem(strings[i*3], strings[i*3+1], Integer.parseInt(strings[i*3+2]));
+            }
+        }
+        
+        public void add(int lvl, String msg) {
+            for (int i = MAX_LOG_COUNT - 1; i > 0; --i) {
+                if (logs[i - 1] == null) continue;
+                logs[i] = logs[i - 1]
+            }
+            logs[0] = new ConsoleItem(lvl, msg);
+        }
+        
+        public void add(ConsoleItem ci) {
+            for (int i = MAX_LOG_COUNT - 1; i > 0; --i) {
+                if (logs[i - 1] == null) continue;
+                logs[i] = logs[i - 1]
+            }
+            logs[0] = ci;
+        }
+        
+        public ConsoleItem get(int index) {
+            return logs[index];
+        }
+    
+    
+        public static final Parcelable.Creator<Lists> CREATOR =
+                new Parcelable.Creator<Lists>() {
+                    @Override
+                    public Lists createFromParcel(Parcel in) {
+                        return new Lists(in);
+                    }
+    
+                    @Override
+                    public ConsoleItem[] newArray(int size) {
+                        return new ConsoleItem[size];
+                    }
+                };
+    
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+        
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            String[] strings = new String[3*MAX_LOG_COUNT];
+            for (int i = 0; i < MAX_LOG_COUNT; ++i) {
+                strings[i*3] = logs[i].time;
+                strings[i*3+1] = logs[i].msg;
+                strings[i*3+2] = String.valueOf(logs[i].color);
+            } 
+            dest.writeStringArray(strings); 
+        }
+        
     }
 }

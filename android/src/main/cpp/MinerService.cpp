@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <unistd.h>
+#include <cstdint>
 
 #define STATE_NONE 0
 #define STATE_ONSTART 1
@@ -60,7 +61,7 @@ void *doWork(void *P) {
   pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
-  for ( ; (nonce + thread_use) > nonce; nonce += thread_use) {
+  for ( ;(nonce + thread_use) > nonce; nonce += thread_use) {
     pthread_mutex_lock (&_mtx);
     bool done = !doingjob;
     pthread_mutex_unlock (&_mtx);
@@ -74,13 +75,13 @@ void *doWork(void *P) {
     //here hashing
     sleep(1);
   }
-  pthread_mutex_lock (&_mtx);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
     std::string messageN = "Native workers was done for id " + std::to_string(active_worker);
     env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
     global_jvm->DetachCurrentThread ();
   }
+  pthread_mutex_lock (&_mtx);
   --active_worker;
   pthread_cond_broadcast(&_cond);
   pthread_mutex_unlock (&_mtx);
@@ -93,7 +94,7 @@ void *prepareToStart(void *) {
   active_worker = 0;
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
-  for (size_t i = 0; i < thread_use; ++i) {
+  for (uint32_t i = 0; i < thread_use; i++) {
     pthread_create (workers + i, &thread_attr, doWork, (void*)new uint32_t(i));
   }
   JNIEnv *env;

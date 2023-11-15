@@ -54,10 +54,10 @@ void MinerService_OnUnload(JNIEnv *env) {
 
 
 void *doWork(void *) {
+  uint32_t nonceNext, nonce;
   pthread_mutex_lock (&_mtx);
-  uint32_t nonceNext = active_worker++;
+  nonceNext = active_worker++;
   pthread_mutex_unlock (&_mtx);
-  uint32_t nonce;
   do {
     nonce = nonceNext;
     pthread_mutex_lock (&_mtx);
@@ -88,6 +88,7 @@ void *doWork(void *) {
 void *prepareToStart(void *) {
   pthread_mutex_lock (&_mtx);
   doingjob = true;
+  active_worker = 0;
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
   for (size_t i = 0; i < thread_use; ++i) {
@@ -105,7 +106,7 @@ void *cleanToStop(void *) {
   if (!active_worker || !workers || !doingjob) return 0;
   pthread_mutex_lock (&_mtx);
   doingjob = false;
-  while (active_worker)
+  while (active_worker <= 0)
     pthread_cond_wait (&_cond, &_mtx);
   pthread_mutex_unlock (&_mtx);
   delete[] workers;

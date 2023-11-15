@@ -54,7 +54,7 @@ void MinerService_OnUnload(JNIEnv *env) {
 }
 
 void *doWork(void *p) {
-  const uint32_t start = (uint32_t)p;
+  const uint32_t start = *((uint32_t*)p);
   uint32_t nonce = start;
   pthread_mutex_lock (&_mtx);
   ++active_worker;
@@ -97,7 +97,7 @@ void *toStartBackground(void*) {
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
   for (uint32_t i = 0; i < thread_use; ++i) {
-    pthread_create (workers + i, &thread_attr, doWork, (void*)i);
+    pthread_create (workers + i, &thread_attr, doWork, (void*)new uint32_t(i));
   }
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {

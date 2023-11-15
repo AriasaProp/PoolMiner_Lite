@@ -57,18 +57,20 @@ void *doWork(void *) {
   uint32_t nonceNext, nonce;
   pthread_mutex_lock (&_mtx);
   nonceNext = active_worker++;
+  if (nonceNext > thread_use) return 0;
   pthread_mutex_unlock (&_mtx);
   do {
     nonce = nonceNext;
     pthread_mutex_lock (&_mtx);
+    if (!doingjob) break;
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
       std::string messageN = "Message from native workers. number " + std::to_string(nonce);
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
       global_jvm->DetachCurrentThread ();
     }
-    if (!doingjob) break;
     pthread_mutex_unlock (&_mtx);
+    //here hashing
     nonceNext = nonce + thread_use;
     sleep(2);
   } while (nonceNext > nonce);
@@ -106,7 +108,7 @@ void *cleanToStop(void *) {
   if (!active_worker || !workers || !doingjob) return 0;
   pthread_mutex_lock (&_mtx);
   doingjob = false;
-  while (active_worker <= 0)
+  while (active_worker > 0)
     pthread_cond_wait (&_cond, &_mtx);
   pthread_mutex_unlock (&_mtx);
   delete[] workers;

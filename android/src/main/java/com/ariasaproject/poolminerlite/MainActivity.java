@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
                     @Override
                     public int getItemCount() {
-                        return logList.size();
+                        return logList.SIZE;
                     }
                 };
         cv.setAdapter(adpt);
@@ -385,29 +385,36 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
 
         public void bindLog(ConsoleItem ci) {
-            int id;
-            switch (ci.color) {
-                default:
-                case 0:
-                    id = R.color.console_text_debug;
-                    break;
-                case 1:
-                    id = R.color.console_text_info;
-                    break;
-                case 2:
-                    id = R.color.console_text_success;
-                    break;
-                case 3:
-                    id = R.color.console_text_warning;
-                    break;
-                case 4:
-                    id = R.color.console_text_error;
-                    break;
+            if (ci == null) {
+                time.setTextColor(getResources().getColor(R.color.console_text_debug));
+                msg.setTextColor(getResources().getColor(R.color.console_text_debug));
+                time.setText("");
+                msg.setText("");
+            } else {
+                int id;
+                switch (ci.color) {
+                    default:
+                    case 0:
+                        id = R.color.console_text_debug;
+                        break;
+                    case 1:
+                        id = R.color.console_text_info;
+                        break;
+                    case 2:
+                        id = R.color.console_text_success;
+                        break;
+                    case 3:
+                        id = R.color.console_text_warning;
+                        break;
+                    case 4:
+                        id = R.color.console_text_error;
+                        break;
+                }
+                time.setTextColor(getResources().getColor(id));
+                msg.setTextColor(getResources().getColor(id));
+                time.setText(ci.time);
+                msg.setText(ci.msg);
             }
-            time.setTextColor(getResources().getColor(id));
-            msg.setTextColor(getResources().getColor(id));
-            time.setText(ci.time);
-            msg.setText(ci.msg);
         }
     }
     

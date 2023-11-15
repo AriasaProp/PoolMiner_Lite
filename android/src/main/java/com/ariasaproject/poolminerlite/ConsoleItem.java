@@ -27,30 +27,30 @@ public class ConsoleItem {
     
     
     public static class Lists extends Object implements Parcelable {
-        private static final int MAX_LOG_COUNT = 50;
-        private final ConsoleItem[] logs = new ConsoleItem[MAX_LOG_COUNT];
+        public final int SIZE = 50;
+        private final ConsoleItem[] logs = new ConsoleItem[SIZE];
         
         protected Lists() {}
         protected Lists(Parcel in) {
-            String[] strings = new String[3*MAX_LOG_COUNT];
+            String[] strings = new String[3*SIZE];
             in.readStringArray(strings);
-            for (int i = 0; i < MAX_LOG_COUNT; ++i) {
+            for (int i = 0; i < SIZE; ++i) {
                 logs[i] = new ConsoleItem(strings[i*3], strings[i*3+1], Integer.parseInt(strings[i*3+2]));
             }
         }
         
         public void add(int lvl, String msg) {
-            for (int i = MAX_LOG_COUNT - 1; i > 0; --i) {
+            for (int i = SIZE - 1; i > 0; --i) {
                 if (logs[i - 1] == null) continue;
-                logs[i] = logs[i - 1]
+                logs[i] = logs[i - 1];
             }
             logs[0] = new ConsoleItem(lvl, msg);
         }
         
         public void add(ConsoleItem ci) {
-            for (int i = MAX_LOG_COUNT - 1; i > 0; --i) {
+            for (int i = SIZE - 1; i > 0; --i) {
                 if (logs[i - 1] == null) continue;
-                logs[i] = logs[i - 1]
+                logs[i] = logs[i - 1];
             }
             logs[0] = ci;
         }
@@ -68,8 +68,8 @@ public class ConsoleItem {
                     }
     
                     @Override
-                    public ConsoleItem[] newArray(int size) {
-                        return new ConsoleItem[size];
+                    public Lists[] newArray(int size) {
+                        return new Lists[size];
                     }
                 };
     
@@ -80,8 +80,8 @@ public class ConsoleItem {
         
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            String[] strings = new String[3*MAX_LOG_COUNT];
-            for (int i = 0; i < MAX_LOG_COUNT; ++i) {
+            String[] strings = new String[3*SIZE];
+            for (int i = 0; i < SIZE; ++i) {
                 strings[i*3] = logs[i].time;
                 strings[i*3+1] = logs[i].msg;
                 strings[i*3+2] = String.valueOf(logs[i].color);

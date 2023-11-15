@@ -53,7 +53,7 @@ void MinerService_OnUnload(JNIEnv *env) {
 }
 
 
-void *doWork(void *params) {
+void *doWork(void *) {
   pthread_mutex_lock (&_mtx);
   uint32_t nonceNext = active_worker++;
   pthread_mutex_unlock (&_mtx);

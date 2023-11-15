@@ -341,17 +341,18 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     // button function
     public void toStartMining(View v) {
         updateState(MINE_STATE_ONSTART);
-        String[] dats = new String[4];
         int[] dati = new int[4];
-        dats[0] = sb.append(et_serv.getText()).toString();
-        sb.setLength(0);
         dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
+        sb.setLength(0);
+        dati[1] = sb_cpu.getProgress();
+        
+        String[] dats = new String[4];
+        dats[0] = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
         dats[1] = sb.append(et_user.getText()).toString();
         sb.setLength(0);
         dats[2] = sb.append(et_pass.getText()).toString();
         sb.setLength(0);
-        dati[1] = sb_cpu.getProgress()
         tv_showInput.setText(
                 String.format(
                         "server = %s:%d \nauth = %s:%s\nuse %d threads",

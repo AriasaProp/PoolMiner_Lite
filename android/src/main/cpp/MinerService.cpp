@@ -62,7 +62,7 @@ void *doWork(void *p) {
   do {
     nonce = nonceNext;
     pthread_mutex_lock (&_mtx);
-    if (!doingjob) break;
+    bool loop = doingjob;
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
       std::string messageN = "Message from native workers. number " + std::to_string(nonce);
@@ -70,6 +70,7 @@ void *doWork(void *p) {
       global_jvm->DetachCurrentThread ();
     }
     pthread_mutex_unlock (&_mtx);
+    if (!loop) break;
     //here hashing
     nonceNext = nonce + thread_use;
     sleep(2);

@@ -341,27 +341,30 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     // button function
     public void toStartMining(View v) {
         updateState(MINE_STATE_ONSTART);
-        String url = sb.append(et_serv.getText()).toString();
+        String[] dats = new String[4];
+        int[] dati = new int[4];
+        dats[0] = sb.append(et_serv.getText()).toString();
         sb.setLength(0);
-        int port = Integer.parseInt(sb.append(et_port.getText()).toString());
+        dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
         sb.setLength(0);
-        String user = sb.append(et_user.getText()).toString();
+        dats[1] = sb.append(et_user.getText()).toString();
         sb.setLength(0);
-        String pass = sb.append(et_pass.getText()).toString();
+        dats[2] = sb.append(et_pass.getText()).toString();
         sb.setLength(0);
+        dati[1] = sb_cpu.getProgress()
         tv_showInput.setText(
                 String.format(
                         "server = %s:%d \nauth = %s:%s\nuse %d threads",
                         url, port, user, pass, sb_cpu.getProgress()));
         SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
-        editor.putString(PREF_URL, url);
-        editor.putInt(PREF_PORT, port);
-        editor.putString(PREF_USER, user);
-        editor.putString(PREF_PASS, pass);
-        editor.putInt(PREF_CPU_USAGE, sb_cpu.getProgress());
+        editor.putString(PREF_URL, dats[0]);
+        editor.putString(PREF_USER, dats[1]);
+        editor.putString(PREF_PASS, dats[2]);
+        editor.putInt(PREF_PORT, dati[0]);
+        editor.putInt(PREF_CPU_USAGE, dati[1]);
         editor.commit();
         
-        dataService.StartMine();
+        dataService.StartMine(dats, dati);
         //mService.startMining(url, port, user, pass, sb_cpu.getProgress());
     }
 

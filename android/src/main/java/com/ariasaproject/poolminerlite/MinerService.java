@@ -69,7 +69,7 @@ public class MinerService extends Service {
         public int State;
         protected LocalBinder() {}
         
-        public void StartMine() {
+        public void StartMine(String[] dats, int[] dati) {
             if (MinerService.this.nativeRunning()) StopMine();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel channel = new NotificationChannel(
@@ -87,7 +87,7 @@ public class MinerService extends Service {
                 .setContentText("Service is running in the foreground")
                 .build()
             );
-            MinerService.this.nativeStart(new String[]{"text1", "text2", "text3", "text4"}, new int[]{80,3,9,9});
+            MinerService.this.nativeStart(dats, dati);
         }
         public boolean isRunning() {
             return MinerService.this.nativeRunning();

@@ -29,7 +29,7 @@ static jobject local_globalRef;
 static uint32_t active_worker = 0;
 static bool doingjob = false;
 static uint32_t port = 80;
-static uint8_t thread_use;
+static uint32_t thread_use;
 static pthread_t *workers = nullptr;
 static pthread_attr_t thread_attr; // make attribute for detached pthread
 
@@ -54,13 +54,11 @@ void MinerService_OnUnload(JNIEnv *env) {
 
 
 void *doWork(void *params) {
-  uint32_t startNonce = *((uint32_t*)params);
   pthread_mutex_lock (&_mtx);
   ++active_worker;
   bool loop = doingjob;
   pthread_mutex_unlock (&_mtx);
-  uint32_t nonce = startNonce;
-  while (loop && nonce >= startNonce) {
+  for (uint32_t nonce = *((uint32_t*)params); loop; ) {
     sleep(2);
     pthread_mutex_lock (&_mtx);
     JNIEnv *env;
@@ -71,12 +69,14 @@ void *doWork(void *params) {
     }
     loop = doingjob;
     pthread_mutex_unlock (&_mtx);
-    nonce += thread_use;
+    uint32_t nonceNext = nonce + thread_use;
+    if (nonceNext < nonce) break;
+    nonce = nonceNext;
   }
   pthread_mutex_lock (&_mtx);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    std::string messageN = "Native workers was done number at " + std::to_string(nonce);
+    std::string messageN = "Native workers was done number at worker " + std::to_string(active_worker);
     env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
     global_jvm->DetachCurrentThread ();
   }
@@ -124,8 +124,8 @@ void *cleanToStop(void *) {
 
 JNIF(void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   jint* integers = env->GetIntArrayElements(i, nullptr);
-  port = (uint32_t)integers[0];
-  thread_use = (uint8_t)integers[1];
+  port = integers[0];
+  thread_use = integers[1];
   env->ReleaseIntArrayElements(i, integers, JNI_ABORT);
   
   jstring jserverName = (jstring)env->GetObjectArrayElement(s, 0);

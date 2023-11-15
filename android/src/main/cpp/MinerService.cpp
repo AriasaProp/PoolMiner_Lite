@@ -73,7 +73,7 @@ void *doWork(void *P) {
     }
     //here hashing
     uint32_t nn = *nonce + thread_use;
-    if (nn < nonce) break;
+    if (nn < *nonce) break;
     *nonce = nn;
   } while (done);
   JNIEnv *env;

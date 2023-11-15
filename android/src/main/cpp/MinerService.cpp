@@ -56,6 +56,7 @@ void MinerService_OnUnload(JNIEnv *env) {
 
 void *doWork(void *P) {
   uint32_t *nonce = (uint32_t*)P;
+  const uint32_t start = *nonce;
   pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
@@ -67,7 +68,7 @@ void *doWork(void *P) {
     sleep(1);
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-      std::string messageN = "Message from native workers. number " + std::to_string(*nonce);
+      std::string messageN = "Message from native workers-" + std::to_string(start) + ". number " + std::to_string(*nonce);
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
       global_jvm->DetachCurrentThread ();
     }
@@ -78,7 +79,7 @@ void *doWork(void *P) {
   } while (done);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    std::string messageN = "Native workers was done for id " + std::to_string(active_worker) + " with last number " + std::to_string(*nonce);
+    std::string messageN = "Native workers " + std::to_string(start) + " was done with number " + std::to_string(*nonce);
     env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
     global_jvm->DetachCurrentThread ();
   }

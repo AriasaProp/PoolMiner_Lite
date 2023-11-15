@@ -30,11 +30,12 @@ public class ConsoleItem {
         public final int SIZE = 50;
         private final ConsoleItem[] logs = new ConsoleItem[SIZE];
         
-        protected Lists() {}
+        public Lists() {}
         protected Lists(Parcel in) {
             String[] strings = new String[3*SIZE];
             in.readStringArray(strings);
             for (int i = 0; i < SIZE; ++i) {
+                if (strings[i*3] == null) break;
                 logs[i] = new ConsoleItem(strings[i*3], strings[i*3+1], Integer.parseInt(strings[i*3+2]));
             }
         }
@@ -82,6 +83,7 @@ public class ConsoleItem {
         public void writeToParcel(Parcel dest, int flags) {
             String[] strings = new String[3*SIZE];
             for (int i = 0; i < SIZE; ++i) {
+                if (logs[i] == null) break;
                 strings[i*3] = logs[i].time;
                 strings[i*3+1] = logs[i].msg;
                 strings[i*3+2] = String.valueOf(logs[i].color);

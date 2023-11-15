@@ -55,11 +55,11 @@ void MinerService_OnUnload(JNIEnv *env) {
 
 void *doWork(void *params) {
   pthread_mutex_lock (&_mtx);
-  ++active_worker;
-  bool loop = doingjob;
+  uint32_t nonceNext = active_worker++;
   pthread_mutex_unlock (&_mtx);
-  for (uint32_t nonce = *((uint32_t*)params); loop; ) {
-    sleep(2);
+  uint32_t nonce;
+  do {
+    nonce = nonceNext;
     pthread_mutex_lock (&_mtx);
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
@@ -67,16 +67,15 @@ void *doWork(void *params) {
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
       global_jvm->DetachCurrentThread ();
     }
-    loop = doingjob;
+    if (!doingjob) break;
     pthread_mutex_unlock (&_mtx);
-    uint32_t nonceNext = nonce + thread_use;
-    if (nonceNext < nonce) break;
-    nonce = nonceNext;
-  }
+    nonceNext = nonce + thread_use;
+    sleep(2);
+  } while (nonceNext > nonce);
   pthread_mutex_lock (&_mtx);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    std::string messageN = "Native workers was done number at worker " + std::to_string(active_worker);
+    std::string messageN = "Native workers was done number at " + std::to_string(nonce);
     env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
     global_jvm->DetachCurrentThread ();
   }
@@ -92,8 +91,7 @@ void *prepareToStart(void *) {
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
   for (size_t i = 0; i < thread_use; ++i) {
-    uint32_t params = i;
-    pthread_create (workers + i, &thread_attr, doWork, (void *)&params);
+    pthread_create (workers + i, &thread_attr, doWork, 0);
   }
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {

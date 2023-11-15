@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             int[] ints = savedInstanceState.getIntArray(KEYBUNDLE_INTS);
             sb_cpu.setProgress(ints[0]); // old
         } else {
-            logList = new ArrayList<ConsoleItem>(MAX_LOG_COUNT);
+            logList = new ConsoleItem.Lists();
             logList.add(new ConsoleItem(0, "Hello user!"));
             logList.add(new ConsoleItem(1, "Hello user!"));
             logList.add(new ConsoleItem(2, "Hello user!"));
@@ -356,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         tv_showInput.setText(
                 String.format(
                         "server = %s:%d \nauth = %s:%s\nuse %d threads",
-                        url, port, user, pass, sb_cpu.getProgress()));
+                        dats[0], dati[0], dats[1], dats[2], dati[1]));
         SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
         editor.putString(PREF_URL, dats[0]);
         editor.putString(PREF_USER, dats[1]);

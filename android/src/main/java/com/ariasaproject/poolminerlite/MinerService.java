@@ -44,20 +44,20 @@ public class MinerService extends Service {
         super.onDestroy();
     }
     @Keep
-    private void updateSpeed (float speed) {
+    private synchronized void updateSpeed (float speed) {
         mVM.postSpeed(speed);
     }
     @Keep
-    private void updateResult (boolean result) {
+    private synchronized void updateResult (boolean result) {
         mVM.postResult(result);
     }
     @Keep
-    private void updateState (int state) {
+    private synchronized void updateState (int state) {
         mVM.postState(state);
     }
     
     @Keep
-    private void sendMessageConsole (int lvl, String msg) {
+    private synchronized void sendMessageConsole (int lvl, String msg) {
         mVM.postLog(lvl, msg);
     }
     

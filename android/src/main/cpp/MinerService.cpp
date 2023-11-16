@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <cstdint>
 #include <sstream>
+#include <vector>
 
 #define STATE_NONE 0
 #define STATE_ONSTART 1
@@ -60,7 +61,9 @@ void *doWork(void *p) {
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
   bool done;
+  //std::vector<uint32_t> numbers;
   do {
+    
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
       std::stringstream ss;
@@ -68,6 +71,8 @@ void *doWork(void *p) {
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(ss.str().c_str()));
       global_jvm->DetachCurrentThread ();
     }
+    
+    //numbers.push_back(nonce);
     sleep(1);
     //here hashing
     pthread_mutex_lock (&_mtx);
@@ -81,6 +86,11 @@ void *doWork(void *p) {
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
     std::stringstream ss;
     ss << "Native workers " << start << " was done with number " << nonce;
+    /*
+    for (uint32_t &n : numbers) {
+      ss << n << ", ";
+    }
+    */
     env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(ss.str().c_str()));
     global_jvm->DetachCurrentThread ();
   }
@@ -88,7 +98,7 @@ void *doWork(void *p) {
   --active_worker;
   pthread_cond_broadcast(&_cond);
   pthread_mutex_unlock (&_mtx);
-  return 0;
+  pthread_exit(NULL);
 }
 void *toStartBackground(void*) {
   pthread_mutex_lock (&_mtx);
@@ -108,7 +118,7 @@ void *toStartBackground(void*) {
     env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
     global_jvm->DetachCurrentThread ();
   }
-  return 0;
+  pthread_exit(NULL);
 }
 
 #define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
@@ -153,7 +163,7 @@ JNIF(jboolean, nativeRunning) (JNIEnv *, jobject) {
   return r;
 }
 void *toStopBackground(void*) {
-  if (!active_worker || !workers || !doingjob) return 0;
+  if (!active_worker || !workers || !doingjob) pthread_exit(NULL);
   pthread_mutex_lock (&_mtx);
   doingjob = false;
   while (active_worker > 0)
@@ -167,7 +177,7 @@ void *toStopBackground(void*) {
     env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
     global_jvm->DetachCurrentThread ();
   }
-  return 0;
+  pthread_exit(NULL);
 }
 JNIF(void, nativeStop) (JNIEnv *, jobject) {
   //send state for mine was stop

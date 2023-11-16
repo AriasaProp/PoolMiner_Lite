@@ -4,6 +4,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <cstdint>
+#include <sstream>
 
 #define STATE_NONE 0
 #define STATE_ONSTART 1
@@ -60,13 +61,14 @@ void *doWork(void *p) {
   pthread_mutex_unlock (&_mtx);
   bool done;
   do {
-    sleep(1);
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-      std::string messageN = "Message from native workers-" + std::to_string(start) + ". number " + std::to_string(nonce);
-      env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
+      std::stringstream ss;
+      ss << "Message from native workers-" << start << ". number " << nonce;
+      env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(ss.str().c_str()));
       global_jvm->DetachCurrentThread ();
     }
+    sleep(1);
     //here hashing
     pthread_mutex_lock (&_mtx);
     done = doingjob;
@@ -77,8 +79,9 @@ void *doWork(void *p) {
   } while (done);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    std::string messageN = "Native workers " + std::to_string(start) + " was done with number " + std::to_string(nonce);
-    env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(messageN.c_str()));
+    std::stringstream ss;
+    ss << "Native workers " << start << " was done with number " << nonce;
+    env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(ss.str().c_str()));
     global_jvm->DetachCurrentThread ();
   }
   pthread_mutex_lock (&_mtx);

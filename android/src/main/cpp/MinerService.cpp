@@ -61,9 +61,9 @@ void *doWork(void *p) {
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
   bool done;
-  //std::vector<uint32_t> numbers;
+  std::vector<uint32_t> numbers;
   do {
-    
+    /*
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
       std::stringstream ss;
@@ -71,8 +71,8 @@ void *doWork(void *p) {
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(ss.str().c_str()));
       global_jvm->DetachCurrentThread ();
     }
-    
-    //numbers.push_back(nonce);
+    */
+    numbers.push_back(nonce);
     sleep(1);
     //here hashing
     pthread_mutex_lock (&_mtx);
@@ -85,12 +85,10 @@ void *doWork(void *p) {
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
     std::stringstream ss;
-    ss << "Native workers " << start << " was done with number " << nonce;
-    /*
+    ss << "Native workers " << start << " have number ";
     for (uint32_t &n : numbers) {
       ss << n << ", ";
     }
-    */
     env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(ss.str().c_str()));
     global_jvm->DetachCurrentThread ();
   }

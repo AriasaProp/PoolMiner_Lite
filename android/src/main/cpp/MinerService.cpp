@@ -53,7 +53,7 @@ void MinerService_OnUnload(JNIEnv *env) {
 }
 
 void *doWork(void *p) {
-  const uint32_t start = *((uint32_t*)p);
+  const uint32_t start = static_cast<uint32_t>((unsigned long)p);
   uint32_t nonce = start;
   pthread_mutex_lock (&_mtx);
   ++active_worker;
@@ -87,19 +87,17 @@ void *doWork(void *p) {
   pthread_mutex_unlock (&_mtx);
   return 0;
 }
-
-#define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
 void *toStartBackground(void*) {
   pthread_mutex_lock (&_mtx);
   doingjob = true;
   active_worker = 0;
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
-  for (uint32_t i = 0; i < thread_use; ++i) {
+  for (unsigned long i = 0; i < thread_use; ++i) {
     pthread_attr_t thread_attr;
     pthread_attr_init (&thread_attr);
     pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-    pthread_create (workers + i, &thread_attr, doWork, (void*)new const uint32_t(i));
+    pthread_create (workers + i, &thread_attr, doWork, (void*)i);
     pthread_attr_destroy (&thread_attr);
   }
   JNIEnv *env;
@@ -109,6 +107,8 @@ void *toStartBackground(void*) {
   }
   return 0;
 }
+
+#define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
 JNIF(void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   jint* integers = env->GetIntArrayElements(i, nullptr);
   port = integers[0];

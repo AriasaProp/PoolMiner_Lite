@@ -162,9 +162,22 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         if (mainStateCurrent == state) return;
         switch (state) {
             default:
-                break;
             case MINE_STATE_NONE:
-                logList.add(0, "No Mining!");
+                switch (mainStateCurrent) {
+                    default:
+                    case MINE_STATE_NONE:
+                        logList.add(1, "Wellcome User!");
+                        break;
+                    case MINE_STATE_ONSTART:
+                        logList.add(1, "Service mining failed to start!");
+                        break;
+                    case MINE_STATE_RUNNING:
+                        logList.add(1, "Jumped from running to none state, for now is imposible!");
+                        break;
+                    case MINE_STATE_ONSTOP:
+                        logList.add(1, "Service mining successful to stop!");
+                        break;
+                }
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.VISIBLE);
@@ -175,7 +188,18 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 status_container.setVisibility(View.GONE);
                 break;
             case MINE_STATE_ONSTART:
-                logList.add(0, "Starting Mining!");
+                switch (mainStateCurrent) {
+                    default:
+                    case MINE_STATE_NONE:
+                        logList.add(1, "Service mining starting!");
+                        break;
+                    case MINE_STATE_RUNNING:
+                        logList.add(1, "Jumped from running to onStart, is imposible from now!");
+                        break;
+                    case MINE_STATE_ONSTOP:
+                        logList.add(1, "Jumped from onStop to onStart, is imposible for now!");
+                        break;
+                }
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.VISIBLE);
@@ -188,7 +212,18 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 tv_rr.setText("000");
                 break;
             case MINE_STATE_RUNNING:
-                logList.add(0, "Started Mining!");
+                switch (mainStateCurrent) {
+                    default:
+                    case MINE_STATE_NONE:
+                        logList.add(1, "Jumped from none to running, is imposible from now!");
+                        break;
+                    case MINE_STATE_ONSTART:
+                        logList.add(1, "Service mining successful to start!");
+                        break;
+                    case MINE_STATE_ONSTOP:
+                        logList.add(1, "Jumped from onStop to running, is imposible from now!");
+                        break;
+                }
                 accepted_result = rejected_result = 0;
                 tv_ra.setText("000");
                 tv_rr.setText("000");
@@ -201,7 +236,18 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 status_container.setVisibility(View.VISIBLE);
                 break;
             case MINE_STATE_ONSTOP:
-                logList.add(0, "Stoping Mining!");
+                switch (mainStateCurrent) {
+                    default:
+                    case MINE_STATE_NONE:
+                        logList.add(1, "Jumped from none to onStop, is imposible from now");
+                        break;
+                    case MINE_STATE_ONSTART:
+                        logList.add(1, "Jumped from onStart to onStop state, for now is imposible!");
+                        break;
+                    case MINE_STATE_RUNNING:
+                        logList.add(1, "Service mining try to stop!");
+                        break;
+                }
                 btn_stopmine.setVisibility(View.VISIBLE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.GONE);

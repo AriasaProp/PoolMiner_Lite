@@ -100,11 +100,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             sb_cpu.setProgress(ints[0]); // old
         } else {
             logList = new ConsoleItem.Lists();
-            logList.add(new ConsoleItem(0, "Hello user!"));
-            logList.add(new ConsoleItem(1, "Hello user!"));
-            logList.add(new ConsoleItem(2, "Hello user!"));
-            logList.add(new ConsoleItem(3, "Hello user!"));
-            logList.add(new ConsoleItem(4, "Hello user!"));
+            logList.add(0, "Contoh Pesan Debug!");
+            logList.add(1, "Contoh Pesan Informatif!");
+            logList.add(2, "Contoh Pesan Sukses!");
+            logList.add(3, "Contoh Pesan Peringatan!");
+            logList.add(4, "Contoh Pesan Bahaya!");
             SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
             et_serv.setText(settings.getString(PREF_URL, DEFAULT_URL));
             et_port.setText(String.valueOf(settings.getInt(PREF_PORT, DEFAULT_PORT)));
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             default:
                 break;
             case MINE_STATE_NONE:
-                logList.add(new ConsoleItem(0, "No Mining!"));
+                logList.add(0, "No Mining!");
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.VISIBLE);
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 status_container.setVisibility(View.GONE);
                 break;
             case MINE_STATE_ONSTART:
-                logList.add(new ConsoleItem(0, "Starting Mining!"));
+                logList.add(0, "Starting Mining!");
                 btn_stopmine.setVisibility(View.GONE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.VISIBLE);
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 tv_rr.setText("000");
                 break;
             case MINE_STATE_RUNNING:
-                logList.add(new ConsoleItem(0, "Started Mining!"));
+                logList.add(0, "Started Mining!");
                 accepted_result = rejected_result = 0;
                 tv_ra.setText("000");
                 tv_rr.setText("000");
@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 status_container.setVisibility(View.VISIBLE);
                 break;
             case MINE_STATE_ONSTOP:
-                logList.add(new ConsoleItem(0, "Stoping Mining!"));
+                logList.add(0, "Stoping Mining!");
                 btn_stopmine.setVisibility(View.VISIBLE);
                 btn_stopmine.setEnabled(false);
                 btn_startmine.setVisibility(View.GONE);

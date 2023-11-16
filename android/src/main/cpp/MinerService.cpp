@@ -32,7 +32,6 @@ static bool doingjob = false;
 static uint32_t port = 80;
 static uint32_t thread_use;
 static pthread_t *workers = nullptr;
-static pthread_attr_t thread_attr; // make attribute for detached pthread
 
 bool MinerService_OnLoad(JNIEnv *env) {
   jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
@@ -97,7 +96,11 @@ void *toStartBackground(void*) {
   pthread_mutex_unlock (&_mtx);
   workers = new pthread_t[thread_use];
   for (uint32_t i = 0; i < thread_use; ++i) {
-    pthread_create (workers + i, &thread_attr, doWork, (void*)new uint32_t(i));
+    pthread_attr_t thread_attr;
+    pthread_attr_init (&thread_attr);
+    pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
+    pthread_create (workers + i, &thread_attr, doWork, (void*)new const uint32_t(i));
+    pthread_attr_destroy (&thread_attr);
   }
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
@@ -127,6 +130,7 @@ JNIF(void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   if (!local_globalRef)
     local_globalRef = env->NewGlobalRef (o);
   pthread_t starting;
+  pthread_attr_t thread_attr;
   pthread_attr_init (&thread_attr);
   pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
   pthread_mutex_lock (&_mtx);
@@ -137,6 +141,7 @@ JNIF(void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     mineRunning = true;
   }
   pthread_mutex_unlock (&_mtx);
+  pthread_attr_destroy (&thread_attr);
 }
 JNIF(jboolean, nativeRunning) (JNIEnv *, jobject) {
   pthread_mutex_lock (&_mtx);
@@ -164,6 +169,9 @@ void *toStopBackground(void*) {
 JNIF(void, nativeStop) (JNIEnv *, jobject) {
   //send state for mine was stop
   pthread_t stopping;
+  pthread_attr_t thread_attr;
+  pthread_attr_init (&thread_attr);
+  pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
   pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
   pthread_attr_destroy (&thread_attr);
 }

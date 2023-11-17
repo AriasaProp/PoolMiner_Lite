@@ -1,11 +1,11 @@
 #include "json.hpp"
 
 namespace json {
-  JSON parse_next(const string &, size_t & );
-  void consume_ws(const string &str, size_t &offset ) {
+  JSON parse_next(const std::string &, size_t & );
+  void consume_ws(const std::string &str, size_t &offset ) {
       while( isspace( str[offset] ) ) ++offset;
   }
-  JSON parse_object(const string &str, size_t &offset ) {
+  JSON parse_object(const std::string &str, size_t &offset ) {
       JSON Object = JSON::Make( JSON::Class::Object );
 
       ++offset;
@@ -23,7 +23,7 @@ namespace json {
           }
           consume_ws( str, ++offset );
           JSON Value = parse_next( str, offset );
-          Object[(string)Key] = Value;
+          Object[(std::string)Key] = Value;
           
           consume_ws( str, offset );
           if( str[offset] == ',' ) {
@@ -40,7 +40,7 @@ namespace json {
 
       return std::move( Object );
   }
-  JSON parse_array(const string &str, size_t &offset ) {
+  JSON parse_array(const std::string &str, size_t &offset ) {
       JSON Array = JSON::Make( JSON::Class::Array );
       unsigned index = 0;
       
@@ -68,9 +68,9 @@ namespace json {
 
       return std::move( Array );
   }
-  JSON parse_string(const string &str, size_t &offset ) {
+  JSON parse_std::string(const std::string &str, size_t &offset ) {
       JSON String;
-      string val;
+      std::string val;
       for( char c = str[++offset]; c != '\"' ; c = str[++offset] ) {
           if( c == '\\' ) {
               switch( str[ ++offset ] ) {
@@ -105,9 +105,9 @@ namespace json {
       String = val;
       return std::move( String );
   }
-  JSON parse_number(const string &str, size_t &offset ) {
+  JSON parse_number(const std::string &str, size_t &offset ) {
       JSON Number;
-      string val, exp_str;
+      std::string val, exp_str;
       char c;
       bool isDouble = false;
       long exp = 0;
@@ -154,7 +154,7 @@ namespace json {
       }
       return std::move( Number );
   }
-  JSON parse_bool(const string &str, size_t &offset ) {
+  JSON parse_bool(const std::string &str, size_t &offset ) {
       JSON Bool;
       if( str.substr( offset, 4 ) == "true" )
           Bool = true;
@@ -167,7 +167,7 @@ namespace json {
       offset += ((bool)Bool ? 4 : 5);
       return std::move( Bool );
   }
-  JSON parse_null(const string &str, size_t &offset ) {
+  JSON parse_null(const std::string &str, size_t &offset ) {
       JSON Null;
       if( str.substr( offset, 4 ) != "null" ) {
           std::cerr << "ERROR: Null: Expected 'null', found '" << str.substr( offset, 4 ) << "'\n";
@@ -176,14 +176,14 @@ namespace json {
       offset += 4;
       return std::move( Null );
   }
-  JSON parse_next(const string &str, size_t &offset ) {
+  JSON parse_next(const std::string &str, size_t &offset ) {
       char value;
       consume_ws( str, offset );
       value = str[offset];
       switch( value ) {
           case '[' : return std::move( parse_array( str, offset ) );
           case '{' : return std::move( parse_object( str, offset ) );
-          case '\"': return std::move( parse_string( str, offset ) );
+          case '\"': return std::move( parse_std::string( str, offset ) );
           case 't' :
           case 'f' : return std::move( parse_bool( str, offset ) );
           case 'n' : return std::move( parse_null( str, offset ) );
@@ -195,7 +195,7 @@ namespace json {
   }
 }
 
-json::JSON json::JSON::Load(const string &str ) {
+json::JSON json::JSON::Load(const std::string &str ) {
   size_t offset = 0;
   return std::move( parse_next( str, offset ) );
 }

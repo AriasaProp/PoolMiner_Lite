@@ -10,15 +10,15 @@ bool json_test() {
     "Array": [1, 2, 3, 4]
   })";
   json::JSON obj = json::JSON::Load( contents );
-  std::string op1 = obj["String"].ToString();
+  std::string op1 = obj["String"];
   std::cout << "String : " << op1 << std::endl;
-  long op2 = obj["Integer"].ToInt();
+  long op2 = obj["Integer"];
   std::cout << "Integer : " << op2 << std::endl;
-  double op3 = obj["Float"].ToFloat();
+  double op3 = obj["Float"];
   std::cout << "Float : " << op3 << std::endl;
-  bool op4 = obj["Bool"].ToBool();
+  bool op4 = obj["Bool"];
   std::cout << "Bool : " << op4 << std::endl;
-  std::string op5 = obj["Array"].ToString();
+  std::string op5 = obj["Array"];
   std::cout << "Array as String : " << op5 << std::endl;
   
   std::cout << "Output : " << obj << std::endl;

@@ -149,7 +149,7 @@ std::string json::JSON::dump (int depth, std::string tab) const {
 //extras
 static json::JSON parse_next(const std::string &, size_t & );
 static json::JSON parse_object(const std::string &str, size_t &offset ) {
-    json::JSON Object = json::JSON::Make( json::JSON::Class::Object );
+    json::JSON Object = json::Make( json::JSON::Class::Object );
 
     do {
       ++offset;
@@ -188,7 +188,7 @@ static json::JSON parse_object(const std::string &str, size_t &offset ) {
     return std::move( Object );
 }
 static json::JSON parse_array(const std::string &str, size_t &offset ) {
-    json::JSON Array = json::JSON::Make( json::JSON::Class::Array );
+    json::JSON Array = json::Make( json::JSON::Class::Array );
     unsigned index = 0;
     
     do {
@@ -210,7 +210,7 @@ static json::JSON parse_array(const std::string &str, size_t &offset ) {
         }
         else {
             std::cerr << "ERROR: Array: Expected ',' or ']', found '" << str[offset] << "'\n";
-            return std::move( json::JSON::Make( json::JSON::Class::Array ) );
+            return std::move( json::Make( json::JSON::Class::Array ) );
         }
     }
 
@@ -238,7 +238,7 @@ static json::JSON parse_string(const std::string &str, size_t &offset ) {
                         val += c;
                     else {
                         std::cerr << "ERROR: String: Expected hex character in unicode escape, found '" << c << "'\n";
-                        return std::move( json::JSON::Make( json::JSON::Class::String ) );
+                        return std::move( json::Make( json::JSON::Class::String ) );
                     }
                 }
                 offset += 4;
@@ -279,7 +279,7 @@ static json::JSON parse_number(const std::string &str, size_t &offset ) {
                 exp_str += c;
             else if( !isspace( c ) && c != ',' && c != ']' && c != '}' ) {
                 std::cerr << "ERROR: Number: Expected a number for exponent, found '" << c << "'\n";
-                return std::move( json::JSON::Make( json::JSON::Class::Null ) );
+                return std::move( json::Make( json::JSON::Class::Null ) );
             }
             else
                 break;
@@ -288,7 +288,7 @@ static json::JSON parse_number(const std::string &str, size_t &offset ) {
     }
     else if( !isspace( c ) && c != ',' && c != ']' && c != '}' ) {
         std::cerr << "ERROR: Number: unexpected character '" << c << "'\n";
-        return std::move( json::JSON::Make( json::JSON::Class::Null ) );
+        return std::move( json::Make( json::JSON::Class::Null ) );
     }
     --offset;
     
@@ -310,7 +310,7 @@ static json::JSON parse_bool(const std::string &str, size_t &offset ) {
         Bool = false;
     else {
         std::cerr << "ERROR: Bool: Expected 'true' or 'false', found '" << str.substr( offset, 5 ) << "'\n";
-        return std::move( json::JSON::Make( json::JSON::Class::Null ) );
+        return std::move( json::Make( json::JSON::Class::Null ) );
     }
     offset += ((bool)Bool ? 4 : 5);
     return std::move( Bool );
@@ -319,7 +319,7 @@ static json::JSON parse_null(const std::string &str, size_t &offset ) {
     json::JSON Null;
     if( str.substr( offset, 4 ) != "null" ) {
         std::cerr << "ERROR: Null: Expected 'null', found '" << str.substr( offset, 4 ) << "'\n";
-        return std::move( json::JSON::Make( json::JSON::Class::Null ) );
+        return std::move( json::Make( json::JSON::Class::Null ) );
     }
     offset += 4;
     return std::move( Null );
@@ -341,24 +341,30 @@ static json::JSON parse_next(const std::string &str, size_t &offset ) {
     std::cerr << "ERROR: Parse: Unknown starting character '" << value << "'\n";
     return json::JSON();
 }
-json::JSON json::JSON::Load(const std::string &str ) {
+
+json::JSON json::Make (json::JSON::Class type) {
+  JSON ret;
+  ret.SetType (type);
+  return ret;
+}
+json::JSON json::Load(const std::string &str ) {
   size_t offset = 0;
   return std::move( parse_next( str, offset ) );
 }
 
 json::JSON json::Array() {
-    return std::move( json::JSON::Make( json::JSON::Class::Array ) );
+    return std::move( json::Make( json::JSON::Class::Array ) );
 }
 
 template <typename... T>
 json::JSON json::Array( T... args ) {
-    json::JSON arr = json::JSON::Make( json::JSON::Class::Array );
+    json::JSON arr = json::Make( json::JSON::Class::Array );
     arr.append( args... );
     return std::move( arr );
 }
 
 json::JSON json::Object() {
-    return std::move( json::JSON::Make( json::JSON::Class::Object ) );
+    return std::move( json::Make( json::JSON::Class::Object ) );
 }
 
 std::ostream& json::operator<<( std::ostream &os, const json::JSON &json ) {

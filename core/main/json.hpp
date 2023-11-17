@@ -93,14 +93,6 @@ struct JSON {
 
   JSON (std::nullptr_t) : Internal (), Type (Class::Null) {}
 
-  static JSON Make (Class type) {
-    JSON ret;
-    ret.SetType (type);
-    return ret;
-  }
-
-  static JSON Load (const std::string &);
-
   template <typename T>
   void append (T arg) {
     SetType (Class::Array);
@@ -272,6 +264,9 @@ struct JSON {
   
   friend std::ostream &operator<< (std::ostream &, const JSON &);
 };
+
+JSON Make (JSON::Class);
+JSON Load (const std::string &);
 
 JSON Array ();
 

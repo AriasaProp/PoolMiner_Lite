@@ -279,8 +279,8 @@ template <typename... T>
 JSON Array (T... args);
 
 JSON Object ();
+std::ostream &operator<< (std::ostream &, const JSON &);
 } // End Namespace json
 
-std::ostream &operator<< (std::ostream &, const json::JSON &);
 
 #endif // JSON_

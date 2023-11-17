@@ -1,7 +1,7 @@
 #include <iostream>
 #include "util.hpp"
 
-bool number_test () {
+bool util_test () {
   
   std::cout << "Util test is empty" << std::endl;
   

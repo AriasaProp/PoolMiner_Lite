@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         et_user = (AppCompatEditText) findViewById(R.id.user_et);
         et_pass = (AppCompatEditText) findViewById(R.id.password_et);
         sb_cpu = (AppCompatSeekBar) findViewById(R.id.cpuSeek);
-        sb_cpu.setMax(Math.max(Runtime.getRuntime().availableProcessors(), 1));
+        sb_cpu.setMax(Math.max(Runtime.getRuntime().availableProcessors() - 1, 1));
         final AppCompatTextView cuv = (AppCompatTextView) findViewById(R.id.cpu_usage_view);
         sb_cpu.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 });
         // checkbox
         cb_screen_awake = (AppCompatCheckBox) findViewById(R.id.settings_checkBox_keepscreenawake);
+        sb_cpu.setProgress(1); // main
         if (savedInstanceState != null) {
             logList = savedInstanceState.getParcelable(KEYBUNDLE_CONSOLE);
             CharSequence[] texts = savedInstanceState.getCharSequenceArray(KEYBUNDLE_TEXTS);
@@ -412,7 +413,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.commit();
         
         dataService.StartMine(dats, dati);
-        //mService.startMining(url, port, user, pass, sb_cpu.getProgress());
     }
 
     public void toStopMining(View v) {

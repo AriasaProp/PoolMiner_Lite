@@ -399,5 +399,6 @@ JSON Array( T... args );
 JSON Object();
 } // End Namespace json
 
+std::ostream& operator<<(std::ostream &, const json::JSON &);
 
 #endif //JSON_

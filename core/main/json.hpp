@@ -14,41 +14,55 @@
 
 namespace json {
 
-namespace {
-  std::string json_escape (const std::string &str) {
-    std::string output;
-    for (unsigned i = 0; i < str.length (); ++i)
-      switch (str[i]) {
-      case '\"':
-        output += "\\\"";
-        break;
-      case '\\':
-        output += "\\\\";
-        break;
-      case '\b':
-        output += "\\b";
-        break;
-      case '\f':
-        output += "\\f";
-        break;
-      case '\n':
-        output += "\\n";
-        break;
-      case '\r':
-        output += "\\r";
-        break;
-      case '\t':
-        output += "\\t";
-        break;
-      default:
-        output += str[i];
-        break;
-      }
-    return std::move (output);
-  }
-} // namespace
+struct JSON {
+private:
+  Class Type = Class::Null;
+  void SetType (Class type) {
+    if (type == Type)
+      return;
 
-class JSON {
+    ClearInternal ();
+
+    switch (type) {
+    case Class::Null:
+      Internal.Map = nullptr;
+      break;
+    case Class::Object:
+      Internal.Map = new std::map<std::string, JSON> ();
+      break;
+    case Class::Array:
+      Internal.List = new std::deque<JSON> ();
+      break;
+    case Class::String:
+      Internal.String = new std::string ();
+      break;
+    case Class::Floating:
+      Internal.Float = 0.0;
+      break;
+    case Class::Integral:
+      Internal.Int = 0;
+      break;
+    case Class::Boolean:
+      Internal.Bool = false;
+      break;
+    }
+
+    Type = type;
+  }
+  void ClearInternal () {
+    switch (Type) {
+    case Class::Object:
+      delete Internal.Map;
+      break;
+    case Class::Array:
+      delete Internal.List;
+      break;
+    case Class::String:
+      delete Internal.String;
+      break;
+    default:;
+    }
+  }
   union BackingData {
     BackingData (double d) : Float (d) {}
     BackingData (long l) : Int (l) {}
@@ -63,8 +77,6 @@ class JSON {
     long Int;
     bool Bool;
   } Internal;
-
-public:
   enum class Class {
     Null,
     Object,
@@ -76,115 +88,43 @@ public:
   };
 
   template <typename Container>
-  class JSONWrapper {
-    Container *object;
-
-  public:
-    JSONWrapper (Container *val) : object (val) {}
-    JSONWrapper (std::nullptr_t) : object (nullptr) {}
-
-    typename Container::iterator begin () { return object ? object->begin () : typename Container::iterator (); }
-    typename Container::iterator end () { return object ? object->end () : typename Container::iterator (); }
-    typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::iterator (); }
-    typename Container::const_iterator end () const { return object ? object->end () : typename Container::iterator (); }
+  struct JSONWrapper {
+    private:
+      Container *object;
+  
+    public:
+      JSONWrapper (Container *val) : object (val) {}
+      JSONWrapper (std::nullptr_t) : object (nullptr) {}
+  
+      typename Container::iterator begin () { return object ? object->begin () : typename Container::iterator (); }
+      typename Container::iterator end () { return object ? object->end () : typename Container::iterator (); }
+      typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::iterator (); }
+      typename Container::const_iterator end () const { return object ? object->end () : typename Container::iterator (); }
   };
 
   template <typename Container>
-  class JSONConstWrapper {
-    const Container *object;
+  struct JSONConstWrapper {
+    private:
+      const Container *object;
 
-  public:
-    JSONConstWrapper (const Container *val) : object (val) {}
-    JSONConstWrapper (std::nullptr_t) : object (nullptr) {}
-
-    typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::const_iterator (); }
-    typename Container::const_iterator end () const { return object ? object->end () : typename Container::const_iterator (); }
+    public:
+      JSONConstWrapper (const Container *val) : object (val) {}
+      JSONConstWrapper (std::nullptr_t) : object (nullptr) {}
+  
+      typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::const_iterator (); }
+      typename Container::const_iterator end () const { return object ? object->end () : typename Container::const_iterator (); }
   };
+  
+public:
+  JSON ();
+  JSON (std::initializer_list<JSON>);
+  JSON (JSON &&);
+  JSON (const JSON &);
 
-  JSON () : Internal (), Type (Class::Null) {}
+  JSON &operator=(JSON &&);
+  JSON &operator= (const JSON &);
 
-  JSON (std::initializer_list<JSON> list)
-      : JSON () {
-    SetType (Class::Object);
-    for (auto i = list.begin (), e = list.end (); i != e; ++i, ++i)
-      operator[] ((std::string)*i) = *std::next (i);
-  }
-
-  JSON (JSON &&other)
-      : Internal (other.Internal), Type (other.Type) {
-    other.Type = Class::Null;
-    other.Internal.Map = nullptr;
-  }
-
-  JSON &operator= (JSON &&other) {
-    ClearInternal ();
-    Internal = other.Internal;
-    Type = other.Type;
-    other.Internal.Map = nullptr;
-    other.Type = Class::Null;
-    return *this;
-  }
-
-  JSON (const JSON &other) {
-    switch (other.Type) {
-    case Class::Object:
-      Internal.Map =
-          new std::map<std::string, JSON> (other.Internal.Map->begin (),
-                                           other.Internal.Map->end ());
-      break;
-    case Class::Array:
-      Internal.List =
-          new std::deque<JSON> (other.Internal.List->begin (),
-                                other.Internal.List->end ());
-      break;
-    case Class::String:
-      Internal.String =
-          new std::string (*other.Internal.String);
-      break;
-    default:
-      Internal = other.Internal;
-    }
-    Type = other.Type;
-  }
-
-  JSON &operator= (const JSON &other) {
-    ClearInternal ();
-    switch (other.Type) {
-    case Class::Object:
-      Internal.Map =
-          new std::map<std::string, JSON> (other.Internal.Map->begin (),
-                                           other.Internal.Map->end ());
-      break;
-    case Class::Array:
-      Internal.List =
-          new std::deque<JSON> (other.Internal.List->begin (),
-                                other.Internal.List->end ());
-      break;
-    case Class::String:
-      Internal.String =
-          new std::string (*other.Internal.String);
-      break;
-    default:
-      Internal = other.Internal;
-    }
-    Type = other.Type;
-    return *this;
-  }
-
-  ~JSON () {
-    switch (Type) {
-    case Class::Array:
-      delete Internal.List;
-      break;
-    case Class::Object:
-      delete Internal.Map;
-      break;
-    case Class::String:
-      delete Internal.String;
-      break;
-    default:;
-    }
-  }
+  ~JSON ();
 
   template <typename T>
   JSON (T b, typename std::enable_if<std::is_same<T, bool>::value>::type * = 0) : Internal (b), Type (Class::Boolean) {}
@@ -289,10 +229,8 @@ public:
 
   /// Functions for getting primitives from the JSON object.
   bool IsNull () const { return Type == Class::Null; }
-
-  operator std::string () const {
-    return (Type == Class::String) ? std::move (json_escape (*Internal.String)) : std::string ("");
-  }
+  
+  operator std::string() const;
   operator double () const {
     return (Type == Class::Floating) ? Internal.Float : 0.0;
   }
@@ -333,104 +271,9 @@ public:
     return JSONConstWrapper<std::deque<JSON>> (nullptr);
   }
 
-  std::string dump (int depth = 1, std::string tab = "  ") const {
-    std::string pad = "";
-    for (int i = 0; i < depth; ++i, pad += tab)
-      ;
-
-    switch (Type) {
-    case Class::Null:
-      return "null";
-    case Class::Object: {
-      std::string s = "{\n";
-      bool skip = true;
-      for (auto &p : *Internal.Map) {
-        if (!skip) s += ",\n";
-        s += (pad + "\"" + p.first + "\" : " + p.second.dump (depth + 1, tab));
-        skip = false;
-      }
-      s += ("\n" + pad.erase (0, 2) + "}");
-      return s;
-    }
-    case Class::Array: {
-      std::string s = "[";
-      bool skip = true;
-      for (auto &p : *Internal.List) {
-        if (!skip) s += ", ";
-        s += p.dump (depth + 1, tab);
-        skip = false;
-      }
-      s += "]";
-      return s;
-    }
-    case Class::String:
-      return "\"" + json_escape (*Internal.String) + "\"";
-    case Class::Floating:
-      return std::to_string (Internal.Float);
-    case Class::Integral:
-      return std::to_string (Internal.Int);
-    case Class::Boolean:
-      return Internal.Bool ? "true" : "false";
-    default:
-      return "";
-    }
-    return "";
-  }
-
+  std::string dump (int, std::string) const;
   friend std::ostream &operator<< (std::ostream &, const JSON &);
 
-private:
-  void SetType (Class type) {
-    if (type == Type)
-      return;
-
-    ClearInternal ();
-
-    switch (type) {
-    case Class::Null:
-      Internal.Map = nullptr;
-      break;
-    case Class::Object:
-      Internal.Map = new std::map<std::string, JSON> ();
-      break;
-    case Class::Array:
-      Internal.List = new std::deque<JSON> ();
-      break;
-    case Class::String:
-      Internal.String = new std::string ();
-      break;
-    case Class::Floating:
-      Internal.Float = 0.0;
-      break;
-    case Class::Integral:
-      Internal.Int = 0;
-      break;
-    case Class::Boolean:
-      Internal.Bool = false;
-      break;
-    }
-
-    Type = type;
-  }
-
-private:
-  void ClearInternal () {
-    switch (Type) {
-    case Class::Object:
-      delete Internal.Map;
-      break;
-    case Class::Array:
-      delete Internal.List;
-      break;
-    case Class::String:
-      delete Internal.String;
-      break;
-    default:;
-    }
-  }
-
-private:
-  Class Type = Class::Null;
 };
 
 JSON Array ();

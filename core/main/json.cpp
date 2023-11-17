@@ -1,5 +1,152 @@
 #include "json.hpp"
 
+//define struct
+json::JSON::JSON (): Internal (), Type (json::JSON::Class::Null) {}
+json::JSON::JSON (std::initializer_list<json::JSON> list): json::JSON () {
+  SetType (json::JSON::Class::Object);
+  for (auto i = list.begin (), e = list.end (); i != e; ++i, ++i)
+    operator[] ((std::string)*i) = *std::next (i);
+}
+json::JSON::JSON (json::JSON &&other): Internal (other.Internal), Type (other.Type) {
+  other.Type = json::JSON::Class::Null;
+  other.Internal.Map = nullptr;
+}
+json::JSON::JSON (const json::JSON &other) {
+  switch (other.Type) {
+  case json::JSON::Class::Object:
+    Internal.Map = new std::map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
+    break;
+  case json::JSON::Class::Array:
+    Internal.List = new std::deque<json::JSON> (other.Internal.List->begin (), other.Internal.List->end ());
+    break;
+  case json::JSON::Class::String:
+    Internal.String = new std::string (*other.Internal.String);
+    break;
+  default:
+    Internal = other.Internal;
+  }
+  Type = other.Type;
+}
+json::JSON& json::JSON::operator=(json::JSON &&other) {
+  ClearInternal ();
+  Internal = other.Internal;
+  Type = other.Type;
+  other.Internal.Map = nullptr;
+  other.Type = json::JSON::Class::Null;
+  return *this;
+}
+json::JSON& json::JSON::operator=(const json::JSON &other) {
+    ClearInternal ();
+    switch (other.Type) {
+    case json::JSON::Class::Object:
+      Internal.Map = new std::map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
+      break;
+    case json::JSON::Class::Array:
+      Internal.List = new std::deque<json::JSON> (other.Internal.List->begin (), other.Internal.List->end ());
+      break;
+    case json::JSON::Class::String:
+      Internal.String = new std::string (*other.Internal.String);
+      break;
+    default:
+      Internal = other.Internal;
+    }
+    Type = other.Type;
+    return *this;
+  }
+json::JSON::~JSON() {
+  switch (Type) {
+  case json::JSON::Class::Array:
+    delete Internal.List;
+    break;
+  case json::JSON::Class::Object:
+    delete Internal.Map;
+    break;
+  case json::JSON::Class::String:
+    delete Internal.String;
+    break;
+  default:;
+  }
+}
+
+static std::string json_escape (const std::string &str) {
+  std::string output;
+  for (unsigned i = 0; i < str.length (); ++i)
+    switch (str[i]) {
+    case '\"':
+      output += "\\\"";
+      break;
+    case '\\':
+      output += "\\\\";
+      break;
+    case '\b':
+      output += "\\b";
+      break;
+    case '\f':
+      output += "\\f";
+      break;
+    case '\n':
+      output += "\\n";
+      break;
+    case '\r':
+      output += "\\r";
+      break;
+    case '\t':
+      output += "\\t";
+      break;
+    default:
+      output += str[i];
+      break;
+    }
+  return std::move (output);
+}
+json::JSON::operator std::string () const {
+  return (Type == json::JSON::Class::String) ? std::move (json_escape (*Internal.String)) : std::string ("");
+}
+std::string json::JSON::dump (int depth, std::string tab) const {
+    std::string pad = "";
+    for (int i = 0; i < depth; ++i, pad += tab);
+
+    switch (Type) {
+    case json::JSON::Class::Null:
+      return "null";
+    case json::JSON::Class::Object: {
+      std::string s = "{\n";
+      bool skip = true;
+      for (auto &p : *Internal.Map) {
+        if (!skip) s += ",\n";
+        s += (pad + "\"" + p.first + "\" : " + p.second.dump (depth + 1, tab));
+        skip = false;
+      }
+      s += ("\n" + pad.erase (0, 2) + "}");
+      return s;
+    }
+    case json::JSON::Class::Array: {
+      std::string s = "[";
+      bool skip = true;
+      for (auto &p : *Internal.List) {
+        if (!skip) s += ", ";
+        s += p.dump (depth + 1, tab);
+        skip = false;
+      }
+      s += "]";
+      return s;
+    }
+    case json::JSON::Class::String:
+      return "\"" + json_escape (*Internal.String) + "\"";
+    case json::JSON::Class::Floating:
+      return std::to_string (Internal.Float);
+    case json::JSON::Class::Integral:
+      return std::to_string (Internal.Int);
+    case json::JSON::Class::Boolean:
+      return Internal.Bool ? "true" : "false";
+    default:
+      return "";
+    }
+    return "";
+  }
+
+
+//extras
 static json::JSON parse_next(const std::string &, size_t & );
 static json::JSON parse_object(const std::string &str, size_t &offset ) {
     json::JSON Object = json::JSON::Make( json::JSON::Class::Object );
@@ -198,6 +345,7 @@ json::JSON json::JSON::Load(const std::string &str ) {
   size_t offset = 0;
   return std::move( parse_next( str, offset ) );
 }
+
 json::JSON json::Array() {
     return std::move( json::JSON::Make( json::JSON::Class::Array ) );
 }
@@ -214,6 +362,6 @@ json::JSON json::Object() {
 }
 
 std::ostream& json::operator<<( std::ostream &os, const json::JSON &json ) {
-    os << json.dump();
+    os << json.dump(1, "  ");
     return os;
 }

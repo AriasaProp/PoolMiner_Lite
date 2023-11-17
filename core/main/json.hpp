@@ -15,14 +15,10 @@
 namespace json {
 
 struct JSON {
-private:
   Class Type = Class::Null;
   void SetType (Class type) {
-    if (type == Type)
-      return;
-
+    if (type == Type) return;
     ClearInternal ();
-
     switch (type) {
     case Class::Null:
       Internal.Map = nullptr;
@@ -63,6 +59,7 @@ private:
     default:;
     }
   }
+  
   union BackingData {
     BackingData (double d) : Float (d) {}
     BackingData (long l) : Int (l) {}
@@ -105,9 +102,6 @@ private:
       typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::const_iterator (); }
       typename Container::const_iterator end () const { return object ? object->end () : typename Container::const_iterator (); }
   };
-  
-public:
-  
   enum class Class {
     Null,
     Object,

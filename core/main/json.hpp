@@ -15,50 +15,16 @@
 namespace json {
 
 struct JSON {
+  enum class Class {
+    Null,
+    Object,
+    Array,
+    String,
+    Floating,
+    Integral,
+    Boolean
+  };
   Class Type = Class::Null;
-  void SetType (Class type) {
-    if (type == Type) return;
-    ClearInternal ();
-    switch (type) {
-    case Class::Null:
-      Internal.Map = nullptr;
-      break;
-    case Class::Object:
-      Internal.Map = new std::map<std::string, JSON> ();
-      break;
-    case Class::Array:
-      Internal.List = new std::deque<JSON> ();
-      break;
-    case Class::String:
-      Internal.String = new std::string ();
-      break;
-    case Class::Floating:
-      Internal.Float = 0.0;
-      break;
-    case Class::Integral:
-      Internal.Int = 0;
-      break;
-    case Class::Boolean:
-      Internal.Bool = false;
-      break;
-    }
-
-    Type = type;
-  }
-  void ClearInternal () {
-    switch (Type) {
-    case Class::Object:
-      delete Internal.Map;
-      break;
-    case Class::Array:
-      delete Internal.List;
-      break;
-    case Class::String:
-      delete Internal.String;
-      break;
-    default:;
-    }
-  }
   
   union BackingData {
     BackingData (double d) : Float (d) {}
@@ -101,15 +67,6 @@ struct JSON {
   
       typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::const_iterator (); }
       typename Container::const_iterator end () const { return object ? object->end () : typename Container::const_iterator (); }
-  };
-  enum class Class {
-    Null,
-    Object,
-    Array,
-    String,
-    Floating,
-    Integral,
-    Boolean
   };
   
   JSON ();
@@ -268,8 +225,52 @@ struct JSON {
   }
 
   std::string dump (int, std::string) const;
-  friend std::ostream &operator<< (std::ostream &, const JSON &);
+  
+  void SetType (Class type) {
+    if (type == Type) return;
+    ClearInternal ();
+    switch (type) {
+    case Class::Null:
+      Internal.Map = nullptr;
+      break;
+    case Class::Object:
+      Internal.Map = new std::map<std::string, JSON> ();
+      break;
+    case Class::Array:
+      Internal.List = new std::deque<JSON> ();
+      break;
+    case Class::String:
+      Internal.String = new std::string ();
+      break;
+    case Class::Floating:
+      Internal.Float = 0.0;
+      break;
+    case Class::Integral:
+      Internal.Int = 0;
+      break;
+    case Class::Boolean:
+      Internal.Bool = false;
+      break;
+    }
 
+    Type = type;
+  }
+  void ClearInternal () {
+    switch (Type) {
+    case Class::Object:
+      delete Internal.Map;
+      break;
+    case Class::Array:
+      delete Internal.List;
+      break;
+    case Class::String:
+      delete Internal.String;
+      break;
+    default:;
+    }
+  }
+  
+  friend std::ostream &operator<< (std::ostream &, const JSON &);
 };
 
 JSON Array ();
@@ -278,7 +279,8 @@ template <typename... T>
 JSON Array (T... args);
 
 JSON Object ();
-std::ostream &operator<< (std::ostream &, const json::JSON &);
 } // End Namespace json
+
+std::ostream &operator<< (std::ostream &, const json::JSON &);
 
 #endif // JSON_

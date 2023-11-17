@@ -215,7 +215,7 @@ json::JSON json::Object() {
     return std::move( JSON::Make( JSON::Class::Object ) );
 }
 
-std::ostream& operator<<( std::ostream &os, const json::JSON &json ) {
+std::ostream& json::operator<<( std::ostream &os, const json::JSON &json ) {
     os << json.dump();
     return os;
 }

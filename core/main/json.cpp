@@ -1,30 +1,31 @@
 #include "json.hpp"
 
 static json::JSON parse_next(const std::string &, size_t & );
-static void consume_ws(const std::string &str, size_t &offset ) {
-    while( isspace( str[offset] ) ) ++offset;
-}
 static json::JSON parse_object(const std::string &str, size_t &offset ) {
     json::JSON Object = json::JSON::Make( json::JSON::Class::Object );
 
-    ++offset;
-    consume_ws( str, offset );
-    if( str[offset] == '}' ) {
-        ++offset; return std::move( Object );
+    do {
+      ++offset;
+    } while(isspace(str[offset]));
+    if(str[offset] == '}') {
+      ++offset;
+      return std::move(Object);
     }
 
     while( true ) {
         json::JSON Key = parse_next( str, offset );
-        consume_ws( str, offset );
+        while( isspace( str[offset] ) ) ++offset;
         if( str[offset] != ':' ) {
             std::cerr << "Error: Object: Expected colon, found '" << str[offset] << "'\n";
             break;
         }
-        consume_ws( str, ++offset );
+        do {
+          ++offset;
+        } while(isspace(str[offset]));
         json::JSON Value = parse_next( str, offset );
         Object[(std::string)Key] = Value;
         
-        consume_ws( str, offset );
+        while( isspace( str[offset] ) ) ++offset;
         if( str[offset] == ',' ) {
             ++offset; continue;
         }
@@ -43,15 +44,16 @@ static json::JSON parse_array(const std::string &str, size_t &offset ) {
     json::JSON Array = json::JSON::Make( json::JSON::Class::Array );
     unsigned index = 0;
     
-    ++offset;
-    consume_ws( str, offset );
+    do {
+      ++offset;
+    } while(isspace(str[offset]));
     if( str[offset] == ']' ) {
         ++offset; return std::move( Array );
     }
 
     while( true ) {
         Array[index++] = parse_next( str, offset );
-        consume_ws( str, offset );
+        while( isspace( str[offset] ) ) ++offset;
 
         if( str[offset] == ',' ) {
             ++offset; continue;
@@ -177,7 +179,7 @@ static json::JSON parse_null(const std::string &str, size_t &offset ) {
 }
 static json::JSON parse_next(const std::string &str, size_t &offset ) {
     char value;
-    consume_ws( str, offset );
+    while( isspace( str[offset] ) ) ++offset;
     value = str[offset];
     switch( value ) {
         case '[' : return std::move( parse_array( str, offset ) );

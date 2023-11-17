@@ -68,7 +68,7 @@ namespace json {
 
       return std::move( Array );
   }
-  JSON parse_std::string(const std::string &str, size_t &offset ) {
+  JSON parse_string(const std::string &str, size_t &offset ) {
       JSON String;
       std::string val;
       for( char c = str[++offset]; c != '\"' ; c = str[++offset] ) {
@@ -183,7 +183,7 @@ namespace json {
       switch( value ) {
           case '[' : return std::move( parse_array( str, offset ) );
           case '{' : return std::move( parse_object( str, offset ) );
-          case '\"': return std::move( parse_std::string( str, offset ) );
+          case '\"': return std::move( parse_string( str, offset ) );
           case 't' :
           case 'f' : return std::move( parse_bool( str, offset ) );
           case 'n' : return std::move( parse_null( str, offset ) );

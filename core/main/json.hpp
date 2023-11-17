@@ -16,7 +16,6 @@ namespace json {
 
 using std::map;
 using std::deque;
-using std::string;
 using std::enable_if;
 using std::initializer_list;
 using std::is_same;
@@ -25,8 +24,8 @@ using std::is_integral;
 using std::is_floating_point;
 
 namespace {
-    string json_escape( const string &str ) {
-        string output;
+    std::string json_escape( const std::string &str ) {
+        std::string output;
         for( unsigned i = 0; i < str.length(); ++i )
             switch( str[i] ) {
                 case '\"': output += "\\\""; break;
@@ -48,12 +47,12 @@ class JSON
         BackingData( double d ) : Float( d ){}
         BackingData( long   l ) : Int( l ){}
         BackingData( bool   b ) : Bool( b ){}
-        BackingData( string s ) : String( new string( s ) ){}
+        BackingData( std::string s ) : String( new std::string( s ) ){}
         BackingData()           : Int( 0 ){}
 
         deque<JSON>        *List;
-        map<string,JSON>   *Map;
-        string             *String;
+        map<std::string,JSON>   *Map;
+        std::string             *String;
         double              Float;
         long                Int;
         bool                Bool;
@@ -124,7 +123,7 @@ class JSON
             switch( other.Type ) {
             case Class::Object:
                 Internal.Map = 
-                    new map<string,JSON>( other.Internal.Map->begin(),
+                    new map<std::string,JSON>( other.Internal.Map->begin(),
                                           other.Internal.Map->end() );
                 break;
             case Class::Array:
@@ -134,7 +133,7 @@ class JSON
                 break;
             case Class::String:
                 Internal.String = 
-                    new string( *other.Internal.String );
+                    new std::string( *other.Internal.String );
                 break;
             default:
                 Internal = other.Internal;
@@ -147,7 +146,7 @@ class JSON
             switch( other.Type ) {
             case Class::Object:
                 Internal.Map = 
-                    new map<string,JSON>( other.Internal.Map->begin(),
+                    new map<std::string,JSON>( other.Internal.Map->begin(),
                                           other.Internal.Map->end() );
                 break;
             case Class::Array:
@@ -157,7 +156,7 @@ class JSON
                 break;
             case Class::String:
                 Internal.String = 
-                    new string( *other.Internal.String );
+                    new std::string( *other.Internal.String );
                 break;
             default:
                 Internal = other.Internal;
@@ -191,7 +190,7 @@ class JSON
         JSON( T f, typename enable_if<is_floating_point<T>::value>::type* = 0 ) : Internal( (double)f ), Type( Class::Floating ){}
 
         template <typename T>
-        JSON( T s, typename enable_if<is_convertible<T,string>::value>::type* = 0 ) : Internal( string( s ) ), Type( Class::String ){}
+        JSON( T s, typename enable_if<is_convertible<T,std::string>::value>::type* = 0 ) : Internal( std::string( s ) ), Type( Class::String ){}
 
         JSON( std::nullptr_t ) : Internal(), Type( Class::Null ){}
 
@@ -200,7 +199,7 @@ class JSON
             return ret;
         }
 
-        static JSON Load( const string & );
+        static JSON Load( const std::string & );
 
         template <typename T>
         void append( T arg ) {
@@ -228,11 +227,11 @@ class JSON
             }
 
         template <typename T>
-            typename enable_if<is_convertible<T,string>::value, JSON&>::type operator=( T s ) {
-                SetType( Class::String ); *Internal.String = string( s ); return *this;
+            typename enable_if<is_convertible<T,std::string>::value, JSON&>::type operator=( T s ) {
+                SetType( Class::String ); *Internal.String = std::string( s ); return *this;
             }
 
-        JSON& operator[]( const string &key ) {
+        JSON& operator[]( const std::string &key ) {
             SetType( Class::Object ); return Internal.Map->operator[]( key );
         }
 
@@ -242,11 +241,11 @@ class JSON
             return Internal.List->operator[]( index );
         }
 
-        JSON &at( const string &key ) {
+        JSON &at( const std::string &key ) {
             return operator[]( key );
         }
 
-        const JSON &at( const string &key ) const {
+        const JSON &at( const std::string &key ) const {
             return Internal.Map->at( key );
         }
 
@@ -265,7 +264,7 @@ class JSON
                 return -1;
         }
 
-        bool hasKey( const string &key ) const {
+        bool hasKey( const std::string &key ) const {
             if( Type == Class::Object )
                 return Internal.Map->find( key ) != Internal.Map->end();
             return false;
@@ -285,10 +284,10 @@ class JSON
         /// Functions for getting primitives from the JSON object.
         bool IsNull() const { return Type == Class::Null; }
 
-        string ToString() const { bool b; return std::move( ToString( b ) ); }
-        string ToString( bool &ok ) const {
+        std::string ToString() const { bool b; return std::move( ToString( b ) ); }
+        std::string ToString( bool &ok ) const {
             ok = (Type == Class::String);
-            return ok ? std::move( json_escape( *Internal.String ) ): string("");
+            return ok ? std::move( json_escape( *Internal.String ) ): std::string("");
         }
 
         double ToFloat() const { bool b; return ToFloat( b ); }
@@ -309,10 +308,10 @@ class JSON
             return ok ? Internal.Bool : false;
         }
 
-        JSONWrapper<map<string,JSON>> ObjectRange() {
+        JSONWrapper<map<std::string,JSON>> ObjectRange() {
             if( Type == Class::Object )
-                return JSONWrapper<map<string,JSON>>( Internal.Map );
-            return JSONWrapper<map<string,JSON>>( nullptr );
+                return JSONWrapper<map<std::string,JSON>>( Internal.Map );
+            return JSONWrapper<map<std::string,JSON>>( nullptr );
         }
 
         JSONWrapper<deque<JSON>> ArrayRange() {
@@ -321,10 +320,10 @@ class JSON
             return JSONWrapper<deque<JSON>>( nullptr );
         }
 
-        JSONConstWrapper<map<string,JSON>> ObjectRange() const {
+        JSONConstWrapper<map<std::string,JSON>> ObjectRange() const {
             if( Type == Class::Object )
-                return JSONConstWrapper<map<string,JSON>>( Internal.Map );
-            return JSONConstWrapper<map<string,JSON>>( nullptr );
+                return JSONConstWrapper<map<std::string,JSON>>( Internal.Map );
+            return JSONConstWrapper<map<std::string,JSON>>( nullptr );
         }
 
 
@@ -334,15 +333,15 @@ class JSON
             return JSONConstWrapper<deque<JSON>>( nullptr );
         }
 
-        string dump( int depth = 1, string tab = "  ") const {
-            string pad = "";
+        std::string dump( int depth = 1, std::string tab = "  ") const {
+            std::string pad = "";
             for( int i = 0; i < depth; ++i, pad += tab );
 
             switch( Type ) {
                 case Class::Null:
                     return "null";
                 case Class::Object: {
-                    string s = "{\n";
+                    std::string s = "{\n";
                     bool skip = true;
                     for( auto &p : *Internal.Map ) {
                         if( !skip ) s += ",\n";
@@ -353,7 +352,7 @@ class JSON
                     return s;
                 }
                 case Class::Array: {
-                    string s = "[";
+                    std::string s = "[";
                     bool skip = true;
                     for( auto &p : *Internal.List ) {
                         if( !skip ) s += ", ";
@@ -388,9 +387,9 @@ class JSON
           
             switch( type ) {
             case Class::Null:      Internal.Map    = nullptr;                break;
-            case Class::Object:    Internal.Map    = new map<string,JSON>(); break;
+            case Class::Object:    Internal.Map    = new map<std::string,JSON>(); break;
             case Class::Array:     Internal.List   = new deque<JSON>();     break;
-            case Class::String:    Internal.String = new string();           break;
+            case Class::String:    Internal.String = new std::string();           break;
             case Class::Floating:  Internal.Float  = 0.0;                    break;
             case Class::Integral:  Internal.Int    = 0;                      break;
             case Class::Boolean:   Internal.Bool   = false;                  break;
@@ -439,13 +438,13 @@ std::ostream& operator<<( std::ostream &os, const JSON &json ) {
 }
 
 namespace {
-    JSON parse_next( const string &, size_t & );
+    JSON parse_next( const std::string &, size_t & );
 
-    void consume_ws( const string &str, size_t &offset ) {
+    void consume_ws( const std::string &str, size_t &offset ) {
         while( isspace( str[offset] ) ) ++offset;
     }
 
-    JSON parse_object( const string &str, size_t &offset ) {
+    JSON parse_object( const std::string &str, size_t &offset ) {
         JSON Object = JSON::Make( JSON::Class::Object );
 
         ++offset;
@@ -481,7 +480,7 @@ namespace {
         return std::move( Object );
     }
 
-    JSON parse_array( const string &str, size_t &offset ) {
+    JSON parse_array( const std::string &str, size_t &offset ) {
         JSON Array = JSON::Make( JSON::Class::Array );
         unsigned index = 0;
         
@@ -510,9 +509,9 @@ namespace {
         return std::move( Array );
     }
 
-    JSON parse_string( const string &str, size_t &offset ) {
+    JSON parse_string( const std::string &str, size_t &offset ) {
         JSON String;
-        string val;
+        std::string val;
         for( char c = str[++offset]; c != '\"' ; c = str[++offset] ) {
             if( c == '\\' ) {
                 switch( str[ ++offset ] ) {
@@ -548,9 +547,9 @@ namespace {
         return std::move( String );
     }
 
-    JSON parse_number( const string &str, size_t &offset ) {
+    JSON parse_number( const std::string &str, size_t &offset ) {
         JSON Number;
-        string val, exp_str;
+        std::string val, exp_str;
         char c;
         bool isDouble = false;
         long exp = 0;
@@ -598,7 +597,7 @@ namespace {
         return std::move( Number );
     }
 
-    JSON parse_bool( const string &str, size_t &offset ) {
+    JSON parse_bool( const std::string &str, size_t &offset ) {
         JSON Bool;
         if( str.substr( offset, 4 ) == "true" )
             Bool = true;
@@ -612,7 +611,7 @@ namespace {
         return std::move( Bool );
     }
 
-    JSON parse_null( const string &str, size_t &offset ) {
+    JSON parse_null( const std::string &str, size_t &offset ) {
         JSON Null;
         if( str.substr( offset, 4 ) != "null" ) {
             std::cerr << "ERROR: Null: Expected 'null', found '" << str.substr( offset, 4 ) << "'\n";
@@ -622,7 +621,7 @@ namespace {
         return std::move( Null );
     }
 
-    JSON parse_next( const string &str, size_t &offset ) {
+    JSON parse_next( const std::string &str, size_t &offset ) {
         char value;
         consume_ws( str, offset );
         value = str[offset];
@@ -639,11 +638,6 @@ namespace {
         std::cerr << "ERROR: Parse: Unknown starting character '" << value << "'\n";
         return JSON();
     }
-}
-
-JSON JSON::Load( const string &str ) {
-    size_t offset = 0;
-    return std::move( parse_next( str, offset ) );
 }
 
 } // End Namespace json

@@ -200,3 +200,22 @@ json::JSON json::JSON::Load(const string &str ) {
   return std::move( parse_next( str, offset ) );
 }
 
+json::JSON json::Array() {
+    return std::move( JSON::Make( JSON::Class::Array ) );
+}
+
+template <typename... T>
+json::JSON json::Array( T... args ) {
+    JSON arr = JSON::Make( JSON::Class::Array );
+    arr.append( args... );
+    return std::move( arr );
+}
+
+json::JSON json::Object() {
+    return std::move( JSON::Make( JSON::Class::Object ) );
+}
+
+std::ostream& operator<<( std::ostream &os, const json::JSON &json ) {
+    os << json.dump();
+    return os;
+}

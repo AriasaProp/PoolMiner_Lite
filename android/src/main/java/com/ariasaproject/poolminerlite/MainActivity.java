@@ -1,26 +1,22 @@
 package com.ariasaproject.poolminerlite;
 
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.PowerManager;
-import android.os.StrictMode;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.SeekBar;
-
-import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -31,21 +27,18 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
-import androidx.lifecycle.Observer;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection {
     static {
         System.loadLibrary("ext");
     }
- 
+
     MinerService.LocalBinder dataService = null;
     private final StringBuilder sb = new StringBuilder();
     private ConsoleItem.Lists logList;
     private int accepted_result, rejected_result;
     Adapter adpt;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,14 +109,15 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         final Window window = getWindow();
         cb_screen_awake.setChecked((window.getAttributes().flags & FLAG_KEEP_SCREEN_ON) != 0);
         cb_screen_awake.setOnCheckedChangeListener(
-        (cb, check) -> {
-            if (check) window.addFlags(FLAG_KEEP_SCREEN_ON);
-            else window.clearFlags(FLAG_KEEP_SCREEN_ON);
-        });
+                (cb, check) -> {
+                    if (check) window.addFlags(FLAG_KEEP_SCREEN_ON);
+                    else window.clearFlags(FLAG_KEEP_SCREEN_ON);
+                });
         // log Adapter
         final RecyclerView cv = (RecyclerView) findViewById(R.id.console_view);
         cv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        adpt = new Adapter<ConsoleItemHolder>() {
+        adpt =
+                new Adapter<ConsoleItemHolder>() {
                     final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
 
                     @Override
@@ -147,10 +141,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         checkBatteryOptimizations();
         bindService(new Intent(this, MinerService.class), this, Context.BIND_AUTO_CREATE);
     }
+
     private static final int REQUEST_BATTERY_OPTIMIZATIONS = 1001;
+
     private void checkBatteryOptimizations() {
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (powerManager != null && !powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+        if (powerManager != null
+                && !powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
             // Jika izin tidak diizinkan, tampilkan dialog untuk meminta izin
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
@@ -158,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             startActivityForResult(intent, REQUEST_BATTERY_OPTIMIZATIONS);
         }
     }
-    
+
     private void updateState(int state) {
         if (mainStateCurrent == state) return;
         switch (state) {
@@ -243,7 +240,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         logList.add(1, "Jumped from none to onStop, is imposible from now");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Jumped from onStart to onStop state, for now is imposible!");
+                        logList.add(
+                                1, "Jumped from onStart to onStop state, for now is imposible!");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(1, "Service mining try to stop!");
@@ -270,7 +268,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 break;
             case REQUEST_BATTERY_OPTIMIZATIONS:
                 PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                if (powerManager != null && powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
+                if (powerManager != null
+                        && powerManager.isIgnoringBatteryOptimizations(getPackageName())) {
                     // Izin diberikan, lanjutkan dengan operasi normal
                 } else {
                     // Izin ditolak, berikan pengguna instruksi lebih lanjut atau tindakan yang
@@ -279,8 +278,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 break;
         }
     }
-    
-    //Service Connection
+
+    // Service Connection
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         dataService = (MinerService.LocalBinder) service;
@@ -291,8 +290,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         dataService.StopMine();
         dataService = null;
     }
-    
-    
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -331,13 +329,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             sb_cpu.setProgress(ints[0]); // old
         }
     }
-    
-    
 
     @Override
     protected void onResume() {
         super.onResume();
-        MinerViewModel mvm = ((MainApplication)getApplication()).getMinerViewModel();
+        MinerViewModel mvm = ((MainApplication) getApplication()).getMinerViewModel();
         float speedHash = mvm.getSpeed();
         if (speedHash > 0.0f) {
             int unit_step = 0;
@@ -348,34 +344,34 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             tv_s.setText(String.format("%.3f %s/Sec", speedHash, UnitHash[unit_step]));
         }
         updateState(mvm.getState());
-        mvm.registerObs(this, 
-            (speed) -> {
-                int unit_step = 0;
-                while (unit_step < UnitHash.length && speed > 1000.0f) {
-                    speed /= 1000.0f;
-                    unit_step++;
-                }
-                tv_s.setText(String.format("%.3f %s/Sec", speed, UnitHash[unit_step]));
-            },
-            (result) -> {
-                if (result) {
-                    tv_ra.setText(String.format("%03d", ++accepted_result));
-                } else {
-                    tv_rr.setText(String.format("%03d", ++rejected_result));
-                }
-            },
-            (state) -> updateState(state),
-            (log) -> {
-                logList.add(log);
-                adpt.notifyDataSetChanged();
-            }
-        );
+        mvm.registerObs(
+                this,
+                (speed) -> {
+                    int unit_step = 0;
+                    while (unit_step < UnitHash.length && speed > 1000.0f) {
+                        speed /= 1000.0f;
+                        unit_step++;
+                    }
+                    tv_s.setText(String.format("%.3f %s/Sec", speed, UnitHash[unit_step]));
+                },
+                (result) -> {
+                    if (result) {
+                        tv_ra.setText(String.format("%03d", ++accepted_result));
+                    } else {
+                        tv_rr.setText(String.format("%03d", ++rejected_result));
+                    }
+                },
+                (state) -> updateState(state),
+                (log) -> {
+                    logList.add(log);
+                    adpt.notifyDataSetChanged();
+                });
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
-        ((MainApplication)getApplication()).getMinerViewModel().unregisterObs();
+        ((MainApplication) getApplication()).getMinerViewModel().unregisterObs();
     }
 
     @Override
@@ -383,7 +379,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         super.onDestroy();
         unbindService(this);
     }
+
     int mainStateCurrent = -1;
+
     // button function
     public void toStartMining(View v) {
         updateState(MINE_STATE_ONSTART);
@@ -394,12 +392,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         sb.setLength(0);
         dats[2] = sb.append(et_pass.getText()).toString();
         sb.setLength(0);
-        
+
         int[] dati = new int[4];
         dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
         sb.setLength(0);
         dati[1] = sb_cpu.getProgress();
-        
+
         tv_showInput.setText(
                 String.format(
                         "server = %s:%d \nauth = %s:%s\nuse %d threads",
@@ -411,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         editor.putInt(PREF_PORT, dati[0]);
         editor.putInt(PREF_CPU_USAGE, dati[1]);
         editor.commit();
-        
+
         dataService.StartMine(dats, dati);
     }
 
@@ -419,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         updateState(MINE_STATE_ONSTOP);
         dataService.StopMine();
     }
-    
+
     private class ConsoleItemHolder extends RecyclerView.ViewHolder {
         private AppCompatTextView time;
         private AppCompatTextView msg;
@@ -463,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             }
         }
     }
-    
+
     ViewGroup input_container, status_container;
     AppCompatTextView tv_s, tv_ra, tv_rr, tv_info;
     AppCompatTextView tv_showInput;
@@ -471,7 +469,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     AppCompatButton btn_startmine, btn_stopmine;
     AppCompatSeekBar sb_cpu;
     AppCompatCheckBox cb_screen_awake;
-    
+
     // key bundles in temporary safe
     private static final String KEYBUNDLE_CONSOLE = "bundle_console";
     private static final String KEYBUNDLE_TEXTS = "bundle_texts";
@@ -496,28 +494,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public static final String DEFAULT_PASS = "1234";
 
     public static final int DEFAULT_PORT = 3333;
-    
-    //unit hash
-    public static final String[] UnitHash = new String[]{
-      "Hash",
-      "kHash",
-      "MHash",
-      "GHash",
-      "THash",
-      "PHash",
-      "EHash",
-      "ZHash",
-      "YHash",
-    };
+
+    // unit hash
+    public static final String[] UnitHash =
+            new String[] {
+                "Hash", "kHash", "MHash", "GHash", "THash", "PHash", "EHash", "ZHash", "YHash",
+            };
 }
-
-
-
-
-
-
-
-
-
-
-

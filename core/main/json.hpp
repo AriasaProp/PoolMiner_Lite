@@ -414,10 +414,6 @@ private:
   }
 
 private:
-  /* beware: only call if YOU know that Internal is allocated. No checks performed here.
-     This function should be called in a constructed JSON just before you are going to
-    overwrite Internal...
-  */
   void ClearInternal () {
     switch (Type) {
     case Class::Object:

@@ -77,15 +77,6 @@ private:
     long Int;
     bool Bool;
   } Internal;
-  enum class Class {
-    Null,
-    Object,
-    Array,
-    String,
-    Floating,
-    Integral,
-    Boolean
-  };
 
   template <typename Container>
   struct JSONWrapper {
@@ -116,6 +107,17 @@ private:
   };
   
 public:
+  
+  enum class Class {
+    Null,
+    Object,
+    Array,
+    String,
+    Floating,
+    Integral,
+    Boolean
+  };
+  
   JSON ();
   JSON (std::initializer_list<JSON>);
   JSON (JSON &&);

@@ -71,20 +71,44 @@ struct connectData {
   int sockfd;
 };
 
+size_t parserObject(char *b, size_t len, char *obj) {
+	bool findedObject = false;
+	size_t bracket = 0;
+	char *buff = b;
+	char *endbuff = buff + len;
+	while ((buff < endbuff) && *buff && !(findedObject && (bracket == 0))) {
+		switch (*buff) {
+			case '{':
+				if (!findedObject) findedObject = true;
+				++bracket;
+				break;
+			case '}':
+				--bracket;
+				break;
+			default:;
+		}
+		++buff;
+	}
+	size_t ob = buff - b;
+	memcpy(obj, b, ob);
+	memmove(b, buff, len - ob);
+	return len - ob;
+}
+
 void *connectionWork (void *p) {
   connectData *dat = (connectData *)p;
   try {
     // subscribe & authorize
+    char buffer[2000000], storeObj[1000]; // 2 Mbyte
     {
-      char message[1024 * 2];
-      strcpy (message, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": []}\n");
-      strcat (message, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
-      strcat (message, dat->auth_user);
-      strcat (message, "\",\"");
-      strcat (message, dat->auth_pass);
-      strcat (message, "\"]}\n");
-      for (int sended = 0, length = strlen (message), tries = 0; (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, message + sended, length - sended, 0);
+      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": []}\n");
+      strcat (buffer, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
+      strcat (buffer, dat->auth_user);
+      strcat (buffer, "\",\"");
+      strcat (buffer, dat->auth_pass);
+      strcat (buffer, "\"]}\n");
+      for (int sended = 0, length = strlen (buffer), tries = 0; (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+        int s = send (dat->sockfd, buffer + sended, length - sended, 0);
         if (s < 0)
           ++tries;
         else
@@ -93,17 +117,19 @@ void *connectionWork (void *p) {
       if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
     }
 
-    char buffer[1024 * 1024 * 2];
     bool loop;
+    memset(buffer, 0, 2000000);
+    size_t startBuff = 0;
     do {
       pthread_mutex_lock (&_mtx);
       loop = doingjob;
       pthread_mutex_unlock (&_mtx);
-      int bytesReceived = recv (dat->sockfd, buffer, 1024 * 1024 * 2, 0);
+      int bytesReceived = recv (dat->sockfd, buffer+startBuff, 2000000-startBuff, 0);
       if (bytesReceived > 0) {
+      	startBuff = parserObject(buffer, bytesReceived, storeObj);
         JNIEnv *env;
         if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (buffer));
+          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
           global_jvm->DetachCurrentThread ();
         }
       }

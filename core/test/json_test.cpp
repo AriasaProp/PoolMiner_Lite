@@ -14,13 +14,13 @@ bool json_test () {
     })";
     std::cout << "The JSON string:\n\n" << str << "\n" << std::endl;
     
-    RSJresource  my_resource (str); 
-    // RSJ 
+    json_resource  my_resource (str); 
+    // json_ 
     std::cout << "\nDirect access:\n";
     std::cout << "\t The cow's X-coordinate is: " << my_resource["animals"][2]["coordinates"][0].as<int>() << std::endl;
     std::cout << "\t The cat's address is: " << my_resource["animals"][0]["address"].as<std::string>("unknown address") << std::endl;
     std::cout << "\t The owner's age is: " << my_resource["owner"]["age"].as<double>(50) << std::endl;
-    RSJresource& dog_resource = my_resource["animals"][1]; // refernce
+    json_resource& dog_resource = my_resource["animals"][1]; // refernce
     std::cout << "\t The dog's Y-coordinate is: " << dog_resource["coordinates"][1].as<double>() << std::endl;
     
     // ----
@@ -35,20 +35,20 @@ bool json_test () {
                         
     // ----
     std::cout << "\nInserting admirers:\n";
-    my_resource["admirers"] = RSJresource(  "{  \n"
+    my_resource["admirers"] = json_resource(  "{  \n"
                                             "    'Jane': [cat, dog],  \n" 
                                             "    'Jonathan': {admires: ['cat', 'goat'], relation_to_owner: 'brother'},  \n"
                                             "    Katie: cow  \n"
                                             "}" );
     for (auto it=my_resource["admirers"].as_object().begin(); it!=my_resource["admirers"].as_object().end(); ++it) {
         std::cout << "\t " << it->first << " admires ";
-        if (it->second.type()==RSJ_ARRAY)
+        if (it->second.type()==JSON_ARRAY)
             for (int a=0; a<it->second.size(); ++a)
                 std::cout << it->second[a].as<std::string>() + ", ";
-        else if (it->second.type()==RSJ_OBJECT)
+        else if (it->second.type()==JSON_OBJECT)
             for (int a=0; a<it->second["admires"].size(); ++a)
                 std::cout << it->second["admires"][a].as<std::string>() + ", ";
-        else if (it->second.type()==RSJ_LEAF)
+        else if (it->second.type()==JSON_LEAF)
             std::cout << it->second.as<std::string>();
         std::cout << std::endl;
     }

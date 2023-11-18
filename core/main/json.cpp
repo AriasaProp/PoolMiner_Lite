@@ -14,7 +14,7 @@ json::JSON::JSON (json::JSON &&other): Internal (other.Internal), Type (other.Ty
 json::JSON::JSON (const json::JSON &other) {
   switch (other.Type) {
   case json::JSON::Class::Object:
-    Internal.Map = new std::map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
+    Internal.Map = new std::unordered_map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
     break;
   case json::JSON::Class::Array:
     Internal.List = new std::deque<json::JSON> (other.Internal.List->begin (), other.Internal.List->end ());
@@ -39,7 +39,7 @@ json::JSON& json::JSON::operator=(const json::JSON &other) {
     ClearInternal ();
     switch (other.Type) {
     case json::JSON::Class::Object:
-      Internal.Map = new std::map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
+      Internal.Map = new std::unordered_map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
       break;
     case json::JSON::Class::Array:
       Internal.List = new std::deque<json::JSON> (other.Internal.List->begin (), other.Internal.List->end ());

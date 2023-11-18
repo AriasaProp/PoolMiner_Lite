@@ -24,7 +24,6 @@ struct JSON {
     Integral,
     Boolean
   };
-  Class Type = Class::Null;
   union BackingData {
     BackingData (double d) : Float (d) {}
     BackingData (long l) : Int (l) {}
@@ -39,6 +38,7 @@ struct JSON {
     long Int;
     bool Bool;
   } Internal;
+  Class Type = Class::Null;
 
   template <typename Container>
   struct JSONWrapper {

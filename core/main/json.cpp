@@ -329,14 +329,14 @@ static json::JSON parse_next(const std::string &str, size_t &offset ) {
     while( isspace( str[offset] ) ) ++offset;
     value = str[offset];
     switch( value ) {
-        case '[' : return std::move( parse_array( str, offset ) );
-        case '{' : return std::move( parse_object( str, offset ) );
-        case '\"': return std::move( parse_string( str, offset ) );
+        case '[' : return parse_array( str, offset );
+        case '{' : return parse_object( str, offset );
+        case '\"': return parse_string( str, offset );
         case 't' :
-        case 'f' : return std::move( parse_bool( str, offset ) );
-        case 'n' : return std::move( parse_null( str, offset ) );
+        case 'f' : return parse_bool( str, offset );
+        case 'n' : return parse_null( str, offset );
         default  : if( ( value <= '9' && value >= '0' ) || value == '-' )
-                       return std::move( parse_number( str, offset ) );
+                       return parse_number( str, offset );
     }
     std::cerr << "ERROR: Parse: Unknown starting character '" << value << "'\n";
     return json::JSON();

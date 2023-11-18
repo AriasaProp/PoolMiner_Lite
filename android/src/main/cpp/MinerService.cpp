@@ -208,7 +208,7 @@ void *toStartBackground (void *p) {
       }
       if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
     }
-    pthread_t connect
+    pthread_t connect;
     pthread_attr_t thread_attr;
     pthread_attr_init (&thread_attr);
     pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);

@@ -2,6 +2,7 @@
 #include <iostream>
 
 bool json_test () {
+	
   std::string contents = R"({
     "String": "Hello, JSON!",
     "Integer": 42,
@@ -9,18 +10,26 @@ bool json_test () {
     "Bool": true,
     "Array": [1, 2, 3, 4]
   })";
-  json::JSON obj = json::Load (contents);
-  std::string op1 = obj["String"];
+  json_resources obj (contents);
+  std::string op1 = obj["String"].as<std::string>();
   std::cout << "String : " << op1 << std::endl;
-  long op2 = obj["Integer"];
+  long op2 = obj["Integer"].as<int>();
   std::cout << "Integer : " << op2 << std::endl;
-  double op3 = obj["Float"];
+  double op3 = obj["Float"].as<float>();
   std::cout << "Float : " << op3 << std::endl;
-  bool op4 = obj["Bool"];
+  bool op4 = obj["Bool"].as<bool>();
   std::cout << "Bool : " << op4 << std::endl;
-  std::string op5 = obj["Array"];
-  std::cout << "Array as String : " << op5 << std::endl;
+  std::cout << "Array : [";
+  std::cout << obj["Array"][0].as<int>();
+  std::cout << ", ";
+  std::cout << obj["Array"][1].as<int>();
+  std::cout << ", ";
+  std::cout << obj["Array"][2].as<int>();
+  std::cout << ", ";
+  std::cout << obj["Array"][3].as<int>();
+  std::cout << "] " << std::endl;
 
-  std::cout << "Output : " << obj << std::endl;
+  std::cout << "Output : " << obj.as<std::string>() << std::endl;
+  
   return op4;
 }

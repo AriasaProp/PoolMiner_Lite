@@ -266,6 +266,7 @@ public:
         { std::cout << as_str(print_comments,update_data) << std::endl; }
     
     // opertor[]
+    json_resource& operator[] (const char *key); // object
     json_resource& operator[] (std::string key); // object
     json_resource& operator[] (int indx); // array
     

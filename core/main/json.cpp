@@ -254,6 +254,11 @@ json_object& json_resource::as_object (bool force) {
 }
 
 inline 
+json_resource& json_resource::operator[] (const char *key) { // returns reference
+    return ( (as_object())[std::string(key)] ); // will return empty resource (with _exists==false) if 
+                                            // either this resource does not exist, is not an object, or the key does not exist
+}
+inline 
 json_resource& json_resource::operator[] (std::string key) { // returns reference
     return ( (as_object())[key] ); // will return empty resource (with _exists==false) if 
                                             // either this resource does not exist, is not an object, or the key does not exist

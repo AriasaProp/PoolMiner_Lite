@@ -10,7 +10,7 @@ bool json_test () {
     "Bool": true,
     "Array": [1, 2, 3, 4]
   })";
-  json_resources obj (contents);
+  json_resource obj (contents);
   std::string op1 = obj["String"].as<std::string>();
   std::cout << "String : " << op1 << std::endl;
   long op2 = obj["Integer"].as<int>();
@@ -20,13 +20,13 @@ bool json_test () {
   bool op4 = obj["Bool"].as<bool>();
   std::cout << "Bool : " << op4 << std::endl;
   std::cout << "Array : [";
-  std::cout << obj["Array"][0].as<int>();
+  std::cout << obj["Array"][0];
   std::cout << ", ";
-  std::cout << obj["Array"][1].as<int>();
+  std::cout << obj["Array"][1];
   std::cout << ", ";
-  std::cout << obj["Array"][2].as<int>();
+  std::cout << obj["Array"][2];
   std::cout << ", ";
-  std::cout << obj["Array"][3].as<int>();
+  std::cout << obj["Array"][3];
   std::cout << "] " << std::endl;
 
   std::cout << "Output : " << obj.as<std::string>() << std::endl;

@@ -71,36 +71,15 @@ struct connectData {
   int sockfd;
 };
 
-size_t parserObject(char *b, size_t len, char *obj) {
-	bool findedObject = false;
-	
-	size_t bracket = 0;
-	char *buff = b;
-	char *endbuff = buff + len;
-	while ((buff < endbuff) && *buff && !(findedObject && (bracket == 0))) {
-		switch (*buff) {
-			case '{':
-				if (!findedObject) findedObject = true;
-				++bracket;
-				break;
-			case '}':
-				--bracket;
-				break;
-			default:;
-		}
-		++buff;
-	}
-	size_t ob = buff - b;
-	memcpy(obj, b, ob);
-	memmove(b, buff, len - ob);
-	return len - ob;
-}
+// 20 kBytes
+#define MAX_MESSAGE 20000
+#define CONNECT_MACHINE 
 
 void *connectWorker (void *p) {
   connectData *dat = (connectData *)p;
   try {
     // subscribe & authorize
-    char buffer[2000000], storeObj[2000]; // 2 Mbyte
+    char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
     {
       strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": []}\n");
       strcat (buffer, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
@@ -120,15 +99,44 @@ void *connectWorker (void *p) {
     }
 
     bool loop;
-    memset(buffer, 0, 2000000);
+    memset(buffer, 0, 20000);
     size_t startBuff = 0;
     do {
       pthread_mutex_lock (&_mtx);
       loop = doingjob;
       pthread_mutex_unlock (&_mtx);
-      int bytesReceived = recv (dat->sockfd, buffer+startBuff, 2000000-startBuff, 0);
+      int bytesReceived = recv (dat->sockfd, buffer + startBuff, MAX_MESSAGE - startBuff, 0);
       if (bytesReceived > 0) {
-      	startBuff = parserObject(buffer, bytesReceived, storeObj);
+      	{
+					bool findedObject = false;
+					
+					size_t bracket = 0;
+					char *buff = buffer;
+					char *endbuff = buff + bytesReceived;
+					while ((buff < endbuff) && *buff && !(findedObject && (bracket == 0))) {
+						switch (*buff) {
+							case '{':
+								if (!findedObject) findedObject = true;
+								++bracket;
+								break;
+							case '}':
+								--bracket;
+								break;
+							default:;
+						}
+						++buff;
+					}
+					
+					if (bracket != 0) {
+						startBuff = 0;
+					} else {
+						size_t ob = buff - buffer;
+						memcpy(storeObj, buffer, ob);
+						memmove(b, buff, bytesReceived - ob);
+						startBuff = bytesReceived - ob;
+					}
+				}
+
         JNIEnv *env;
         if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
           env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));

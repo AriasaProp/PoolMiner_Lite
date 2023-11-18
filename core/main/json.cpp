@@ -97,10 +97,10 @@ static std::string json_escape (const std::string &str) {
       output += str[i];
       break;
     }
-  return std::move (output);
+  return output;
 }
 json::JSON::operator std::string () const {
-  return (Type == json::JSON::Class::String) ? std::move (json_escape (*Internal.String)) : std::string ("");
+  return (Type == json::JSON::Class::String) ? json_escape (*Internal.String) : std::string ("");
 }
 std::string json::JSON::dump (int depth, std::string tab) const {
     std::string pad = "";
@@ -156,7 +156,7 @@ static json::JSON parse_object(const std::string &str, size_t &offset ) {
     } while(isspace(str[offset]));
     if(str[offset] == '}') {
       ++offset;
-      return std::move(Object);
+      return Object;
     }
 
     while( true ) {

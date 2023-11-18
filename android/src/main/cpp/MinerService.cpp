@@ -41,7 +41,6 @@ static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
 static jobject local_globalRef;
 static uint32_t active_worker = 0;
 static bool doingjob = false;
-static uint32_t port = 80;
 static uint32_t thread_use;
 static pthread_t *workers = nullptr;
 
@@ -264,12 +263,12 @@ void *toStartBackground (void *p) {
 #define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
 JNIF (void, nativeStart)
 (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
+  connectData *cd = new connectData;
   jint *integers = env->GetIntArrayElements (i, nullptr);
-  port = integers[0];
+  cd->port = integers[0];
   thread_use = integers[1];
   env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
 
-  connectData *cd = new connectData;
   {
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
     jsize len = env->GetStringUTFLength (jserverName);

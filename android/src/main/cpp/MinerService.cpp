@@ -95,7 +95,7 @@ size_t parserObject(char *b, size_t len, char *obj) {
 	return len - ob;
 }
 
-void *connectionWork (void *p) {
+void *connectWorker (void *p) {
   connectData *dat = (connectData *)p;
   try {
     // subscribe & authorize
@@ -187,7 +187,7 @@ void *toStartBackground (void *p) {
   try {
     // check inputs parameter for mining
     connectData *dat = (connectData *)p;
-    struct hostent *host = gethostbyname (data->server);
+    struct hostent *host = gethostbyname (dat->server);
     if (!host) throw "host name was invalid";
     dat->sockfd = socket (AF_INET, SOCK_STREAM, 0);
     if (dat->sockfd < 0) throw "socket has error!";

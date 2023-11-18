@@ -248,7 +248,7 @@ void *toStartBackground (void *p) {
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (er));
       std::string msgO (dat->server);
       msgO += ":";
-      magO += std::to_string(dat->port);
+      msgO += std::to_string(dat->port);
       msgO += "  ";
       msgO += dat->auth_user;
       msgO += ":";

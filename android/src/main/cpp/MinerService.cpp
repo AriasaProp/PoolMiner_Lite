@@ -108,7 +108,8 @@ void *connectWorker (void *p) {
       strcat (buffer, "\",\"");
       strcat (buffer, dat->auth_pass);
       strcat (buffer, "\"]}\n");
-      for (int sended = 0, length = strlen (buffer), tries = 0; (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+      size_t tries = 0;
+      for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, buffer + sended, length - sended, 0);
         if (s < 0)
           ++tries;
@@ -207,10 +208,11 @@ void *toStartBackground (void *p) {
       }
       if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
     }
+    pthread_t connect
     pthread_attr_t thread_attr;
     pthread_attr_init (&thread_attr);
     pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-    pthread_create (&connectWorker, &thread_attr, connectionWork, (void *)dat);
+    pthread_create (&connect, &thread_attr, connectWorker, (void *)dat);
     pthread_attr_destroy (&thread_attr);
     // done
 

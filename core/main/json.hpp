@@ -270,7 +270,24 @@ public:
     json_resource& operator[] (int indx); // array
     
     // ------------------------------------
-    
+    operator std::string() const {
+    	return data;
+    }
+    operator long() const {
+      return exists()? std::stol(data) : 0;
+    }
+    operator int() const {
+      return exists()? std::stoi(data) : 0;
+    }
+    operator double() const {
+      return exists()? std::stod(data) : 0;
+    }
+    operator float() const {
+      return exists()? std::stof(data) : 0;
+    }
+    operator bool() const {
+      return exists()? (bool)std::stof(data) : false;
+    }
     // as
     template <class dataType>
     dataType as (const dataType& def = dataType()) { // specialized outside class declaration

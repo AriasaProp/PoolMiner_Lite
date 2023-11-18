@@ -73,7 +73,7 @@ struct connectData {
 
 // 20 kBytes
 #define MAX_MESSAGE 20000
-#define CONNECT_MACHINE 
+#define CONNECT_MACHINE "MinerPool-Lite"
 
 void *connectWorker (void *p) {
   connectData *dat = (connectData *)p;
@@ -81,8 +81,9 @@ void *connectWorker (void *p) {
     // subscribe & authorize
     char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
     {
-      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": []}\n");
-      strcat (buffer, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
+      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [");
+      strcat (buffer, CONNECT_MACHINE);
+      strcat (buffer, "]}\n {\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
       strcat (buffer, dat->auth_user);
       strcat (buffer, "\",\"");
       strcat (buffer, dat->auth_pass);
@@ -90,12 +91,12 @@ void *connectWorker (void *p) {
       size_t tries = 0;
       for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, buffer + sended, length - sended, 0);
-        if (s < 0)
+        if (s <= 0)
           ++tries;
         else
           sended += s;
       }
-      if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
+      if (tries >= MAX_ATTEMPTS_TRY) throw "Send message is always failed!";
     }
 
     bool loop;
@@ -194,9 +195,9 @@ void *doWork (void *p) {
   pthread_exit (NULL);
 }
 void *toStartBackground (void *p) {
+  connectData *dat = (connectData *)p;
   try {
     // check inputs parameter for mining
-    connectData *dat = (connectData *)p;
     struct hostent *host = gethostbyname (dat->server);
     if (!host) throw "host name was invalid";
     dat->sockfd = socket (AF_INET, SOCK_STREAM, 0);
@@ -245,6 +246,14 @@ void *toStartBackground (void *p) {
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (er));
+      std::string msgO (dat->server);
+      msgO += ":";
+      magO += std::to_string(dat->port);
+      msgO += "  ";
+      msgO += dat->auth_user;
+      msgO += ":";
+      msgO += dat->auth_pass;
+      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (msgO.c_str()));
       env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
       global_jvm->DetachCurrentThread ();
     }

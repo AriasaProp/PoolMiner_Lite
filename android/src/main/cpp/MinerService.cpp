@@ -249,29 +249,29 @@ JNIF (void, nativeStart)
   thread_use = integers[1];
   env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
 
-  connectData cd = new connectData;
+  connectData *cd = new connectData;
   {
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
     jsize len = env->GetStringUTFLength (jserverName);
-    cd.server = new char[len];
+    cd->server = new char[len];
     const char *serverName = env->GetStringUTFChars (jserverName, 0);
-    memcpy (cd.server, serverName, len);
+    memcpy (cd->server, serverName, len);
     env->ReleaseStringUTFChars (jserverName, serverName);
   }
   {
     jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
     jsize len = env->GetStringUTFLength (jauth_user);
-    cd.auth_user = new char[len];
+    cd->auth_user = new char[len];
     const char *auth_user = env->GetStringUTFChars (jauth_user, 0);
-    memcpy (cd.auth_user, auth_user, len);
+    memcpy (cd->auth_user, auth_user, len);
     env->ReleaseStringUTFChars (jauth_user, auth_user);
   }
   {
     jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
     jsize len = env->GetStringUTFLength (jauth_pass);
-    cd.auth_pass = new char[len];
+    cd->auth_pass = new char[len];
     const char *auth_pass = env->GetStringUTFChars (jauth_pass, 0);
-    memcpy (cd.auth_pass, auth_pass, len);
+    memcpy (cd->auth_pass, auth_pass, len);
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
   if (!local_globalRef)

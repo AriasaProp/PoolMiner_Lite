@@ -132,7 +132,7 @@ void *connectWorker (void *p) {
 					} else {
 						size_t ob = buff - buffer;
 						memcpy(storeObj, buffer, ob);
-						memmove(b, buff, bytesReceived - ob);
+						memmove(buffer, buff, bytesReceived - ob);
 						startBuff = bytesReceived - ob;
 					}
 				}

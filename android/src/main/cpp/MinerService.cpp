@@ -73,6 +73,7 @@ struct connectData {
 
 size_t parserObject(char *b, size_t len, char *obj) {
 	bool findedObject = false;
+	
 	size_t bracket = 0;
 	char *buff = b;
 	char *endbuff = buff + len;

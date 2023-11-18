@@ -347,7 +347,7 @@ json::JSON json::Make (json::JSON::Class type) {
   ret.SetType (type);
   return ret;
 }
-json::JSON json::Load(const std::string &str ) {
+json::JSON json::Parse(const std::string &str ) {
   size_t offset = 0;
   return std::move( parse_next( str, offset ) );
 }

@@ -7,7 +7,7 @@
 #include <deque>
 #include <initializer_list>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <ostream>
 #include <string>
 #include <type_traits>
@@ -25,7 +25,6 @@ struct JSON {
     Boolean
   };
   Class Type = Class::Null;
-  
   union BackingData {
     BackingData (double d) : Float (d) {}
     BackingData (long l) : Int (l) {}
@@ -34,7 +33,7 @@ struct JSON {
     BackingData () : Int (0) {}
 
     std::deque<JSON> *List;
-    std::map<std::string, JSON> *Map;
+    std::unordered_map<std::string, JSON> *Map;
     std::string *String;
     double Float;
     long Int;
@@ -192,10 +191,10 @@ struct JSON {
     return (Type == Class::Boolean) ? Internal.Bool : false;
   }
 
-  JSONWrapper<std::map<std::string, JSON>> ObjectRange () {
+  JSONWrapper<std::unordered_map<std::string, JSON>> ObjectRange () {
     if (Type == Class::Object)
-      return JSONWrapper<std::map<std::string, JSON>> (Internal.Map);
-    return JSONWrapper<std::map<std::string, JSON>> (nullptr);
+      return JSONWrapper<std::unordered_map<std::string, JSON>> (Internal.Map);
+    return JSONWrapper<std::unordered_map<std::string, JSON>> (nullptr);
   }
 
   JSONWrapper<std::deque<JSON>> ArrayRange () {
@@ -204,10 +203,10 @@ struct JSON {
     return JSONWrapper<std::deque<JSON>> (nullptr);
   }
 
-  JSONConstWrapper<std::map<std::string, JSON>> ObjectRange () const {
+  JSONConstWrapper<std::unordered_map<std::string, JSON>> ObjectRange () const {
     if (Type == Class::Object)
-      return JSONConstWrapper<std::map<std::string, JSON>> (Internal.Map);
-    return JSONConstWrapper<std::map<std::string, JSON>> (nullptr);
+      return JSONConstWrapper<std::unordered_map<std::string, JSON>> (Internal.Map);
+    return JSONConstWrapper<std::unordered_map<std::string, JSON>> (nullptr);
   }
 
   JSONConstWrapper<std::deque<JSON>> ArrayRange () const {
@@ -226,7 +225,7 @@ struct JSON {
       Internal.Map = nullptr;
       break;
     case Class::Object:
-      Internal.Map = new std::map<std::string, JSON> ();
+      Internal.Map = new std::unordered_map<std::string, JSON> ();
       break;
     case Class::Array:
       Internal.List = new std::deque<JSON> ();
@@ -266,7 +265,7 @@ struct JSON {
 };
 
 JSON Make (JSON::Class);
-JSON Load (const std::string &);
+JSON Parse (const std::string &);
 
 JSON Array ();
 

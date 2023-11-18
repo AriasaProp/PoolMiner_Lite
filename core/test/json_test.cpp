@@ -9,7 +9,7 @@ bool json_test () {
     "Bool": true,
     "Array": [1, 2, 3, 4]
   })";
-  json::JSON obj = json::Load (contents);
+  json::JSON obj = json::Parse (contents);
   std::string op1 = obj["String"];
   std::cout << "String : " << op1 << std::endl;
   long op2 = obj["Integer"];

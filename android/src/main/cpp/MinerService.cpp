@@ -99,7 +99,7 @@ void *connectionWork (void *p) {
   connectData *dat = (connectData *)p;
   try {
     // subscribe & authorize
-    char buffer[2000000], storeObj[1000]; // 2 Mbyte
+    char buffer[2000000], storeObj[2000]; // 2 Mbyte
     {
       strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": []}\n");
       strcat (buffer, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");

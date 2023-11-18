@@ -257,7 +257,7 @@ public:
     // access raw data and other attributes
     int size(void);
     std::string& raw_data (void) { return (data); }
-    bool exists (void) { return (_exists); }
+    bool exists () { return _exists; }
     bool is_parsed (void) { return (parsed_data_p!=NULL); }
     json_resourceType type (void);
     // emitter
@@ -275,19 +275,19 @@ public:
     	return data;
     }
     operator long() const {
-      return exists()? std::stol(data) : 0;
+      return this->exists()? std::stol(data) : 0;
     }
     operator int() const {
-      return exists()? std::stoi(data) : 0;
+      return this->exists()? std::stoi(data) : 0;
     }
     operator double() const {
-      return exists()? std::stod(data) : 0;
+      return this->exists()? std::stod(data) : 0;
     }
     operator float() const {
-      return exists()? std::stof(data) : 0;
+      return this->exists()? std::stof(data) : 0;
     }
     operator bool() const {
-      return exists()? (bool)std::stof(data) : false;
+      return this->exists() && (bool)std::stof(data);
     }
     // as
     template <class dataType>

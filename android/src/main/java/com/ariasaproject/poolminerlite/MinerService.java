@@ -61,20 +61,22 @@ public class MinerService extends Service {
 
     @Keep
     private synchronized void updateState(int state) {
-    		switch (state) {
-    			case 0:
-	            stopForeground(true);
-	            break;
-    			case 2:
-		          startForeground(NOTIFICATION_ID,
-		              new NotificationCompat.Builder(MinerService.this, NOTIFICATION_CHANNEL_ID)
-		                      .setSmallIcon(R.mipmap.ic_launcher_foreground)
-		                      .setContentTitle(NOTIFICATION_TITLE)
-		                      .setContentText("Service is running in the foreground")
-		                      .build());
-		          break;
-    			default:;
-    		}
+        switch (state) {
+            case 0:
+                stopForeground(true);
+                break;
+            case 2:
+                startForeground(
+                        NOTIFICATION_ID,
+                        new NotificationCompat.Builder(MinerService.this, NOTIFICATION_CHANNEL_ID)
+                                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                                .setContentTitle(NOTIFICATION_TITLE)
+                                .setContentText("Service is running in the foreground")
+                                .build());
+                break;
+            default:
+                ;
+        }
         mVM.postState(state);
     }
 

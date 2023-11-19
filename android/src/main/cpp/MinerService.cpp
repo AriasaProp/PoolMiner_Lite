@@ -75,6 +75,9 @@ struct connectData {
 #define CONNECT_MACHINE "PoolMiner-Lite"
 
 void *recvWorker (void *p) {
+	pthread_mutex_lock (&_mtx);
+  ++active_worker;
+  pthread_mutex_unlock (&_mtx);
   connectData *dat = (connectData *)p;
   try {
     char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
@@ -137,6 +140,10 @@ void *recvWorker (void *p) {
   delete[] dat->auth_user;
   delete[] dat->auth_pass;
   delete dat;
+  pthread_mutex_lock (&_mtx);
+  --active_worker;
+  pthread_cond_broadcast (&_cond);
+  pthread_mutex_unlock (&_mtx);
   pthread_exit (NULL);
 }
 

@@ -148,7 +148,7 @@ void *connectWorker (void *) {
 						startBuff = bytesReceived - ob;
 					}
 				}
-				sendMessageToConsole(0, (const char)&storeObj, 1);
+				sendMessageToConsole(0, (const char**)&storeObj, 1);
 			}
 			sleep (1);
 		} while (loop);

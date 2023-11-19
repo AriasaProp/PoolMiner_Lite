@@ -300,6 +300,8 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
 	conn_port = integers[0];
 	thread_use = integers[1];
 	env->ReleaseIntArrayElements (i,integers, JNI_ABORT);
+	
+	std::string aut;
 	{
 		jstring js = (jstring)env->GetObjectArrayElement (s, 0);
 		jsize len = env->GetStringUTFLength (js);
@@ -307,7 +309,7 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
 		const char *serverName = env->GetStringUTFChars (js, 0);
 		memcpy (conn_server, serverName, len);
 		env->ReleaseStringUTFChars (js, serverName);
-		env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (conn_server));
+		aut += std::string(conn_server);
 	}
 	{
 		jstring js = (jstring)env->GetObjectArrayElement (s, 1);
@@ -316,7 +318,7 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
 		const char *auth_user = env->GetStringUTFChars (js, 0);
 		memcpy (conn_auth_user, auth_user, len);
 		env->ReleaseStringUTFChars (js, auth_user);
-		env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (conn_auth_user));
+		aut += std::string(conn_auth_user);
 	}
 	{
 		jstring js = (jstring)env->GetObjectArrayElement (s, 2);
@@ -325,8 +327,10 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
 		const char *auth_pass = env->GetStringUTFChars (js, 0);
 		memcpy (conn_auth_pass, auth_pass, len);
 		env->ReleaseStringUTFChars (js, auth_pass);
-		env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (conn_auth_pass));
+		aut += std::string(conn_auth_pass);
 	}
+	env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (aut.c_str()));
+	
 	if (!local_globalRef)
 	local_globalRef = env->NewGlobalRef (o);
 	pthread_t starting;

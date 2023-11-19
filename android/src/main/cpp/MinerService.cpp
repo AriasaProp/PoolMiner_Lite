@@ -206,7 +206,6 @@ void *doWork (void *p) {
 void *toStartBackground (void *) {
 	try {
 		// check inputs parameter for mining
-		if (strcmp(conn_auth_pass, "1234") != 0) throw "pass invalid";
 		struct hostent *host = gethostbyname (conn_server);
 		if (!host) throw "host name was invalid";
 		conn_sockfd = socket (AF_INET, SOCK_STREAM, 0);
@@ -219,19 +218,22 @@ void *toStartBackground (void *) {
 
 		{
 			size_t tries = 0;
-			while (
-				(tries < MAX_ATTEMPTS_TRY) &&
-				(connect (conn_sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) != 0)) {
-				++tries,
+			do {
+				if (connect (conn_sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
+				++tries;
 				sleep (1);
-			}
+			} while (tries < MAX_ATTEMPTS_TRY);
 			if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
 		}
 		pthread_t connect;
 		pthread_attr_t thread_attr;
 		pthread_attr_init (&thread_attr);
-		pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-		pthread_create (&connect, &thread_attr, connectWorker, NULL);
+		pthread_attr_setdetachstate (&thread_attr,
+			PTHREAD_CREATE_DETACHED);
+		pthread_create (&connect,
+			&thread_attr,
+			connectWorker,
+			NULL);
 		pthread_attr_destroy (&thread_attr);
 		// done
 
@@ -243,13 +245,19 @@ void *toStartBackground (void *) {
 		for (unsigned long i = 0; i < thread_use; ++i) {
 			pthread_attr_t thread_attr;
 			pthread_attr_init (&thread_attr);
-			pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-			pthread_create (workers + i, &thread_attr, doWork, (void *)i);
+			pthread_attr_setdetachstate (&thread_attr,
+				PTHREAD_CREATE_DETACHED);
+			pthread_create (workers + i,
+				&thread_attr,
+				doWork,
+				(void *)i);
 			pthread_attr_destroy (&thread_attr);
 		}
 		JNIEnv *env;
 		if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-			env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
+			env->CallVoidMethod (local_globalRef,
+				updateState,
+				STATE_RUNNING);
 			global_jvm->DetachCurrentThread ();
 		}
 	} catch (const char *er) {
@@ -265,7 +273,9 @@ void *toStartBackground (void *) {
 			":",
 			conn_auth_pass
 		};
-		sendMessageToConsole(4, messages, 9);
+		sendMessageToConsole(4,
+			messages,
+			9);
 		conn_sockfd = -1;
 		delete[] conn_server;
 		conn_server = nullptr;
@@ -276,7 +286,9 @@ void *toStartBackground (void *) {
 		conn_auth_pass = nullptr;
 		JNIEnv *env;
 		if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-			env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+			env->CallVoidMethod (local_globalRef,
+				updateState,
+				STATE_NONE);
 			global_jvm->DetachCurrentThread ();
 		}
 	}
@@ -284,65 +296,92 @@ void *toStartBackground (void *) {
 }
 
 #define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
-JNIF (void, nativeStart)
-(JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
+JNIF (void,
+	nativeStart)
+(JNIEnv *env,
+	jobject o,
+	jobjectArray s,
+	jintArray i) {
 	if (mineRunning && active_worker && workers && doingjob) {
 		pthread_mutex_lock (&_mtx);
 		doingjob = false;
 		while (active_worker > 0) {
-			pthread_cond_wait (&_cond, &_mtx);
+			pthread_cond_wait (&_cond,
+				&_mtx);
 		}
 		mineRunning = false;
 		pthread_mutex_unlock (&_mtx);
 		delete[] workers;
 		workers = nullptr;
-		env->CallVoidMethod (o, updateState, STATE_NONE);
+		env->CallVoidMethod (o,
+			updateState,
+			STATE_NONE);
 	}
-	
-	jint *integers = env->GetIntArrayElements (i, nullptr);
+
+	jint *integers = env->GetIntArrayElements (i,
+		nullptr);
 	conn_port = integers[0];
 	thread_use = integers[1];
-	env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
+	env->ReleaseIntArrayElements (i,
+		integers,
+		JNI_ABORT);
 
-	jstring js = (jstring)env->GetObjectArrayElement (s, 0);
+	jstring js = (jstring)env->GetObjectArrayElement (s,
+		0);
 	jsize len = env->GetStringUTFLength (js);
 	conn_server = new char[len];
-	const char *serverName = env->GetStringUTFChars (js, 0);
-	strcpy (conn_server, serverName);
-	env->ReleaseStringUTFChars (js, serverName);
+	const char *serverName = env->GetStringUTFChars (js,
+		0);
+	strcpy (conn_server,
+		serverName);
+	env->ReleaseStringUTFChars (js,
+		serverName);
 
-	js = (jstring)env->GetObjectArrayElement (s, 1);
+	js = (jstring)env->GetObjectArrayElement (s,
+		1);
 	len = env->GetStringUTFLength (js);
 	conn_auth_user = new char[len];
-	const char *auth_user = env->GetStringUTFChars (js, 0);
-	strcpy (conn_auth_user, auth_user);
-	env->ReleaseStringUTFChars (js, auth_user);
+	const char *auth_user = env->GetStringUTFChars (js,
+		0);
+	strcpy (conn_auth_user,
+		auth_user);
+	env->ReleaseStringUTFChars (js,
+		auth_user);
 
-	js = (jstring)env->GetObjectArrayElement (s, 2);
+	js = (jstring)env->GetObjectArrayElement (s,
+		2);
 	len = env->GetStringUTFLength (js);
 	conn_auth_pass = new char[len];
-	const char *auth_pass = env->GetStringUTFChars (js, 0);
-	strcpy (conn_auth_pass, auth_pass);
-	env->ReleaseStringUTFChars (js, auth_pass);
+	const char *auth_pass = env->GetStringUTFChars (js,
+		0);
+	strcpy (conn_auth_pass,
+		auth_pass);
+	env->ReleaseStringUTFChars (js,
+		auth_pass);
 
 	if (!local_globalRef)
 	local_globalRef = env->NewGlobalRef (o);
 	pthread_t starting;
 	pthread_attr_t thread_attr;
 	pthread_attr_init (&thread_attr);
-	pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_setdetachstate (&thread_attr,
+		PTHREAD_CREATE_DETACHED);
 	pthread_mutex_lock (&_mtx);
 	if (pthread_create (&starting, &thread_attr, toStartBackground, 0) != 0) {
 		doingjob = false;
-		env->CallVoidMethod (o, updateState, STATE_NONE);
+		env->CallVoidMethod (o,
+			updateState,
+			STATE_NONE);
 	} else {
 		mineRunning = true;
 	}
 	pthread_mutex_unlock (&_mtx);
 	pthread_attr_destroy (&thread_attr);
 }
-JNIF (jboolean, nativeRunning)
-(JNIEnv *, jobject) {
+JNIF (jboolean,
+	nativeRunning)
+(JNIEnv *,
+	jobject) {
 	pthread_mutex_lock (&_mtx);
 	bool r = mineRunning;
 	pthread_mutex_unlock (&_mtx);
@@ -353,25 +392,34 @@ void *toStopBackground (void *) {
 	pthread_mutex_lock (&_mtx);
 	doingjob = false;
 	while (active_worker > 0)
-	pthread_cond_wait (&_cond, &_mtx);
+	pthread_cond_wait (&_cond,
+		&_mtx);
 	mineRunning = false;
 	pthread_mutex_unlock (&_mtx);
 	delete[] workers;
 	workers = nullptr;
 	JNIEnv *env;
 	if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-		env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+		env->CallVoidMethod (local_globalRef,
+			updateState,
+			STATE_NONE);
 		global_jvm->DetachCurrentThread ();
 	}
 	pthread_exit (NULL);
 }
-JNIF (void, nativeStop)
-(JNIEnv *, jobject) {
+JNIF (void,
+	nativeStop)
+(JNIEnv *,
+	jobject) {
 	// send state for mine was stop
 	pthread_t stopping;
 	pthread_attr_t thread_attr;
 	pthread_attr_init (&thread_attr);
-	pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-	pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
+	pthread_attr_setdetachstate (&thread_attr,
+		PTHREAD_CREATE_DETACHED);
+	pthread_create (&stopping,
+		&thread_attr,
+		toStopBackground,
+		NULL);
 	pthread_attr_destroy (&thread_attr);
 }

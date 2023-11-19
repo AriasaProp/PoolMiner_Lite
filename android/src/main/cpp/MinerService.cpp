@@ -148,7 +148,7 @@ void *connectWorker (void *) {
 						startBuff = bytesReceived - ob;
 					}
 				}
-				sendMessageToConsole(0, (const char**)&storeObj, 1);
+				sendMessageToConsole(0, (const char)&storeObj, 1);
 			}
 			sleep (1);
 		} while (loop);
@@ -231,7 +231,7 @@ void *toStartBackground (void *) {
 		pthread_attr_t thread_attr;
 		pthread_attr_init (&thread_attr);
 		pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-		pthread_create (&connect, &thread_attr, connectWorker, (void *)dat);
+		pthread_create (&connect, &thread_attr, connectWorker, NULL);
 		pthread_attr_destroy (&thread_attr);
 		// done
 
@@ -253,12 +253,13 @@ void *toStartBackground (void *) {
 			global_jvm->DetachCurrentThread ();
 		}
 	} catch (const char *er) {
+		std::string s_port = std::to_string(conn_port);
 		const char *messages[] = {
 			er,
 			"\ninfo connection ",
 			conn_server,
 			":",
-			std::to_string(conn_port).c_str(),
+			s_port.c_str(),
 			" ",
 			conn_auth_user,
 			":",
@@ -288,8 +289,9 @@ JNIF (void, nativeStart)
 	if (mineRunning && active_worker && workers && doingjob) {
 		pthread_mutex_lock (&_mtx);
 		doingjob = false;
-		while (active_worker > 0)
-		pthread_cond_wait (&_cond, &_mtx);
+		while (active_worker > 0) {
+			pthread_cond_wait (&_cond, &_mtx);
+		}
 		mineRunning = false;
 		pthread_mutex_unlock (&_mtx);
 		delete[] workers;

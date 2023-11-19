@@ -298,37 +298,33 @@ JNIF (void, nativeStart)
 		workers = nullptr;
 		env->CallVoidMethod (o, updateState, STATE_NONE);
 	}
+	
 	jint *integers = env->GetIntArrayElements (i, nullptr);
 	conn_port = integers[0];
 	thread_use = integers[1];
 	env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
 
-	{
-		jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
-		jsize len = env->GetStringUTFLength (jserverName);
-		conn_server = new char[len];
-		const char *serverName = env->GetStringUTFChars (jserverName, 0);
-		memcpy (conn_server, serverName, len);
-		env->ReleaseStringUTFChars (jserverName, serverName);
-	}
-	{
-		jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
-		jsize len = env->GetStringUTFLength (jauth_user);
-		conn_auth_user = new char[len];
-		const char *auth_user = env->GetStringUTFChars (jauth_user, 0);
-		memcpy (conn_auth_user, auth_user, len);
-		env->ReleaseStringUTFChars (jauth_user, auth_user);
-	}
-	{
-		jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
-		jsize len = env->GetStringUTFLength (jauth_pass);
-		conn_auth_pass = new char[len];
-		const char *auth_pass = env->GetStringUTFChars (jauth_pass, 0);
-		memcpy (conn_auth_pass, auth_pass, len);
-		env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (auth_pass));
+	jstring js = (jstring)env->GetObjectArrayElement (s, 0);
+	jsize len = env->GetStringUTFLength (js);
+	conn_server = new char[len];
+	const char *serverName = env->GetStringUTFChars (js, 0);
+	strcpy (conn_server, serverName);
+	env->ReleaseStringUTFChars (js, serverName);
 
-		env->ReleaseStringUTFChars (jauth_pass, auth_pass);
-	}
+	js = (jstring)env->GetObjectArrayElement (s, 1);
+	len = env->GetStringUTFLength (js);
+	conn_auth_user = new char[len];
+	const char *auth_user = env->GetStringUTFChars (js, 0);
+	strcpy (conn_auth_user, auth_user);
+	env->ReleaseStringUTFChars (js, auth_user);
+
+	js = (jstring)env->GetObjectArrayElement (s, 2);
+	len = env->GetStringUTFLength (js);
+	conn_auth_pass = new char[len];
+	const char *auth_pass = env->GetStringUTFChars (js, 0);
+	strcpy (conn_auth_pass, auth_pass);
+	env->ReleaseStringUTFChars (js, auth_pass);
+
 	if (!local_globalRef)
 	local_globalRef = env->NewGlobalRef (o);
 	pthread_t starting;

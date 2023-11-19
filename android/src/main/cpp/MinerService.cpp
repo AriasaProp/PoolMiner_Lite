@@ -88,10 +88,9 @@ static inline void sendMessageToConsole(jint lvl, const char **msgs, size_t len)
 	pthread_mutex_unlock (&_mtx);
 }
 
-void *connectWorker (void *) {
+void *recvWorker (void *) {
 	try {
 		char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
-
 		bool loop;
 		size_t startBuff = 0;
 		do {
@@ -211,7 +210,7 @@ void *toStartBackground (void *) {
 			char buffer[600];
 			strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
 			strcat (buffer, CONNECT_MACHINE);
-			strcat (buffer, "\"]}\n {\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
+			strcat (buffer, "\"]}\n{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
 			strcat (buffer, conn_auth_user);
 			strcat (buffer, "\",\"");
 			strcat (buffer, conn_auth_pass);
@@ -230,12 +229,8 @@ void *toStartBackground (void *) {
 		pthread_t connect;
 		pthread_attr_t thread_attr;
 		pthread_attr_init (&thread_attr);
-		pthread_attr_setdetachstate (&thread_attr,
-			PTHREAD_CREATE_DETACHED);
-		pthread_create (&connect,
-			&thread_attr,
-			connectWorker,
-			NULL);
+		pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
+		pthread_create (&connect, &thread_attr, recvWorker, NULL);
 		pthread_attr_destroy (&thread_attr);
 		// done
 
@@ -247,19 +242,13 @@ void *toStartBackground (void *) {
 		for (unsigned long i = 0; i < thread_use; ++i) {
 			pthread_attr_t thread_attr;
 			pthread_attr_init (&thread_attr);
-			pthread_attr_setdetachstate (&thread_attr,
-				PTHREAD_CREATE_DETACHED);
-			pthread_create (workers + i,
-				&thread_attr,
-				doWork,
-				(void *)i);
+			pthread_attr_setdetachstate (&thread_attr,PTHREAD_CREATE_DETACHED);
+			pthread_create (workers + i,&thread_attr,doWork,(void *)i);
 			pthread_attr_destroy (&thread_attr);
 		}
 		JNIEnv *env;
 		if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-			env->CallVoidMethod (local_globalRef,
-				updateState,
-				STATE_RUNNING);
+			env->CallVoidMethod (local_globalRef,updateState,STATE_RUNNING);
 			global_jvm->DetachCurrentThread ();
 		}
 	} catch (const char *er) {
@@ -275,9 +264,7 @@ void *toStartBackground (void *) {
 			":",
 			conn_auth_pass
 		};
-		sendMessageToConsole(4,
-			messages,
-			9);
+		sendMessageToConsole(4,messages,9);
 		conn_sockfd = -1;
 		delete[] conn_server;
 		conn_server = nullptr;
@@ -288,9 +275,7 @@ void *toStartBackground (void *) {
 		conn_auth_pass = nullptr;
 		JNIEnv *env;
 		if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-			env->CallVoidMethod (local_globalRef,
-				updateState,
-				STATE_NONE);
+			env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
 			global_jvm->DetachCurrentThread ();
 		}
 	}
@@ -320,47 +305,34 @@ JNIF (void,
 			STATE_NONE);
 	}
 
-	jint *integers = env->GetIntArrayElements (i,
-		nullptr);
+	jint *integers = env->GetIntArrayElements (i, nullptr);
 	conn_port = integers[0];
 	thread_use = integers[1];
-	env->ReleaseIntArrayElements (i,
-		integers,
-		JNI_ABORT);
-
-	jstring js = (jstring)env->GetObjectArrayElement (s,
-		0);
-	jsize len = env->GetStringUTFLength (js);
-	conn_server = new char[len];
-	const char *serverName = env->GetStringUTFChars (js,
-		0);
-	strcpy (conn_server,
-		serverName);
-	env->ReleaseStringUTFChars (js,
-		serverName);
-
-	js = (jstring)env->GetObjectArrayElement (s,
-		1);
-	len = env->GetStringUTFLength (js);
-	conn_auth_user = new char[len];
-	const char *auth_user = env->GetStringUTFChars (js,
-		0);
-	strcpy (conn_auth_user,
-		auth_user);
-	env->ReleaseStringUTFChars (js,
-		auth_user);
-
-	js = (jstring)env->GetObjectArrayElement (s,
-		2);
-	len = env->GetStringUTFLength (js);
-	conn_auth_pass = new char[len];
-	const char *auth_pass = env->GetStringUTFChars (js,
-		0);
-	strcpy (conn_auth_pass,
-		auth_pass);
-	env->ReleaseStringUTFChars (js,
-		auth_pass);
-
+	env->ReleaseIntArrayElements (i,integers, JNI_ABORT);
+	{
+		jstring js = (jstring)env->GetObjectArrayElement (s, 0);
+		conn_server = new char[env->GetStringUTFLength (js)];
+		const char *serverName = env->GetStringUTFChars (js, 0);
+		memcpy (conn_server, serverName, sizeof conn_server);
+		env->ReleaseStringUTFChars (js, serverName);
+		env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (conn_server));
+	}
+	{
+		jstring js = (jstring)env->GetObjectArrayElement (s, 1);
+		conn_auth_user = new char[env->GetStringUTFLength (js)];
+		const char *auth_user = env->GetStringUTFChars (js, 0);
+		memcpy (conn_auth_user, auth_user, sizeof conn_auth_user);
+		env->ReleaseStringUTFChars (js, auth_user);
+		env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (conn_auth_user));
+	}
+	{
+		jstring js = (jstring)env->GetObjectArrayElement (s, 2);
+		conn_auth_pass = new char[env->GetStringUTFLength (js)];
+		const char *auth_pass = env->GetStringUTFChars (js, 0);
+		memcpy (conn_auth_pass, auth_pass, sizeof conn_auth_pass);
+		env->ReleaseStringUTFChars (js, auth_pass);
+		env->CallVoidMethod (o, sendMessageConsole, 0, env->NewStringUTF (conn_auth_pass));
+	}
 	if (!local_globalRef)
 	local_globalRef = env->NewGlobalRef (o);
 	pthread_t starting;

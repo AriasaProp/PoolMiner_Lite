@@ -41,7 +41,6 @@ static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
 static jobject local_globalRef;
 static uint32_t active_worker = 0;
 static bool doingjob = false;
-static uint32_t port = 80;
 static uint32_t thread_use;
 static pthread_t *workers = nullptr;
 
@@ -72,34 +71,14 @@ struct connectData {
 };
 
 // 20 kBytes
-#define MAX_MESSAGE 20000
-#define CONNECT_MACHINE 
+#define MAX_MESSAGE 10000
+#define CONNECT_MACHINE "PoolMiner-Lite"
 
-void *connectWorker (void *p) {
+void *recvWorker (void *p) {
   connectData *dat = (connectData *)p;
   try {
-    // subscribe & authorize
     char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
-    {
-      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": []}\n");
-      strcat (buffer, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
-      strcat (buffer, dat->auth_user);
-      strcat (buffer, "\",\"");
-      strcat (buffer, dat->auth_pass);
-      strcat (buffer, "\"]}\n");
-      size_t tries = 0;
-      for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, buffer + sended, length - sended, 0);
-        if (s < 0)
-          ++tries;
-        else
-          sended += s;
-      }
-      if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
-    }
-
     bool loop;
-    memset(buffer, 0, 20000);
     size_t startBuff = 0;
     do {
       pthread_mutex_lock (&_mtx);
@@ -209,18 +188,41 @@ void *toStartBackground (void *p) {
 
     {
       size_t tries = 0;
-      while (
-          (tries < MAX_ATTEMPTS_TRY) &&
-          (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) != 0)) {
-        ++tries, sleep (1);
-      }
+	    do {
+        if (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
+        ++tries;
+        sleep (1);
+	    } while (tries < MAX_ATTEMPTS_TRY);
       if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
+    }
+    try {
+    // subscribe & authorize
+    	char buffer[500];
+      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
+      strcat (buffer, CONNECT_MACHINE);
+      strcat (buffer, "\"]}\n{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
+      strcat (buffer, dat->auth_user);
+      strcat (buffer, "\",\"");
+      strcat (buffer, dat->auth_pass);
+      strcat (buffer, "\"]}\n");
+      size_t tries = 0;
+      for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+        int s = send (dat->sockfd, buffer + sended, length - sended, 0);
+        if (s <= 0)
+          ++tries;
+        else
+          sended += s;
+      }
+      if (tries >= MAX_ATTEMPTS_TRY) throw "Sending tries is always failed!";
+    } catch (const char *er) {
+    	close(dat->sockfd);
+    	throw er;
     }
     pthread_t connect;
     pthread_attr_t thread_attr;
     pthread_attr_init (&thread_attr);
     pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-    pthread_create (&connect, &thread_attr, connectWorker, (void *)dat);
+    pthread_create (&connect, &thread_attr, recvWorker, (void *)dat);
     pthread_attr_destroy (&thread_attr);
     // done
 
@@ -253,14 +255,15 @@ void *toStartBackground (void *p) {
 }
 
 #define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
-JNIF (void, nativeStart)
-(JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
+
+JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
+  connectData *cd = new connectData;
+  
   jint *integers = env->GetIntArrayElements (i, nullptr);
-  port = integers[0];
+  cd->port = integers[0];
   thread_use = integers[1];
   env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
 
-  connectData *cd = new connectData;
   {
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
     jsize len = env->GetStringUTFLength (jserverName);
@@ -301,8 +304,7 @@ JNIF (void, nativeStart)
   pthread_mutex_unlock (&_mtx);
   pthread_attr_destroy (&thread_attr);
 }
-JNIF (jboolean, nativeRunning)
-(JNIEnv *, jobject) {
+JNIF (jboolean, nativeRunning) (JNIEnv *, jobject) {
   pthread_mutex_lock (&_mtx);
   bool r = mineRunning;
   pthread_mutex_unlock (&_mtx);
@@ -325,8 +327,7 @@ void *toStopBackground (void *) {
   }
   pthread_exit (NULL);
 }
-JNIF (void, nativeStop)
-(JNIEnv *, jobject) {
+JNIF (void, nativeStop) (JNIEnv *, jobject) {
   // send state for mine was stop
   pthread_t stopping;
   pthread_attr_t thread_attr;

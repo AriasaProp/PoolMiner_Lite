@@ -7,10 +7,10 @@
 #include <deque>
 #include <initializer_list>
 #include <iostream>
-#include <unordered_map>
 #include <ostream>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 
 namespace json {
@@ -43,38 +43,38 @@ struct JSON {
 
   template <typename Container>
   struct JSONWrapper {
-    private:
-      Container *object;
-  
-    public:
-      JSONWrapper (Container *val) : object (val) {}
-      JSONWrapper (std::nullptr_t) : object (nullptr) {}
-  
-      typename Container::iterator begin () { return object ? object->begin () : typename Container::iterator (); }
-      typename Container::iterator end () { return object ? object->end () : typename Container::iterator (); }
-      typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::iterator (); }
-      typename Container::const_iterator end () const { return object ? object->end () : typename Container::iterator (); }
+  private:
+    Container *object;
+
+  public:
+    JSONWrapper (Container *val) : object (val) {}
+    JSONWrapper (std::nullptr_t) : object (nullptr) {}
+
+    typename Container::iterator begin () { return object ? object->begin () : typename Container::iterator (); }
+    typename Container::iterator end () { return object ? object->end () : typename Container::iterator (); }
+    typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::iterator (); }
+    typename Container::const_iterator end () const { return object ? object->end () : typename Container::iterator (); }
   };
 
   template <typename Container>
   struct JSONConstWrapper {
-    private:
-      const Container *object;
+  private:
+    const Container *object;
 
-    public:
-      JSONConstWrapper (const Container *val) : object (val) {}
-      JSONConstWrapper (std::nullptr_t) : object (nullptr) {}
-  
-      typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::const_iterator (); }
-      typename Container::const_iterator end () const { return object ? object->end () : typename Container::const_iterator (); }
+  public:
+    JSONConstWrapper (const Container *val) : object (val) {}
+    JSONConstWrapper (std::nullptr_t) : object (nullptr) {}
+
+    typename Container::const_iterator begin () const { return object ? object->begin () : typename Container::const_iterator (); }
+    typename Container::const_iterator end () const { return object ? object->end () : typename Container::const_iterator (); }
   };
-  
+
   JSON ();
   JSON (std::initializer_list<JSON>);
   JSON (JSON &&);
   JSON (const JSON &);
 
-  JSON &operator=(JSON &&);
+  JSON &operator= (JSON &&);
   JSON &operator= (const JSON &);
 
   ~JSON ();
@@ -174,8 +174,8 @@ struct JSON {
 
   /// Functions for getting primitives from the JSON object.
   bool IsNull () const { return Type == Class::Null; }
-  
-  operator std::string() const;
+
+  operator std::string () const;
   operator double () const {
     return (Type == Class::Floating) ? Internal.Float : 0.0;
   }
@@ -217,7 +217,7 @@ struct JSON {
   }
 
   std::string dump (int, std::string) const;
-  
+
   void SetType (Class type) {
     if (type == Type) return;
     ClearInternal ();
@@ -261,7 +261,7 @@ struct JSON {
     default:;
     }
   }
-  
+
   friend std::ostream &operator<< (std::ostream &, const JSON &);
 };
 
@@ -276,6 +276,5 @@ JSON Array (T... args);
 JSON Object ();
 std::ostream &operator<< (std::ostream &, const JSON &);
 } // End Namespace json
-
 
 #endif // JSON_

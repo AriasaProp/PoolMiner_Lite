@@ -25,4 +25,3 @@ bool json_test () {
   std::cout << "json end" << std::endl;
   return op4;
 }
-

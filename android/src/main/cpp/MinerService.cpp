@@ -72,7 +72,7 @@ struct connectData {
 
 // 20 kBytes
 #define MAX_MESSAGE 20000
-#define CONNECT_MACHINE "MinerPool-Lite"
+#define CONNECT_MACHINE "PoolMiner-Lite"
 
 void *connectWorker (void *p) {
   connectData *dat = (connectData *)p;
@@ -80,9 +80,9 @@ void *connectWorker (void *p) {
     // subscribe & authorize
     char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
     {
-      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [");
+      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
       strcat (buffer, CONNECT_MACHINE);
-      strcat (buffer, "]}\n {\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
+      strcat (buffer, "\"]}\n {\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
       strcat (buffer, dat->auth_user);
       strcat (buffer, "\",\"");
       strcat (buffer, dat->auth_pass);
@@ -96,6 +96,11 @@ void *connectWorker (void *p) {
           sended += s;
       }
       if (tries >= MAX_ATTEMPTS_TRY) throw "Send message is always failed!";
+      JNIEnv *env;
+      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+        env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (buffer));
+        global_jvm->DetachCurrentThread ();
+      }
     }
 
     bool loop;

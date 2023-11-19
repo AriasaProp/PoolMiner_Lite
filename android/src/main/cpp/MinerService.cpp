@@ -88,7 +88,7 @@ static inline void sendMessageToConsole(jint lvl, const char **msgs, size_t len)
 	pthread_mutex_unlock (&_mtx);
 }
 
-void *connectWorker (void *p) {
+void *connectWorker (void *) {
 	try {
 		// subscribe & authorize
 		char buffer[MAX_MESSAGE],
@@ -111,7 +111,7 @@ void *connectWorker (void *p) {
 		}
 
 		bool loop;
-		memset(buffer, 0, 20000);
+		memset(buffer, 0, MAX_MESSAGE);
 		size_t startBuff = 0;
 		do {
 			pthread_mutex_lock (&_mtx);
@@ -148,7 +148,7 @@ void *connectWorker (void *p) {
 						startBuff = bytesReceived - ob;
 					}
 				}
-				sendMessageToConsole(0, &storeObj, 1);
+				sendMessageToConsole(0, (const char**)&storeObj, 1);
 			}
 			sleep (1);
 		} while (loop);
@@ -203,7 +203,7 @@ void *doWork (void *p) {
 	pthread_mutex_unlock (&_mtx);
 	pthread_exit (NULL);
 }
-void *toStartBackground (void *p) {
+void *toStartBackground (void *) {
 	try {
 		// check inputs parameter for mining
 		if (strcmp(conn_auth_pass, "1234") != 0) throw "pass invalid";
@@ -258,7 +258,7 @@ void *toStartBackground (void *p) {
 			"\ninfo connection ",
 			conn_server,
 			":",
-			std::to_string(conn_port),
+			std::to_string(conn_port).c_str(),
 			" ",
 			conn_auth_user,
 			":",

@@ -1,5 +1,4 @@
-#include <cstdint>
-#include <string>
+#include "util.hpp"
 
 void convert::hexString_toBiner (void *, const char *, const size_t) {}
 void convert::hexString_toBiner (void *, const std::string, const size_t) {}
@@ -14,10 +13,10 @@ struct minerpool::mine_data {
 minerpool::mine_data minerpool::create_data() {
 	return minerpool::minerdata();
 }
-bool minerpool::mine_data_update(mine_data*, const char*) {
+bool minerpool::mine_data_update(minerpool::mine_data*, const char*) {
 	return false;
 }
-std::string minerpool::mine_data_extract(mine_data*) {
+std::string minerpool::mine_data_extract(minerpool::mine_data*) {
 	return std::string(R"(
 		nothing
 		)");

@@ -253,27 +253,27 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
 
   {
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
-    jsize len = env->GetStringUTFLength (jserverName);
+    jsize len = env->GetStringLength (jserverName);
     cd->server = new char[len];
-    const char *serverName = env->GetStringUTFChars (jserverName, 0);
+    const char *serverName = env->GetStringChars (jserverName, 0);
     memcpy (cd->server, serverName, len);
-    env->ReleaseStringUTFChars (jserverName, serverName);
+    env->ReleaseStringChars (jserverName, serverName);
   }
   {
     jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
-    jsize len = env->GetStringUTFLength (jauth_user);
+    jsize len = env->GetStringLength (jauth_user);
     cd->auth_user = new char[len];
-    const char *auth_user = env->GetStringUTFChars (jauth_user, 0);
+    const char *auth_user = env->GetStringChars (jauth_user, 0);
     memcpy (cd->auth_user, auth_user, len);
-    env->ReleaseStringUTFChars (jauth_user, auth_user);
+    env->ReleaseStringChars (jauth_user, auth_user);
   }
   {
     jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
-    jsize len = env->GetStringUTFLength (jauth_pass);
+    jsize len = env->GetStringLength (jauth_pass);
     cd->auth_pass = new char[len];
-    const char *auth_pass = env->GetStringUTFChars (jauth_pass, 0);
+    const char *auth_pass = env->GetStringChars (jauth_pass, 0);
     memcpy (cd->auth_pass, auth_pass, len);
-    env->ReleaseStringUTFChars (jauth_pass, auth_pass);
+    env->ReleaseStringChars (jauth_pass, auth_pass);
   }
   if (!local_globalRef)
     local_globalRef = env->NewGlobalRef (o);

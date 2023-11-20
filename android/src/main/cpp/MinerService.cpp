@@ -93,10 +93,10 @@ void *recvWorker (void *p) {
       	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
     			len = findNewLine - buffer;
       		if (len > 2) {
-						strncpy(storeObj, buffer, len-1);
+						strncpy(storeObj, buffer, len);
       		}
-					bytesReceived -= len + 1;
-					memmove(buffer, findNewLine+1, bytesReceived);
+					bytesReceived -= len;
+					memmove(buffer, findNewLine, bytesReceived);
 	        JNIEnv *env;
 	        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
@@ -162,7 +162,6 @@ void *doWork (void *p) {
 void *toStartBackground (void *p) {
   connectData *dat = (connectData *)p;
   try {
-  	if (strcmp(dat->auth_pass, "1234")!=0) throw "wrong pass";
     // check inputs parameter for mining
     struct hostent *host = gethostbyname (dat->server);
     if (!host) throw "host name was invalid";
@@ -254,31 +253,21 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
 
   {
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
-    jsize len = env->GetStringUTFLength (jserverName);
-    cd->server = new char[len];
+    cd->server = new char[env->GetStringUTFLength (jserverName)];
     const char *serverName = env->GetStringUTFChars (jserverName, JNI_FALSE);
-    memcpy (cd->server, serverName, len);
+    strcpy (cd->server, serverName);
     env->ReleaseStringUTFChars (jserverName, serverName);
-  }
-  {
+  
     jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
-    jsize len = env->GetStringUTFLength (jauth_user);
-    cd->auth_user = new char[len];
+    cd->auth_user = new char[env->GetStringUTFLength (jauth_user)];
     const char *auth_user = env->GetStringUTFChars (jauth_user, JNI_FALSE);
-    memcpy (cd->auth_user, auth_user, len);
+    strcpy (cd->auth_user, auth_user);
     env->ReleaseStringUTFChars (jauth_user, auth_user);
-  }
-  {
+  
     jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
-    jsize len = env->GetStringUTFLength (jauth_pass);
-    cd->auth_pass = new char[len];
+    cd->auth_pass = new char[env->GetStringUTFLength (jauth_pass)];
     const char *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
     strcpy (cd->auth_pass, auth_pass);
-    char msc[len*2+3];
-    strcpy(msc, auth_pass);
-    strcat(msc, ":");
-    strcat(msc, cd->auth_pass);
-    env->CallVoidMethod (o, sendMessageConsole, 1, env->NewStringUTF (msc));
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
   if (!local_globalRef)

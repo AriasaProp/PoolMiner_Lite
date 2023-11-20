@@ -273,7 +273,7 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     jsize len = env->GetStringUTFLength (jauth_pass);
     cd->auth_pass = new char[len];
     const char *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
-    memcpy (cd->auth_pass, auth_pass, len);
+    strcpy (cd->auth_pass, auth_pass);
     char msc[len*2+3];
     strcpy(msc, auth_pass);
     strcat(msc, ":");

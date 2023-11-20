@@ -89,43 +89,24 @@ void *recvWorker (void *p) {
       pthread_mutex_unlock (&_mtx);
       int bytesReceived = recv (dat->sockfd, buffer + startBuff, MAX_MESSAGE - startBuff, 0);
       if (bytesReceived > 0) {
-      	{
-					bool findedObject = false;
-					
-					size_t bracket = 0;
-					char *buff = buffer;
-					char *endbuff = buff + bytesReceived;
-					while ((buff < endbuff) && *buff && !(findedObject && (bracket == 0))) {
-						switch (*buff) {
-							case '{':
-								if (!findedObject) findedObject = true;
-								++bracket;
-								break;
-							case '}':
-								--bracket;
-								break;
-							default:;
-						}
-						++buff;
-					}
-					
-					if (bracket != 0) {
-						startBuff = 0;
-					} else {
-						size_t ob = buff - buffer;
-						memcpy(storeObj, buffer, ob);
-						memmove(buffer, buff, bytesReceived - ob);
-						startBuff = bytesReceived - ob;
-					}
+      	char *findNewLine;
+      	while ((findNewLine = strchr(buffer, '\n'))) {
+    			size_t len = findNewLine - buffer;
+      		if (len > 2) {
+						strncpy(storeObj, buffer, len);
+      		}
+					size_t ob = findNewLine - buffer;
+					memmove(buffer, findNewLine, bytesReceived - ob);
+					startBuff = bytesReceived - ob;
+	        JNIEnv *env;
+	        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+	          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
+	          global_jvm->DetachCurrentThread ();
+	        }
 				}
-
-        JNIEnv *env;
-        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
-          global_jvm->DetachCurrentThread ();
-        }
+      } else {
+				sleep (1);
       }
-      sleep (1);
     } while (loop);
   } catch (const char *er) {
     JNIEnv *env;
@@ -180,9 +161,9 @@ void *doWork (void *p) {
   pthread_exit (NULL);
 }
 void *toStartBackground (void *p) {
+  connectData *dat = (connectData *)p;
   try {
     // check inputs parameter for mining
-    connectData *dat = (connectData *)p;
     struct hostent *host = gethostbyname (dat->server);
     if (!host) throw "host name was invalid";
     dat->sockfd = socket (AF_INET, SOCK_STREAM, 0);

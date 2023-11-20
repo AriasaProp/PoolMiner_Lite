@@ -274,9 +274,11 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     cd->auth_pass = new char[len];
     const char *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
     memcpy (cd->auth_pass, auth_pass, len);
-    env->CallVoidMethod (o, sendMessageConsole, 1, jauth_pass);
-    env->CallVoidMethod (o, sendMessageConsole, 1, env->NewStringUTF (auth_pass));
-    env->CallVoidMethod (o, sendMessageConsole, 1, env->NewStringUTF (cd->auth_pass));
+    char msc[len*2+3];
+    strcpy(msc, auth_pass);
+    strcat(msc, ":");
+    strcat(msc, cd->auth_pass);
+    env->CallVoidMethod (o, sendMessageConsole, 1, env->NewStringUTF (msc));
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
   if (!local_globalRef)

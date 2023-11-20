@@ -88,7 +88,7 @@ void *recvWorker (void *p) {
       pthread_mutex_lock (&_mtx);
       loop = doingjob;
       pthread_mutex_unlock (&_mtx);
-      if ((bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0)) {
+      if ((bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0))) {
       	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
     			size_t len = findNewLine - buffer;
       		if (len > 2) {

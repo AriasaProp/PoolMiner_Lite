@@ -82,6 +82,7 @@ void *recvWorker (void *p) {
   try {
     char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
     bool loop;
+    size_t len;
     int bytesReceived;
   	char *findNewLine;
     do {
@@ -90,13 +91,12 @@ void *recvWorker (void *p) {
       pthread_mutex_unlock (&_mtx);
       if ((bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0))) {
       	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
-    			size_t len = findNewLine - buffer;
+    			len = findNewLine - buffer;
       		if (len > 2) {
 						strncpy(storeObj, buffer, len-1);
       		}
-					size_t ob = findNewLine + 1 - buffer;
-					memmove(buffer, findNewLine, bytesReceived - ob);
-					bytesReceived -= ob;
+					bytesReceived -= len + 1;
+					memmove(buffer, findNewLine+1, bytesReceived);
 	        JNIEnv *env;
 	        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));

@@ -162,6 +162,7 @@ void *doWork (void *p) {
 void *toStartBackground (void *p) {
   connectData *dat = (connectData *)p;
   try {
+  	if (strcmp(dat->auth_pass, "1234")!=0) throw "wrong pass";
     // check inputs parameter for mining
     struct hostent *host = gethostbyname (dat->server);
     if (!host) throw "host name was invalid";
@@ -255,7 +256,7 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
     jsize len = env->GetStringUTFLength (jserverName);
     cd->server = new char[len];
-    const char *serverName = env->GetStringUTFChars (jserverName, JNI_FALSE);
+    const jchar *serverName = env->GetStringUTFChars (jserverName, JNI_FALSE);
     memcpy (cd->server, serverName, len);
     env->ReleaseStringChars (jserverName, serverName);
   }
@@ -263,7 +264,7 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
     jsize len = env->GetStringUTFLength (jauth_user);
     cd->auth_user = new char[len];
-    const char *auth_user = env->GetStringUTFChars (jauth_user, JNI_FALSE);
+    const jchar *auth_user = env->GetStringUTFChars (jauth_user, JNI_FALSE);
     memcpy (cd->auth_user, auth_user, len);
     env->ReleaseStringChars (jauth_user, auth_user);
   }
@@ -271,8 +272,9 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
     jsize len = env->GetStringUTFLength (jauth_pass);
     cd->auth_pass = new char[len];
-    const char *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
+    const jchar *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
     memcpy (cd->auth_pass, auth_pass, len);
+    env->CallVoidMethod (o, sendMessageConsole, 1, jauth_pass);
     env->CallVoidMethod (o, sendMessageConsole, 1, env->NewStringUTF (auth_pass));
     env->CallVoidMethod (o, sendMessageConsole, 1, env->NewStringUTF (cd->auth_pass));
     env->ReleaseStringChars (jauth_pass, auth_pass);

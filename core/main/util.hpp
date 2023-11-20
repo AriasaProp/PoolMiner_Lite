@@ -12,6 +12,7 @@ extern void hexString_toBiner (void *, const std::string, const size_t);
 namespace minerpool {
 	
 struct mine_data;
+mine_data create_data();
 extern bool mine_data_update(mine_data*, const char*);
 extern std::string mine_data_extract(mine_data*);
 }

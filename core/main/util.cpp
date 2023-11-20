@@ -11,7 +11,7 @@ struct minerpool::mine_data {
 	size_t x;
 };
 minerpool::mine_data minerpool::create_data() {
-	return minerpool::minerdata();
+	return minerpool::mine_data();
 }
 bool minerpool::mine_data_update(minerpool::mine_data*, const char*) {
 	return false;

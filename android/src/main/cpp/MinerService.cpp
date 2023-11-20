@@ -95,8 +95,8 @@ void *recvWorker (void *p) {
       		if (len > 2) {
 						strncpy(storeObj, buffer, len);
       		}
-					bytesReceived -= len;
-					memmove(buffer, findNewLine, bytesReceived);
+					bytesReceived -= len+1;
+					memmove(buffer, findNewLine+1, bytesReceived);
 	        JNIEnv *env;
 	        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));

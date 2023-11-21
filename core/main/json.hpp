@@ -144,8 +144,8 @@ struct JSON {
 
   JSON &operator[] (int index) {
     SetType (Class::Array);
-    if (index >= Internal.List->size ()) Internal.List->resize (index + 1);
-    return Internal.List->operator[] (index);
+    if ((unsigned)index >= Internal.List->size ()) Internal.List->resize (index + 1);
+    return Internal.List->operator[] ((unsigned)index);
   }
   JSON &operator[] (unsigned index) {
     SetType (Class::Array);

@@ -135,8 +135,8 @@ struct connectData {
   int sockfd;
 };
 
-// 20 kBytes
-#define MAX_MESSAGE 15000
+// 5 kBytes => 40 kBit
+#define MAX_MESSAGE 5000
 #define CONNECT_MACHINE "PoolMiner-Lite"
 
 void *doWork (void *p) {
@@ -191,48 +191,54 @@ void *startConnect (void *p) {
     }
     try {
     	// try subscribe
+    	size_t start_buffer = 0;
     	char buffer[MAX_MESSAGE];
+    	char message[MAX_MESSAGE];
 	    char storeObj[MAX_MESSAGE];
-      strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
-      strcat (buffer, CONNECT_MACHINE);
-      strcat (buffer, "\"]}\n");
+	    
+      strcpy (message, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
+      strcat (message, CONNECT_MACHINE);
+      strcat (message, "\"]}\n");
       size_t tries = 0;
-      for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, buffer + sended, length - sended, 0);
+      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+        int s = send (dat->sockfd, message + sended, length - sended, 0);
         if (s <= 0) ++tries; else sended += s;
       }
       if (tries >= MAX_ATTEMPTS_TRY) throw "Sending subscribe is always failed!";
       //recv subscribe prove
       do {
 		    size_t len;
-		    int bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0);
+		    int bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0);
 		  	char *findNewLine;
       	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
+      		bytesReceived += start_buffer;
     			len = findNewLine - buffer;
       		if (len > 2) {
 						strncpy(storeObj, buffer, len);
       		}
 					bytesReceived -= len+1;
 					memmove(buffer, findNewLine+1, bytesReceived);
+					memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
 					json::JSON rcv = json::Parse(std::string(storeObj));
 					if(rcv.IsNull()) continue;
 					mdh.updateData(rcv);
 					if (mdh.subscribed) break;
-      		sleep(1);
 				}
+				start_buffer = bytesReceived;
+    		sleep(1);
       } while (++tries < MAX_ATTEMPTS_TRY);
       if (!mdh.subscribed) throw "Doesn't receive any subscribe message result!";
       
       
     	// try authorize
-      strcpy (buffer, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
-      strcat (buffer, dat->auth_user);
-      strcat (buffer, "\",\"");
-      strcat (buffer, dat->auth_pass);
-      strcat (buffer, "\"]}\n");
+      strcpy (message, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
+      strcat (message, dat->auth_user);
+      strcat (message, "\",\"");
+      strcat (message, dat->auth_pass);
+      strcat (message, "\"]}\n");
       tries = 0;
-      for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, buffer + sended, length - sended, 0);
+      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+        int s = send (dat->sockfd, message + sended, length - sended, 0);
         if (s <= 0)
           ++tries;
         else
@@ -242,24 +248,26 @@ void *startConnect (void *p) {
       //recv authorize prove
       do {
 		    size_t len;
-		    int bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0);
+		    int bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0);
 		  	char *findNewLine;
       	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
+    			bytesReceived += start_buffer;
     			len = findNewLine - buffer;
       		if (len > 2) {
 						strncpy(storeObj, buffer, len);
       		}
 					bytesReceived -= len+1;
 					memmove(buffer, findNewLine+1, bytesReceived);
+					memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
 					json::JSON rcv = json::Parse(std::string(storeObj));
 					if(rcv.IsNull()) continue;
 					mdh.updateData(rcv);
 					if (mdh.authorized) break;
-      		sleep(1);
 				}
+				start_buffer = bytesReceived;
+    		sleep(1);
       } while (++tries < MAX_ATTEMPTS_TRY);
       if (!mdh.authorized) throw "Doesn't receive any authorize message result!";
-      
       
       //state start running
       {
@@ -280,20 +288,23 @@ void *startConnect (void *p) {
 			      pthread_mutex_lock (&_mtx);
 			      loop = doingjob;
 			      pthread_mutex_unlock (&_mtx);
-			      if ((bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0))) {
+			      if ((bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0))) {
 			      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
+			    			bytesReceived += start_buffer;
 			    			len = findNewLine - buffer;
 			      		if (len > 2) {
 									strncpy(storeObj, buffer, len);
 			      		}
 								bytesReceived -= len+1;
 								memmove(buffer, findNewLine+1, bytesReceived);
+								memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
 				        JNIEnv *env;
 				        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 				          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
 				          global_jvm->DetachCurrentThread ();
 				        }
 							}
+							start_buffer = bytesReceived;
 			      } else {
 							sleep (1);
 			      }
@@ -307,13 +318,13 @@ void *startConnect (void *p) {
 			    }
 			  }
 	    }
-		  delete[] dat->server;
-		  delete[] dat->auth_user;
-		  delete[] dat->auth_pass;
     } catch (const char *er) {
     	close(dat->sockfd);
     	throw er;
     }
+	  delete[] dat->server;
+	  delete[] dat->auth_user;
+	  delete[] dat->auth_pass;
   	close(dat->sockfd);
 	  delete dat;
 /*

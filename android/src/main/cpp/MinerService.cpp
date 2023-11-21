@@ -59,16 +59,16 @@ public:
 	
 	void updateData(json::JSON d) {
 		if (!d.hasKey("id")) throw "json data doesn't has id. it's invalid.";
-		if (d["id"].isNull()) {
+		if (d["id"].IsNull()) {
 			
 		} else {
 			int id = d["id"];
 			switch (id) {
 				case 1: //subscribe proving
-					if (d.hasKey("error") && !d["error"].isNull())
+					if (d.hasKey("error") && !d["error"].IsNull())
 						throw ((std::string) d["error"]).c_str();
 					if (!d.hasKey("result")) throw "hasn't result";
-					if (d["result"].isNull()) throw "subscribe result is null, how?";
+					if (d["result"].IsNull()) throw "subscribe result is null, how?";
 					// method data extraction
 					updateByMethod(
 						d["result"][0][0][0],
@@ -85,10 +85,10 @@ public:
 					subscribed = true;
 					break;
 				case 2:
-					if (d.hasKey("error") && !d["error"].isNull())
+					if (d.hasKey("error") && !d["error"].IsNull())
 						throw ((std::string) d["error"]).c_str();
 					if (d.hasKey("result")) {
-						if (d["result"].isNull() && !((bool)d["result"])) throw "authorize is failed";
+						if (d["result"].IsNull() && !((bool)d["result"])) throw "authorize is failed";
 					}
 					authorized = true;
 					break;
@@ -216,7 +216,7 @@ void *startConnect (void *p) {
 					bytesReceived -= len+1;
 					memmove(buffer, findNewLine+1, bytesReceived);
 					json::JSON rcv = json::Parse(std::string(storeObj));
-					if(rcv.isNull()) continue;
+					if(rcv.IsNull()) continue;
 					mdh.updateData(rcv);
 					if (mdh.subscribed) break;
       		sleep(1);
@@ -254,7 +254,7 @@ void *startConnect (void *p) {
 					bytesReceived -= len+1;
 					memmove(buffer, findNewLine+1, bytesReceived);
 					json::JSON rcv = json::Parse(std::string(storeObj));
-					if(rcv.isNull()) continue;
+					if(rcv.IsNull()) continue;
 					mdh.updateData(rcv);
 					if (mdh.authorized) break;
       		sleep(1);

@@ -142,6 +142,11 @@ struct JSON {
     return Internal.Map->operator[] (key);
   }
 
+  JSON &operator[] (int index) {
+    SetType (Class::Array);
+    if (index >= Internal.List->size ()) Internal.List->resize (index + 1);
+    return Internal.List->operator[] (index);
+  }
   JSON &operator[] (unsigned index) {
     SetType (Class::Array);
     if (index >= Internal.List->size ()) Internal.List->resize (index + 1);

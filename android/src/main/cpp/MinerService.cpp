@@ -204,7 +204,6 @@ void *startConnect (void *p) {
       if (tries >= MAX_ATTEMPTS_TRY) throw "Sending subscribe is always failed!";
       //recv subscribe prove
       do {
-      	bool loop;
 		    size_t len;
 		    int bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0);
 		  	char *findNewLine;
@@ -242,7 +241,6 @@ void *startConnect (void *p) {
       if (tries >= MAX_ATTEMPTS_TRY) throw "Sending authorize is always failed!";
       //recv authorize prove
       do {
-      	bool loop;
 		    size_t len;
 		    int bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0);
 		  	char *findNewLine;

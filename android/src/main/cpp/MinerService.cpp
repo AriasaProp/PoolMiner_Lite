@@ -15,6 +15,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "json.hpp"
+#include "util.hpp"
+
 #define STATE_NONE 0
 #define STATE_ONSTART 1
 #define STATE_RUNNING 2
@@ -33,6 +36,68 @@ static jmethodID updateSpeed;
 static jmethodID updateResult;
 static jmethodID updateState;
 static jmethodID sendMessageConsole;
+
+//mine data holder
+struct mine_data_holder {
+private:
+	hex_array session_id;
+	hex_array difficulty;
+	hex_array xnonce1;
+	size_t xnonce2_size;
+	void updateByMethod(std::string method, std::string value) {
+		if (method == "mining.notify") {
+			session_id = convert::hexString_toBiner(value);
+		}
+		if (method == "mining.set_difficulty") {
+			difficulty = convert::hexString_toBiner(value);
+		}
+	}
+public:
+	bool subscribed = false;
+	bool authorized = false;
+	
+	
+	void updateData(json::JSON d) {
+		if (!d.hasKey("id")) throw "json data doesn't has id. it's invalid.";
+		if (d["id"].isNull()) {
+			
+		} else {
+			int id = d["id"];
+			switch (id) {
+				case 1: //subscribe proving
+					if (d.hasKey("error") && !d["error"].isNull())
+						throw ((std::string) d["error"]).c_str();
+					if (!d.hasKey("result")) throw "hasn't result";
+					if (d["result"].isNull()) throw "subscribe result is null, how?";
+					// method data extraction
+					updateByMethod(
+						d["result"][0][0][0],
+						d["result"][0][0][1]
+					);
+					updateByMethod(
+						d["result"][0][1][0],
+						d["result"][0][1][1]
+					);
+					// xnonce1
+					xnonce1 = convert::hexString_toBiner(d["result"][1]);
+					//xnonce2 size
+					xnonce2_size = (int)d["result"][2];
+					subscribed = true;
+					break;
+				case 2:
+					if (d.hasKey("error") && !d["error"].isNull())
+						throw ((std::string) d["error"]).c_str();
+					if (d.hasKey("result")) {
+						if (d["result"].isNull() && !((bool)d["result"])) throw "authorize is failed";
+					}
+					authorized = true;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+};
 
 // for mining data
 static bool mineRunning;
@@ -71,61 +136,8 @@ struct connectData {
 };
 
 // 20 kBytes
-#define MAX_MESSAGE 10000
+#define MAX_MESSAGE 15000
 #define CONNECT_MACHINE "PoolMiner-Lite"
-
-void *recvWorker (void *p) {
-	pthread_mutex_lock (&_mtx);
-  ++active_worker;
-  pthread_mutex_unlock (&_mtx);
-  connectData *dat = (connectData *)p;
-  try {
-    char buffer[MAX_MESSAGE], storeObj[MAX_MESSAGE];
-    bool loop;
-    size_t len;
-    int bytesReceived;
-  	char *findNewLine;
-    do {
-      pthread_mutex_lock (&_mtx);
-      loop = doingjob;
-      pthread_mutex_unlock (&_mtx);
-      if ((bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0))) {
-      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
-    			len = findNewLine - buffer;
-      		if (len > 2) {
-						strncpy(storeObj, buffer, len);
-      		}
-					bytesReceived -= len+1;
-					memmove(buffer, findNewLine+1, bytesReceived);
-	        JNIEnv *env;
-	        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
-	          global_jvm->DetachCurrentThread ();
-	        }
-				}
-      } else {
-				sleep (1);
-      }
-    } while (loop);
-  } catch (const char *er) {
-    JNIEnv *env;
-    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (er));
-      env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-      global_jvm->DetachCurrentThread ();
-    }
-  }
-  close (dat->sockfd);
-  delete[] dat->server;
-  delete[] dat->auth_user;
-  delete[] dat->auth_pass;
-  delete dat;
-  pthread_mutex_lock (&_mtx);
-  --active_worker;
-  pthread_cond_broadcast (&_cond);
-  pthread_mutex_unlock (&_mtx);
-  pthread_exit (NULL);
-}
 
 void *doWork (void *p) {
   const uint32_t start = static_cast<uint32_t> ((unsigned long)p);
@@ -144,24 +156,19 @@ void *doWork (void *p) {
     if (nn < nonce) break;
     nonce = nn;
   } while (loop);
-  /*
-  JNIEnv *env;
-  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    std::stringstream ss;
-    ss << "Native workers " << start << " have number ";
-    env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(ss.str().c_str()));
-    global_jvm->DetachCurrentThread ();
-  }
-  */
   pthread_mutex_lock (&_mtx);
   --active_worker;
   pthread_cond_broadcast (&_cond);
   pthread_mutex_unlock (&_mtx);
   pthread_exit (NULL);
 }
-void *toStartBackground (void *p) {
+void *startConnect (void *p) {
+	pthread_mutex_lock (&_mtx);
+  ++active_worker;
+  pthread_mutex_unlock (&_mtx);
   connectData *dat = (connectData *)p;
   try {
+  	mine_data_holder mdh;
     // check inputs parameter for mining
     struct hostent *host = gethostbyname (dat->server);
     if (!host) throw "host name was invalid";
@@ -172,7 +179,7 @@ void *toStartBackground (void *p) {
       .sin_port = htons (dat->port),
       .sin_addr = *((struct in_addr *)host->h_addr)
     };
-
+    //try connect socket
     {
       size_t tries = 0;
 	    do {
@@ -183,16 +190,48 @@ void *toStartBackground (void *p) {
       if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
     }
     try {
-    // subscribe & authorize
-    	char buffer[500];
+    	// try subscribe
+    	char buffer[MAX_MESSAGE];
+	    char storeObj[MAX_MESSAGE];
       strcpy (buffer, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
       strcat (buffer, CONNECT_MACHINE);
-      strcat (buffer, "\"]}\n{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
+      strcat (buffer, "\"]}\n");
+      size_t tries = 0;
+      for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+        int s = send (dat->sockfd, buffer + sended, length - sended, 0);
+        if (s <= 0) ++tries; else sended += s;
+      }
+      if (tries >= MAX_ATTEMPTS_TRY) throw "Sending subscribe is always failed!";
+      //recv subscribe prove
+      do {
+      	bool loop;
+		    size_t len;
+		    int bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0);
+		  	char *findNewLine;
+      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
+    			len = findNewLine - buffer;
+      		if (len > 2) {
+						strncpy(storeObj, buffer, len);
+      		}
+					bytesReceived -= len+1;
+					memmove(buffer, findNewLine+1, bytesReceived);
+					json::JSON rcv = json::Parse(std::string(storeObj));
+					if(rcv.isNull()) continue;
+					mdh.updateData(rcv);
+					if (mdh.subscribed) break;
+      		sleep(1);
+				}
+      } while (++tries < MAX_ATTEMPTS_TRY);
+      if (!mdh.subscribed) throw "Doesn't receive any subscribe message result!";
+      
+      
+    	// try authorize
+      strcpy (buffer, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
       strcat (buffer, dat->auth_user);
       strcat (buffer, "\",\"");
       strcat (buffer, dat->auth_pass);
       strcat (buffer, "\"]}\n");
-      size_t tries = 0;
+      tries = 0;
       for (int sended = 0, length = strlen (buffer); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, buffer + sended, length - sended, 0);
         if (s <= 0)
@@ -200,19 +239,86 @@ void *toStartBackground (void *p) {
         else
           sended += s;
       }
-      if (tries >= MAX_ATTEMPTS_TRY) throw "Sending tries is always failed!";
+      if (tries >= MAX_ATTEMPTS_TRY) throw "Sending authorize is always failed!";
+      //recv authorize prove
+      do {
+      	bool loop;
+		    size_t len;
+		    int bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0);
+		  	char *findNewLine;
+      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
+    			len = findNewLine - buffer;
+      		if (len > 2) {
+						strncpy(storeObj, buffer, len);
+      		}
+					bytesReceived -= len+1;
+					memmove(buffer, findNewLine+1, bytesReceived);
+					json::JSON rcv = json::Parse(std::string(storeObj));
+					if(rcv.isNull()) continue;
+					mdh.updateData(rcv);
+					if (mdh.authorized) break;
+      		sleep(1);
+				}
+      } while (++tries < MAX_ATTEMPTS_TRY);
+      if (!mdh.authorized) throw "Doesn't receive any authorize message result!";
+      
+      
+      //state start running
+      {
+	      JNIEnv *env;
+		    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+		      env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
+		      global_jvm->DetachCurrentThread ();
+		    }
+	    }
+	    //loop update data from server
+	    { 
+			  try {
+			    bool loop;
+			    size_t len;
+			    int bytesReceived;
+			  	char *findNewLine;
+			    do {
+			      pthread_mutex_lock (&_mtx);
+			      loop = doingjob;
+			      pthread_mutex_unlock (&_mtx);
+			      if ((bytesReceived = recv (dat->sockfd, buffer, MAX_MESSAGE, 0))) {
+			      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
+			    			len = findNewLine - buffer;
+			      		if (len > 2) {
+									strncpy(storeObj, buffer, len);
+			      		}
+								bytesReceived -= len+1;
+								memmove(buffer, findNewLine+1, bytesReceived);
+				        JNIEnv *env;
+				        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+				          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
+				          global_jvm->DetachCurrentThread ();
+				        }
+							}
+			      } else {
+							sleep (1);
+			      }
+			    } while (loop);
+			  } catch (const char *er) {
+			    JNIEnv *env;
+			    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+			      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (er));
+			      env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+			      global_jvm->DetachCurrentThread ();
+			    }
+			  }
+	    }
+		  delete[] dat->server;
+		  delete[] dat->auth_user;
+		  delete[] dat->auth_pass;
     } catch (const char *er) {
     	close(dat->sockfd);
     	throw er;
     }
-    pthread_t connect;
-    pthread_attr_t thread_attr;
-    pthread_attr_init (&thread_attr);
-    pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-    pthread_create (&connect, &thread_attr, recvWorker, (void *)dat);
-    pthread_attr_destroy (&thread_attr);
-    // done
-
+  	close(dat->sockfd);
+	  delete dat;
+/*
     pthread_mutex_lock (&_mtx);
     doingjob = true;
     active_worker = 0;
@@ -225,19 +331,26 @@ void *toStartBackground (void *p) {
       pthread_create (workers + i, &thread_attr, doWork, (void *)i);
       pthread_attr_destroy (&thread_attr);
     }
-    JNIEnv *env;
-    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-      env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-      global_jvm->DetachCurrentThread ();
-    }
+*/
   } catch (const char *er) {
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
       env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (er));
-      env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
       global_jvm->DetachCurrentThread ();
     }
   }
+  //set state mining to none
+  {
+	  JNIEnv *env;
+	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+	    global_jvm->DetachCurrentThread ();
+	  }
+  }
+  pthread_mutex_lock (&_mtx);
+  --active_worker;
+  pthread_cond_broadcast (&_cond);
+  pthread_mutex_unlock (&_mtx);
   pthread_exit (NULL);
 }
 
@@ -245,12 +358,12 @@ void *toStartBackground (void *p) {
 
 JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   connectData *cd = new connectData;
-  
-  jint *integers = env->GetIntArrayElements (i, nullptr);
-  cd->port = integers[0];
-  thread_use = integers[1];
-  env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
-
+  {
+	  jint *integers = env->GetIntArrayElements (i, nullptr);
+	  cd->port = integers[0];
+	  thread_use = integers[1];
+	  env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
+	}
   {
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
     cd->server = new char[env->GetStringUTFLength (jserverName)];
@@ -277,7 +390,8 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   pthread_attr_init (&thread_attr);
   pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
   pthread_mutex_lock (&_mtx);
-  if (pthread_create (&starting, &thread_attr, toStartBackground, (void *)cd) != 0) {
+  active_worker = 0;
+  if (pthread_create (&starting, &thread_attr, startConnect, (void *)cd) != 0) {
     doingjob = false;
     env->CallVoidMethod (o, updateState, STATE_NONE);
   } else {
@@ -302,11 +416,6 @@ void *toStopBackground (void *) {
   pthread_mutex_unlock (&_mtx);
   delete[] workers;
   workers = nullptr;
-  JNIEnv *env;
-  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-    global_jvm->DetachCurrentThread ();
-  }
   pthread_exit (NULL);
 }
 JNIF (void, nativeStop) (JNIEnv *, jobject) {

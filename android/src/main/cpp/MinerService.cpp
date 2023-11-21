@@ -322,11 +322,7 @@ void *startConnect (void *p) {
     	close(dat->sockfd);
     	throw er;
     }
-	  delete[] dat->server;
-	  delete[] dat->auth_user;
-	  delete[] dat->auth_pass;
   	close(dat->sockfd);
-	  delete dat;
 /*
     pthread_mutex_lock (&_mtx);
     doingjob = true;
@@ -348,6 +344,10 @@ void *startConnect (void *p) {
       global_jvm->DetachCurrentThread ();
     }
   }
+  delete[] dat->server;
+  delete[] dat->auth_user;
+  delete[] dat->auth_pass;
+  delete dat;
   //set state mining to none
   {
 	  JNIEnv *env;

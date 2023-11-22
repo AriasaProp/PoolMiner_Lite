@@ -25,6 +25,7 @@ json::JSON::JSON (const json::JSON &other) {
   }
   Type = other.Type;
 }
+
 json::JSON& json::JSON::operator=(json::JSON &&other) {
   ClearInternal ();
   Internal = other.Internal;

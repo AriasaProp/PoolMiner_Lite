@@ -71,6 +71,8 @@ struct JSON {
   
   JSON ();
   JSON (Class);
+  JSON (JSON &&other);
+  JSON (const JSON &other);
   
   JSON &operator=(JSON &&);
   JSON &operator= (const JSON &);

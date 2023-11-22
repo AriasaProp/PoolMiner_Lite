@@ -139,7 +139,7 @@ static void inline sendJavaMsg(jint lvl, const char* msg) {
     	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
     	delete[] m.second;
   	}
-  	m.clear();
+  	queuedMsg.clear();
   	pthread_mutex_unlock (&_mtx);
     global_jvm->DetachCurrentThread ();
   }
@@ -356,7 +356,7 @@ void *startConnect (void *p) {
 			env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
 			delete[] m.second;
 		}
-		m.clear();
+		queuedMsg.clear();
     env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
     global_jvm->DetachCurrentThread ();
   }

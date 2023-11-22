@@ -131,18 +131,16 @@ static std::vector<std::pair<jint, char const*>> queuedMsg;
 static void inline sendJavaMsg(jint lvl, const char* msg) {
 	pthread_mutex_lock (&_mtx);
   queuedMsg.emplace_back(lvl, msg);
-  pthread_mutex_unlock (&_mtx);
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-		pthread_mutex_lock (&_mtx);
   	for (std::pair<jint,char const*> m : queuedMsg) {
     	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
     	delete[] m.second;
   	}
   	queuedMsg.clear();
-  	pthread_mutex_unlock (&_mtx);
     global_jvm->DetachCurrentThread ();
   }
+	pthread_mutex_unlock (&_mtx);
 }
 
 struct connectData {
@@ -243,8 +241,8 @@ void *startConnect (void *p) {
 				}
 				start_buffer = bytesReceived;
     		sleep(1);
-      } while (++tries < MAX_ATTEMPTS_TRY);
-      if (!mdh.subscribed) throw "Doesn't receive any subscribe message result!";
+      } while (!mdh.subscribed && (++tries < MAX_ATTEMPTS_TRY));
+    	if (!mdh.subscribed) throw "Doesn't receive any subscribe message result!";
       sendJavaMsg(2, "subscribe success");
       
     	// try authorize
@@ -282,7 +280,7 @@ void *startConnect (void *p) {
 				}
 				start_buffer = bytesReceived;
     		sleep(1);
-      } while (++tries < MAX_ATTEMPTS_TRY);
+      } while (!mdh.authorized && (++tries < MAX_ATTEMPTS_TRY));
       if (!mdh.authorized) throw "Doesn't receive any authorize message result!";
       sendJavaMsg(2, "authorize success");
       //state start running

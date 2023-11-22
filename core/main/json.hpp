@@ -72,6 +72,24 @@ struct JSON {
   JSON ();
   JSON (Class);
   ~JSON ();
+  
+  JSON &operator=(JSON &&);
+  JSON &operator= (const JSON &);
+
+  template <typename T>
+  JSON (T b, typename std::enable_if<std::is_same<T, bool>::value>::type * = 0) : Internal (b), Type (Class::Boolean) {}
+
+  template <typename T>
+  JSON (T i, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value>::type * = 0) : Internal ((long)i), Type (Class::Integral) {}
+
+  template <typename T>
+  JSON (T f, typename std::enable_if<std::is_floating_point<T>::value>::type * = 0) : Internal ((double)f), Type (Class::Floating) {}
+
+  template <typename T>
+  JSON (T s, typename std::enable_if<std::is_convertible<T, std::string>::value>::type * = 0) : Internal (std::string (s)), Type (Class::String) {}
+
+  JSON (std::nullptr_t) : Internal (), Type (Class::Null) {}
+  ~JSON ();
 
   template <typename T>
   void append (T arg) {

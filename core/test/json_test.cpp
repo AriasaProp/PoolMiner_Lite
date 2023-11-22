@@ -2,6 +2,7 @@
 #include <iostream>
 
 bool json_test () {
+  std::cout << "Begin JSON"  << std::endl;
   std::string contents = R"({
     "String": "Hello, JSON!",
     "Integer": 42,

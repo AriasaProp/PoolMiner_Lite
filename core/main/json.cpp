@@ -5,6 +5,52 @@ json::JSON::JSON (): Internal (), Type (json::JSON::Class::Null) {}
 json::JSON::JSON (json::JSON::Class type): Internal () {
   SetType (type);
 }
+json::JSON::JSON (json::JSON &&other): Internal (other.Internal), Type (other.Type) {
+  other.Type = json::JSON::Class::Null;
+  other.Internal.Map = nullptr;
+}
+json::JSON::JSON (const json::JSON &other) {
+  switch (other.Type) {
+  case json::JSON::Class::Object:
+    Internal.Map = new std::unordered_map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
+    break;
+  case json::JSON::Class::Array:
+    Internal.List = new std::deque<json::JSON> (other.Internal.List->begin (), other.Internal.List->end ());
+    break;
+  case json::JSON::Class::String:
+    Internal.String = new std::string (*other.Internal.String);
+    break;
+  default:
+    Internal = other.Internal;
+  }
+  Type = other.Type;
+}
+json::JSON& json::JSON::operator=(json::JSON &&other) {
+  ClearInternal ();
+  Internal = other.Internal;
+  Type = other.Type;
+  other.Internal.Map = nullptr;
+  other.Type = json::JSON::Class::Null;
+  return *this;
+}
+json::JSON& json::JSON::operator=(const json::JSON &other) {
+    ClearInternal ();
+    switch (other.Type) {
+    case json::JSON::Class::Object:
+      Internal.Map = new std::unordered_map<std::string, json::JSON> (other.Internal.Map->begin (), other.Internal.Map->end ());
+      break;
+    case json::JSON::Class::Array:
+      Internal.List = new std::deque<json::JSON> (other.Internal.List->begin (), other.Internal.List->end ());
+      break;
+    case json::JSON::Class::String:
+      Internal.String = new std::string (*other.Internal.String);
+      break;
+    default:
+      Internal = other.Internal;
+    }
+    Type = other.Type;
+    return *this;
+  }
 
 json::JSON::~JSON() {
   switch (Type) {

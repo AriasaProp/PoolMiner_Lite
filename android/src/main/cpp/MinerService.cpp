@@ -153,6 +153,7 @@ struct connectData {
 
 // 5 kBytes => 40 kBit
 #define MAX_MESSAGE 5000
+#define MAX_SEND 500
 #define CONNECT_MACHINE "PoolMiner-Lite"
 
 void *doWork (void *p) {
@@ -207,9 +208,10 @@ void *startConnect (void *p) {
     	// try subscribe
     	size_t start_buffer = 0;
     	char buffer[MAX_MESSAGE];
-    	char message[MAX_MESSAGE];
+    	char message[MAX_SEND];
 	    char storeObj[MAX_MESSAGE];
 	    
+    	memset(message, 0, MAX_SEND);
       strcpy (message, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
       strcat (message, CONNECT_MACHINE);
       strcat (message, "\"]}\n");
@@ -245,6 +247,7 @@ void *startConnect (void *p) {
       sendJavaMsg(2, "subscribe success");
       
     	// try authorize
+    	memset(message, 0, MAX_SEND);
       strcpy (message, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
       strcat (message, dat->auth_user);
       strcat (message, "\",\"");

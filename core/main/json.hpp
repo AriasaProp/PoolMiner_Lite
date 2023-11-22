@@ -70,6 +70,7 @@ struct JSON {
   };
   
   JSON ();
+  JSON (Class);
   ~JSON ();
 
   template <typename T>

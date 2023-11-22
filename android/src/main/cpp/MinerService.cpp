@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
-
+#include <vector>
 #include <arpa/inet.h>
 #include <cstdint>
 #include <cstdio>
@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <utility>
 
 #include "json.hpp"
 #include "util.hpp"
@@ -126,6 +127,23 @@ void MinerService_OnUnload (JNIEnv *env) {
   updateState = NULL;
   sendMessageConsole = NULL;
 }
+static std::vector<std::pair<jint, char const*>> queuedMsg;
+static void inline sendJavaMsg(jint lvl, const char* msg) {
+	pthread_mutex_lock (&_mtx);
+  queueMsg.emplace_back(lvl, msg);
+  pthread_mutex_unlock (&_mtx);
+	JNIEnv *env;
+  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+		pthread_mutex_lock (&_mtx);
+  	for (std::pair<jint,char const*> m : queueMsg) {
+    	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
+    	delete[] m.second;
+  	}
+  	m.clear();
+  	pthread_mutex_unlock (&_mtx);
+    global_jvm->DetachCurrentThread ();
+  }
+}
 
 struct connectData {
   char *server;
@@ -213,9 +231,8 @@ void *startConnect (void *p) {
       	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
       		bytesReceived += start_buffer;
     			len = findNewLine - buffer;
-      		if (len > 2) {
+      		if (len > 2)
 						strncpy(storeObj, buffer, len);
-      		}
 					bytesReceived -= len+1;
 					memmove(buffer, findNewLine+1, bytesReceived);
 					memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
@@ -228,7 +245,7 @@ void *startConnect (void *p) {
     		sleep(1);
       } while (++tries < MAX_ATTEMPTS_TRY);
       if (!mdh.subscribed) throw "Doesn't receive any subscribe message result!";
-      
+      sendJavaMsg(2, "subscribe success");
       
     	// try authorize
       strcpy (message, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
@@ -253,9 +270,8 @@ void *startConnect (void *p) {
       	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
     			bytesReceived += start_buffer;
     			len = findNewLine - buffer;
-      		if (len > 2) {
+      		if (len > 2)
 						strncpy(storeObj, buffer, len);
-      		}
 					bytesReceived -= len+1;
 					memmove(buffer, findNewLine+1, bytesReceived);
 					memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
@@ -268,7 +284,7 @@ void *startConnect (void *p) {
     		sleep(1);
       } while (++tries < MAX_ATTEMPTS_TRY);
       if (!mdh.authorized) throw "Doesn't receive any authorize message result!";
-      
+      sendJavaMsg(2, "authorize success");
       //state start running
       {
 	      JNIEnv *env;
@@ -278,45 +294,33 @@ void *startConnect (void *p) {
 		    }
 	    }
 	    //loop update data from server
-	    { 
-			  try {
-			    bool loop;
-			    size_t len;
-			    int bytesReceived;
-			  	char *findNewLine;
-			    do {
-			      pthread_mutex_lock (&_mtx);
-			      loop = doingjob;
-			      pthread_mutex_unlock (&_mtx);
-			      if ((bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0))) {
-			      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
-			    			bytesReceived += start_buffer;
-			    			len = findNewLine - buffer;
-			      		if (len > 2) {
-									strncpy(storeObj, buffer, len);
-			      		}
-								bytesReceived -= len+1;
-								memmove(buffer, findNewLine+1, bytesReceived);
-								memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
-				        JNIEnv *env;
-				        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-				          env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (storeObj));
-				          global_jvm->DetachCurrentThread ();
-				        }
-							}
-							start_buffer = bytesReceived;
-			      } else {
-							sleep (1);
-			      }
-			    } while (loop);
-			  } catch (const char *er) {
-			    JNIEnv *env;
-			    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-			      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (er));
-			      env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-			      global_jvm->DetachCurrentThread ();
-			    }
-			  }
+	    {
+		    bool loop = true;
+		    size_t len, tries = 0;
+		    int bytesReceived;
+		  	char *findNewLine;
+		    while (loop) {
+		      pthread_mutex_lock (&_mtx);
+		      loop = doingjob;
+		      pthread_mutex_unlock (&_mtx);
+		      if ((bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0)) <= 0) {
+		    		if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
+						sleep (1);
+						continue;
+		      }
+		      if (tries) tries = 0;
+	      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
+	    			bytesReceived += start_buffer;
+	    			len = findNewLine - buffer;
+	      		if (len > 2)
+							strncpy(storeObj, buffer, len);
+						bytesReceived -= len+1;
+						memmove(buffer, findNewLine+1, bytesReceived);
+						memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
+		        sendJavaMsg(0, storeObj);
+					}
+					start_buffer = bytesReceived;
+		    }
 	    }
     } catch (const char *er) {
     	close(dat->sockfd);
@@ -338,25 +342,24 @@ void *startConnect (void *p) {
     }
 */
   } catch (const char *er) {
-    JNIEnv *env;
-    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (er));
-      global_jvm->DetachCurrentThread ();
-    }
+    sendJavaMsg(4, er);
   }
   delete[] dat->server;
   delete[] dat->auth_user;
   delete[] dat->auth_pass;
   delete dat;
   //set state mining to none
-  {
-	  JNIEnv *env;
-	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-	    global_jvm->DetachCurrentThread ();
-	  }
-  }
   pthread_mutex_lock (&_mtx);
+  JNIEnv *env;
+  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+		for (std::pair<jint,char const*> m : queueMsg) {
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
+			delete[] m.second;
+		}
+		m.clear();
+    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+    global_jvm->DetachCurrentThread ();
+  }
   --active_worker;
   pthread_cond_broadcast (&_cond);
   pthread_mutex_unlock (&_mtx);

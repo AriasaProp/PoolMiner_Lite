@@ -196,15 +196,13 @@ void *startConnect (void *p) {
       .sin_addr = *((struct in_addr *)host->h_addr)
     };
     //try connect socket
-    {
-      size_t tries = 0;
-	    do {
-        if (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
-        ++tries;
-        sleep (1);
-	    } while (tries < MAX_ATTEMPTS_TRY);
-      if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
-    }
+    size_t tries = 0;
+    do {
+      if (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
+      ++tries;
+      sleep (1);
+    } while (tries < MAX_ATTEMPTS_TRY);
+    if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
     try {
     	// try subscribe
     	size_t start_buffer = 0;
@@ -215,13 +213,14 @@ void *startConnect (void *p) {
       strcpy (message, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
       strcat (message, CONNECT_MACHINE);
       strcat (message, "\"]}\n");
-      size_t tries = 0;
+      tries = 0;
       for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
         if (s <= 0) ++tries; else sended += s;
       }
       if (tries >= MAX_ATTEMPTS_TRY) throw "Sending subscribe is always failed!";
       //recv subscribe prove
+      tries = 0;
       do {
 		    size_t len;
 		    int bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0);
@@ -261,6 +260,7 @@ void *startConnect (void *p) {
       }
       if (tries >= MAX_ATTEMPTS_TRY) throw "Sending authorize is always failed!";
       //recv authorize prove
+      tries = 0;
       do {
 		    size_t len;
 		    int bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0);
@@ -292,9 +292,10 @@ void *startConnect (void *p) {
 		    }
 	    }
 	    //loop update data from server
+	    tries = 0;
 	    {
 		    bool loop = true;
-		    size_t len, tries = 0;
+		    size_t len;
 		    int bytesReceived;
 		  	char *findNewLine;
 		    while (loop) {

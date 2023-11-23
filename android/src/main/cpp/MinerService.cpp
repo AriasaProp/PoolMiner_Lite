@@ -38,6 +38,48 @@ static jmethodID updateResult;
 static jmethodID updateState;
 static jmethodID sendMessageConsole;
 
+// for mining data
+static bool mineRunning;
+static pthread_mutex_t _mtx = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
+static jobject local_globalRef;
+static uint32_t active_worker = 0;
+static bool doingjob = false;
+static uint32_t thread_use;
+static pthread_t *workers = nullptr;
+
+bool MinerService_OnLoad (JNIEnv *env) {
+  jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
+  return (m_class &&
+          (updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V")) &&
+          (updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V")) &&
+          (updateState = env->GetMethodID (m_class, "updateState", "(I)V")) &&
+          (sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V")));
+  mineRunning = false;
+}
+void MinerService_OnUnload (JNIEnv *env) {
+  env->DeleteGlobalRef (local_globalRef);
+  local_globalRef = NULL;
+  updateSpeed = NULL;
+  updateResult = NULL;
+  updateState = NULL;
+  sendMessageConsole = NULL;
+}
+static std::vector<std::pair<jint, char const*>> queuedMsg;
+static void inline sendJavaMsg(jint lvl, const char* msg) {
+	pthread_mutex_lock (&_mtx);
+  queuedMsg.emplace_back(lvl, msg);
+	JNIEnv *env;
+  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+  	for (std::pair<jint,char const*> m :queuedMsg) {
+    	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
+    	delete[] m.second;
+  	}
+  	queuedMsg.clear();
+    global_jvm->DetachCurrentThread ();
+  }
+	pthread_mutex_unlock (&_mtx);
+}
 //mine data holder
 struct mine_data_holder {
 private:
@@ -96,49 +138,6 @@ public:
 		}
 	}
 };
-
-// for mining data
-static bool mineRunning;
-static pthread_mutex_t _mtx = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
-static jobject local_globalRef;
-static uint32_t active_worker = 0;
-static bool doingjob = false;
-static uint32_t thread_use;
-static pthread_t *workers = nullptr;
-
-bool MinerService_OnLoad (JNIEnv *env) {
-  jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
-  return (m_class &&
-          (updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V")) &&
-          (updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V")) &&
-          (updateState = env->GetMethodID (m_class, "updateState", "(I)V")) &&
-          (sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V")));
-  mineRunning = false;
-}
-void MinerService_OnUnload (JNIEnv *env) {
-  env->DeleteGlobalRef (local_globalRef);
-  local_globalRef = NULL;
-  updateSpeed = NULL;
-  updateResult = NULL;
-  updateState = NULL;
-  sendMessageConsole = NULL;
-}
-static std::vector<std::pair<jint, char const*>> queuedMsg;
-static void inline sendJavaMsg(jint lvl, const char* msg) {
-	pthread_mutex_lock (&_mtx);
-  queuedMsg.emplace_back(lvl, msg);
-	JNIEnv *env;
-  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-  	for (std::pair<jint,char const*> m :queuedMsg) {
-    	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
-    	delete[] m.second;
-  	}
-  	queuedMsg.clear();
-    global_jvm->DetachCurrentThread ();
-  }
-	pthread_mutex_unlock (&_mtx);
-}
 
 struct connectData {
   char *server;
@@ -206,7 +205,7 @@ void *startConnect (void *p) {
     	char buffer[MAX_MESSAGE];
     	char message[MAX_SEND];
 	    
-      sprintf (message, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n\0", CONNECT_MACHINE);
+      sprintf (message, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n", CONNECT_MACHINE);
       tries = 0;
       for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
@@ -232,7 +231,7 @@ void *startConnect (void *p) {
       sendJavaMsg(2, "subscribe success");
       
     	// try authorize
-      sprintf (message, "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n\0", dat->auth_user, dat->auth_pass);
+      sprintf (message, "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n", dat->auth_user, dat->auth_pass);
       tries = 0;
       for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
@@ -271,9 +270,6 @@ void *startConnect (void *p) {
 	    tries = 0;
 	    {
 		    bool loop = true;
-		    size_t len;
-		    int bytesReceived;
-		  	char *findNewLine;
 		    while (loop) {
 		      pthread_mutex_lock (&_mtx);
 		      loop = doingjob;

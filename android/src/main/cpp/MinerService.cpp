@@ -101,7 +101,7 @@ public:
 	
 	
 	void updateData(json::JSON d) {
-		if (!d.hasKey("id")) throw "json data doesn't has id. it's invalid.";
+		if (!d.hasKey("id")) throw std::runtime_error("json data doesn't has id. it's invalid.");
 		if (d["id"].IsNull()) {
 			sendJavaMsg(0, ((std::string)d).c_str());
 		} else {
@@ -109,10 +109,10 @@ public:
 			switch (id) {
 				case 1:{ //subscribe proving
 					if (d.hasKey("error") && !d["error"].IsNull())
-						throw ((std::string) d["error"]).c_str();
-					if (!d.hasKey("result")) throw "hasn't result";
+						throw std::runtime_error(((std::string) d["error"]).c_str());
+					if (!d.hasKey("result")) throw std::runtime_error("hasn't result");
 					json::JSON &res = d["result"];
-					if (res.IsNull()) throw "subscribe result is null, how?";
+					if (res.IsNull()) throw std::runtime_error("subscribe result is null, how?");
 					// method data extraction
 					updateByMethod(res[0][0][0],res[0][0][1]);
 					updateByMethod(res[0][1][0],res[0][1][1]);
@@ -123,11 +123,11 @@ public:
 					subscribed = true;
 				}
 					break;
-				case 2:{
+				case 2: {
 					if (d.hasKey("error") && !d["error"].IsNull())
-						throw ((std::string) d["error"]).c_str();
+						throw (((std::string) d["error"]).c_str());
 					if (d.hasKey("result")) {
-						if (d["result"].IsNull() && !((bool)d["result"])) throw "authorize is failed";
+						if (d["result"].IsNull() && !((bool)d["result"])) throw std::runtime_error("authorize is failed");
 					}
 					authorized = true;
 				}
@@ -184,9 +184,9 @@ void *startConnect (void *p) {
   	mine_data_holder mdh;
     // check inputs parameter for mining
     struct hostent *host = gethostbyname (dat->server);
-    if (!host) throw "host name was invalid";
+    if (!host) throw std::runtime_error("host name was invalid");
     dat->sockfd = socket (AF_INET, SOCK_STREAM, 0);
-    if (dat->sockfd < 0) throw "socket has error!";
+    if (dat->sockfd < 0) throw std::runtime_error("socket has error!");
     struct sockaddr_in server_addr {
       .sin_family = AF_INET,
       .sin_port = htons (dat->port),
@@ -199,7 +199,7 @@ void *startConnect (void *p) {
       ++tries;
       sleep (1);
     } while (tries < MAX_ATTEMPTS_TRY);
-    if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
+    if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Connection tries is always failed!");
     try {
     	// try subscribe
     	char buffer[MAX_MESSAGE];
@@ -211,14 +211,14 @@ void *startConnect (void *p) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
         if (s <= 0) ++tries; else sended += s;
       }
-      if (tries >= MAX_ATTEMPTS_TRY) throw "Sending subscribe is always failed!";
+      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending subscribe is always failed!");
       //recv subscribe prove
       tries = 0;
       do {
 		    if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) > 0) {
 			  	std::string msgRcv(buffer);
 			    size_t pos = 0;
-	      	while ( ((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.subscribed) {
+	      	while (((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.subscribed) {
 						json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
 						msgRcv.erase(0, pos+1);
 						if(rcv.IsNull()) continue;
@@ -227,7 +227,7 @@ void *startConnect (void *p) {
 		    }
     		sleep(1);
       } while (!mdh.subscribed && (++tries < MAX_ATTEMPTS_TRY));
-    	if (!mdh.subscribed) throw "Doesn't receive any subscribe message result!";
+    	if (!mdh.subscribed) throw std::runtime_error("Doesn't receive any subscribe message result!");
       sendJavaMsg(2, "subscribe success");
       
     	// try authorize
@@ -235,19 +235,16 @@ void *startConnect (void *p) {
       tries = 0;
       for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
-        if (s <= 0)
-          ++tries;
-        else
-          sended += s;
+        if (s <= 0) ++tries; else sended += s;
       }
-      if (tries >= MAX_ATTEMPTS_TRY) throw "Sending authorize is always failed!";
+      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending authorize is always failed!");
       //recv authorize prove
       tries = 0;
       do {
 		  	if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) > 0) {
 			  	std::string msgRcv(buffer);
 			    size_t pos = 0;
-	      	while ( ((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.authorized) {
+	      	while (((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.authorized) {
 						json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
 						msgRcv.erase(0, pos+1);
 						if(rcv.IsNull()) continue;
@@ -256,7 +253,7 @@ void *startConnect (void *p) {
 		    }
     		sleep(1);
       } while (!mdh.authorized && (++tries < MAX_ATTEMPTS_TRY));
-      if (!mdh.authorized) throw "Doesn't receive any authorize message result!";
+      if (!mdh.authorized) throw std::runtime_error("Doesn't receive any authorize message result!");
       sendJavaMsg(2, "authorize success");
       //state start running
       {
@@ -275,7 +272,7 @@ void *startConnect (void *p) {
 		      loop = doingjob;
 		      pthread_mutex_unlock (&_mtx);
 		      if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
-		    		if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
+		    		if (++tries > MAX_ATTEMPTS_TRY) throw std::runtime_error("failed to receive message socket!.");
 						sleep (1);
 		      } else {
 			      if (tries) tries = 0;
@@ -290,7 +287,7 @@ void *startConnect (void *p) {
 		      }
 		    }
 	    }
-    } catch (const char *er) {
+    } catch (const std::exception &er) {
     	close(dat->sockfd);
     	throw er;
     }
@@ -309,8 +306,8 @@ void *startConnect (void *p) {
       pthread_attr_destroy (&thread_attr);
     }
 */
-  } catch (const char *er) {
-    sendJavaMsg(4, er);
+  } catch (const std::exception &er) {
+    sendJavaMsg(4, er.what());
   }
   delete[] dat->server;
   delete[] dat->auth_user;

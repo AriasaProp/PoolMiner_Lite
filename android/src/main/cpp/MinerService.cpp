@@ -221,7 +221,7 @@ void *startConnect (void *p) {
 			    size_t pos = 0;
 	      	while ( ((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.subscribed) {
 						json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
-						rcvMsg.erase(0, pos+1);
+						msgRcv.erase(0, pos+1);
 						if(rcv.IsNull()) continue;
 						mdh.updateData(rcv);
 					}
@@ -250,7 +250,7 @@ void *startConnect (void *p) {
 			    size_t pos = 0;
 	      	while ( ((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.authorized) {
 						json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
-						rcvMsg.erase(0, pos+1);
+						msgRcv.erase(0, pos+1);
 						if(rcv.IsNull()) continue;
 						mdh.updateData(rcv);
 					}
@@ -287,7 +287,7 @@ void *startConnect (void *p) {
 				    size_t pos = 0;
 		      	while ((pos = msgRcv.find("\n")) != std::string::npos) {
 							json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
-							rcvMsg.erase(0, pos+1);
+							msgRcv.erase(0, pos+1);
 							if(rcv.IsNull()) continue;
 							mdh.updateData(rcv);
 						}

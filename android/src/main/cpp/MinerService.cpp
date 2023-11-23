@@ -61,37 +61,34 @@ public:
 	void updateData(json::JSON d) {
 		if (!d.hasKey("id")) throw "json data doesn't has id. it's invalid.";
 		if (d["id"].IsNull()) {
-			
+			sendJavaMsg(0, ((std::string)d).c_str());
 		} else {
 			int id = d["id"];
 			switch (id) {
-				case 1: //subscribe proving
+				case 1:{ //subscribe proving
 					if (d.hasKey("error") && !d["error"].IsNull())
 						throw ((std::string) d["error"]).c_str();
 					if (!d.hasKey("result")) throw "hasn't result";
-					if (d["result"].IsNull()) throw "subscribe result is null, how?";
+					json::JSON &res = d["result"];
+					if (res.IsNull()) throw "subscribe result is null, how?";
 					// method data extraction
-					updateByMethod(
-						d["result"][0][0][0],
-						d["result"][0][0][1]
-					);
-					updateByMethod(
-						d["result"][0][1][0],
-						d["result"][0][1][1]
-					);
+					updateByMethod(res[0][0][0],res[0][0][1]);
+					updateByMethod(res[0][1][0],res[0][1][1]);
 					// xnonce1
-					xnonce1 = convert::hexString_toBiner(d["result"][1]);
+					xnonce1 = convert::hexString_toBiner(res[1]);
 					//xnonce2 size
-					xnonce2_size = (int)d["result"][2];
+					xnonce2_size = (int)res[2];
 					subscribed = true;
+				}
 					break;
-				case 2:
+				case 2:{
 					if (d.hasKey("error") && !d["error"].IsNull())
 						throw ((std::string) d["error"]).c_str();
 					if (d.hasKey("result")) {
 						if (d["result"].IsNull() && !((bool)d["result"])) throw "authorize is failed";
 					}
 					authorized = true;
+				}
 					break;
 				default:
 					break;
@@ -133,7 +130,7 @@ static void inline sendJavaMsg(jint lvl, const char* msg) {
   queuedMsg.emplace_back(lvl, msg);
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-  	for (std::pair<jint,char const*> m : queuedMsg) {
+  	for (std::pair<jint,char const*> m :queuedMsg) {
     	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
     	delete[] m.second;
   	}
@@ -206,15 +203,10 @@ void *startConnect (void *p) {
     if (tries >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
     try {
     	// try subscribe
-    	size_t start_buffer = 0;
     	char buffer[MAX_MESSAGE];
     	char message[MAX_SEND];
-	    char storeObj[MAX_MESSAGE];
 	    
-    	memset(message, 0, MAX_SEND);
-      strcpy (message, "{\"id\": 1, \"method\": \"mining.subscribe\", \"params\": [\"");
-      strcat (message, CONNECT_MACHINE);
-      strcat (message, "\"]}\n");
+      sprintf (message, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n\0", CONNECT_MACHINE);
       tries = 0;
       for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
@@ -224,35 +216,23 @@ void *startConnect (void *p) {
       //recv subscribe prove
       tries = 0;
       do {
-		    size_t len;
-		    int bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0);
-		  	char *findNewLine;
-      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
-      		bytesReceived += start_buffer;
-    			len = findNewLine - buffer;
-      		if (len > 2)
-						strncpy(storeObj, buffer, len);
-					bytesReceived -= len+1;
-					memmove(buffer, findNewLine+1, bytesReceived);
-					memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
-					json::JSON rcv = json::Parse(std::string(storeObj));
-					if(rcv.IsNull()) continue;
-					mdh.updateData(rcv);
-					if (mdh.subscribed) break;
-				}
-				start_buffer = bytesReceived;
+		    if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) > 0) {
+			  	std::string msgRcv(buffer);
+			    size_t pos = 0;
+	      	while ( ((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.subscribed) {
+						json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
+						rcvMsg.erase(0, pos+1);
+						if(rcv.IsNull()) continue;
+						mdh.updateData(rcv);
+					}
+		    }
     		sleep(1);
       } while (!mdh.subscribed && (++tries < MAX_ATTEMPTS_TRY));
     	if (!mdh.subscribed) throw "Doesn't receive any subscribe message result!";
       sendJavaMsg(2, "subscribe success");
       
     	// try authorize
-    	memset(message, 0, MAX_SEND);
-      strcpy (message, "{\"id\": 2, \"method\": \"mining.authorize\", \"params\": [\"");
-      strcat (message, dat->auth_user);
-      strcat (message, "\",\"");
-      strcat (message, dat->auth_pass);
-      strcat (message, "\"]}\n");
+      sprintf (message, "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n\0", dat->auth_user, dat->auth_pass);
       tries = 0;
       for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
@@ -265,23 +245,16 @@ void *startConnect (void *p) {
       //recv authorize prove
       tries = 0;
       do {
-		    size_t len;
-		    int bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0);
-		  	char *findNewLine;
-      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
-    			bytesReceived += start_buffer;
-    			len = findNewLine - buffer;
-      		if (len > 2)
-						strncpy(storeObj, buffer, len);
-					bytesReceived -= len+1;
-					memmove(buffer, findNewLine+1, bytesReceived);
-					memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
-					json::JSON rcv = json::Parse(std::string(storeObj));
-					if(rcv.IsNull()) continue;
-					mdh.updateData(rcv);
-					if (mdh.authorized) break;
-				}
-				start_buffer = bytesReceived;
+		  	if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) > 0) {
+			  	std::string msgRcv(buffer);
+			    size_t pos = 0;
+	      	while ( ((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.authorized) {
+						json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
+						rcvMsg.erase(0, pos+1);
+						if(rcv.IsNull()) continue;
+						mdh.updateData(rcv);
+					}
+		    }
     		sleep(1);
       } while (!mdh.authorized && (++tries < MAX_ATTEMPTS_TRY));
       if (!mdh.authorized) throw "Doesn't receive any authorize message result!";
@@ -305,23 +278,20 @@ void *startConnect (void *p) {
 		      pthread_mutex_lock (&_mtx);
 		      loop = doingjob;
 		      pthread_mutex_unlock (&_mtx);
-		      if ((bytesReceived = recv (dat->sockfd, buffer+start_buffer, MAX_MESSAGE-start_buffer, 0)) <= 0) {
+		      if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
 		    		if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
 						sleep (1);
-						continue;
+		      } else {
+			      if (tries) tries = 0;
+				  	std::string msgRcv(buffer);
+				    size_t pos = 0;
+		      	while ((pos = msgRcv.find("\n")) != std::string::npos) {
+							json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
+							rcvMsg.erase(0, pos+1);
+							if(rcv.IsNull()) continue;
+							mdh.updateData(rcv);
+						}
 		      }
-		      if (tries) tries = 0;
-	      	while ((bytesReceived > 0) && (findNewLine = strchr(buffer, '\n'))) {
-	    			bytesReceived += start_buffer;
-	    			len = findNewLine - buffer;
-	      		if (len > 2)
-							strncpy(storeObj, buffer, len);
-						bytesReceived -= len+1;
-						memmove(buffer, findNewLine+1, bytesReceived);
-						memset(buffer+bytesReceived, 0, MAX_MESSAGE - bytesReceived);
-		        sendJavaMsg(0, storeObj);
-					}
-					start_buffer = bytesReceived;
 		    }
 	    }
     } catch (const char *er) {
@@ -354,7 +324,7 @@ void *startConnect (void *p) {
   pthread_mutex_lock (&_mtx);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-		for (std::pair<jint,char const*> m : queuedMsg) {
+		for (std::pair<jint,char const*> m :queuedMsg) {
 			env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
 			delete[] m.second;
 		}

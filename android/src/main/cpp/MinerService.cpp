@@ -68,7 +68,7 @@ void MinerService_OnUnload (JNIEnv *env) {
 static std::vector<std::pair<jint, char const*>> queuedMsg;
 static void inline sendJavaMsg(jint lvl, const char* msg) {
 	pthread_mutex_lock (&_mtx);
-  queuedMsg.push_back(lvl, msg);
+  queuedMsg.emplace_back(lvl, msg);
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
   	for (std::pair<jint,char const*> m :queuedMsg) {
@@ -179,26 +179,33 @@ void *startConnect (void *p) {
 	pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
+  sendJavaMsg(0, "Debug sample message!");
+  sendJavaMsg(1, "Info sample message!");
+  sendJavaMsg(2, "Success sample message!");
+  sendJavaMsg(3, "Warning sample message!");
+  sendJavaMsg(4, "Error sample message!");
   connectData *dat = (connectData *)p;
   try {
   	mine_data_holder mdh;
     // check inputs parameter for mining
-    struct hostent *host = gethostbyname (dat->server);
-    if (!host) throw std::runtime_error("host name was invalid");
-    dat->sockfd = socket (AF_INET, SOCK_STREAM, 0);
-    if (dat->sockfd < 0) throw std::runtime_error("socket has error!");
-    struct sockaddr_in server_addr {
-      .sin_family = AF_INET,
-      .sin_port = htons (dat->port),
-      .sin_addr = *((struct in_addr *)host->h_addr)
-    };
-    //try connect socket
     size_t tries = 0;
-    do {
-      if (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
-      ++tries;
-      sleep (1);
-    } while (tries < MAX_ATTEMPTS_TRY);
+    {
+	    struct hostent *host = gethostbyname (dat->server);
+	    if (!host) throw std::runtime_error("host name was invalid");
+	    dat->sockfd = socket (AF_INET, SOCK_STREAM, 0);
+	    if (dat->sockfd < 0) throw std::runtime_error("socket has error!");
+	    struct sockaddr_in server_addr {
+	      .sin_family = AF_INET,
+	      .sin_port = htons (dat->port),
+	      .sin_addr = *((struct in_addr *)host->h_addr)
+	    };
+	    //try connect socket
+	    do {
+	      if (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
+	      ++tries;
+	      sleep (1);
+	    } while (tries < MAX_ATTEMPTS_TRY);
+    }
     if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Connection tries is always failed!");
     try {
     	// try subscribe

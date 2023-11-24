@@ -66,7 +66,7 @@ void MinerService_OnUnload (JNIEnv *env) {
   sendMessageConsole = NULL;
 }
 static std::vector<std::pair<jint, const char *>> queuedMsg;
-static void inline sendJavaMsg(jint lvl, const char* msg) {
+static void sendJavaMsg(jint lvl, const char* msg) {
 	pthread_mutex_lock (&_mtx);
   queuedMsg.emplace_back(lvl, msg);
 	JNIEnv *env;
@@ -328,7 +328,7 @@ void *startConnect (void *p) {
   pthread_mutex_lock (&_mtx);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-		for (std::pair<jint,char const*> m :queuedMsg) {
+		for (std::pair<jint,const char*> m :queuedMsg) {
 			env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
 			delete[] m.second;
 		}

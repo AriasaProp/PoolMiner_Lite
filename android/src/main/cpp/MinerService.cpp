@@ -65,19 +65,12 @@ void MinerService_OnUnload (JNIEnv *env) {
   updateState = NULL;
   sendMessageConsole = NULL;
 }
-static std::vector<std::pair<jint, std::string>> queuedMsg;
 static void sendJavaMsg(jint lvl, std::string msg) {
-	pthread_mutex_lock (&_mtx);
-  queuedMsg.emplace_back(lvl, msg);
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-  	for (std::pair<jint,std::string> m :queuedMsg) {
-    	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second.c_str()));
-  	}
-  	queuedMsg.clear();
+  	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second.c_str()));
     global_jvm->DetachCurrentThread ();
   }
-	pthread_mutex_unlock (&_mtx);
 }
 static void sendJavaMsg(jint lvl, const char* msg) {
 	sendJavaMsg(lvl, std::string(msg));
@@ -327,16 +320,12 @@ void *startConnect (void *p) {
   delete[] dat->auth_pass;
   delete dat;
   //set state mining to none
-  pthread_mutex_lock (&_mtx);
   JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-		for (std::pair<jint,std::string> m :queuedMsg) {
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second.c_str()));
-		}
-		queuedMsg.clear();
     env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
     global_jvm->DetachCurrentThread ();
   }
+  pthread_mutex_lock (&_mtx);
   --active_worker;
   pthread_cond_broadcast (&_cond);
   pthread_mutex_unlock (&_mtx);

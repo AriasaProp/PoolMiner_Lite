@@ -22,6 +22,11 @@ public class MinerService extends Service {
     public void onCreate() {
         super.onCreate();
         mVM = ((MainApplication) getApplication()).getMinerViewModel();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_TITLE, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Override
@@ -52,6 +57,20 @@ public class MinerService extends Service {
 
     @Keep
     private synchronized void updateState(int state) {
+        switch (state) {
+        		case 0:
+        				stopForeground(true);
+        				break;
+        		case 2:
+        				startForeground(NOTIFICATION_ID,
+                    new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                            .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                            .setContentTitle(NOTIFICATION_TITLE)
+                            .setContentText("Service is running in the foreground")
+                            .build());
+        				break;
+        		default:;
+        }
         mVM.postState(state);
     }
 
@@ -73,23 +92,6 @@ public class MinerService extends Service {
 
         public void StartMine(String[] dats, int[] dati) {
             if (MinerService.this.nativeRunning()) StopMine();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel =
-                        new NotificationChannel(
-                                NOTIFICATION_CHANNEL_ID,
-                                NOTIFICATION_TITLE,
-                                NotificationManager.IMPORTANCE_DEFAULT);
-                NotificationManager notificationManager =
-                        MinerService.this.getSystemService(NotificationManager.class);
-                notificationManager.createNotificationChannel(channel);
-            }
-            MinerService.this.startForeground(
-                    NOTIFICATION_ID,
-                    new NotificationCompat.Builder(MinerService.this, NOTIFICATION_CHANNEL_ID)
-                            .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                            .setContentTitle(NOTIFICATION_TITLE)
-                            .setContentText("Service is running in the foreground")
-                            .build());
             MinerService.this.nativeStart(dats, dati);
         }
 
@@ -100,7 +102,6 @@ public class MinerService extends Service {
         public void StopMine() {
             if (!MinerService.this.nativeRunning()) return;
             MinerService.this.nativeStop();
-            MinerService.this.stopForeground(true);
             MinerService.this.stopSelf();
         }
     }

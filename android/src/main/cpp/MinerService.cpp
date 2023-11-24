@@ -68,7 +68,7 @@ void MinerService_OnUnload (JNIEnv *env) {
 static std::vector<std::pair<jint, char const*>> queuedMsg;
 static void inline sendJavaMsg(jint lvl, const char* msg) {
 	pthread_mutex_lock (&_mtx);
-  queuedMsg.emplace_back(lvl, msg);
+  queuedMsg.push_back(lvl, msg);
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
   	for (std::pair<jint,char const*> m :queuedMsg) {

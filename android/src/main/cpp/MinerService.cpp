@@ -203,15 +203,16 @@ void *startConnect (void *p) {
     try {
     	// try subscribe
     	char buffer[MAX_MESSAGE];
-    	char message[MAX_SEND];
-	    
-      sprintf (message, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n", CONNECT_MACHINE);
-      tries = 0;
-      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, message + sended, length - sended, 0);
-        if (s <= 0) ++tries; else sended += s;
-      }
-      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending subscribe is always failed!");
+	    {
+	    	char message[MAX_SEND];
+	      sprintf (message, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n", CONNECT_MACHINE);
+	      tries = 0;
+	      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+	        int s = send (dat->sockfd, message + sended, length - sended, 0);
+	        if (s <= 0) ++tries; else sended += s;
+	      }
+	      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending subscribe is always failed!");
+	    }
       //recv subscribe prove
       tries = 0;
       do {
@@ -231,13 +232,16 @@ void *startConnect (void *p) {
       sendJavaMsg(2, "subscribe success");
       
     	// try authorize
-      sprintf (message, "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n", dat->auth_user, dat->auth_pass);
-      tries = 0;
-      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, message + sended, length - sended, 0);
-        if (s <= 0) ++tries; else sended += s;
-      }
-      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending authorize is always failed!");
+    	{
+	    	char message[MAX_SEND];
+	      sprintf (message, "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n", dat->auth_user, dat->auth_pass);
+	      tries = 0;
+	      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+	        int s = send (dat->sockfd, message + sended, length - sended, 0);
+	        if (s <= 0) ++tries; else sended += s;
+	      }
+	      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending authorize is always failed!");
+    	}
       //recv authorize prove
       tries = 0;
       do {

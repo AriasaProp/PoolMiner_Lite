@@ -66,9 +66,6 @@ void MinerService_OnUnload (JNIEnv *env) {
   sendMessageConsole = NULL;
 }
 static std::vector<std::pair<jint, std::string>> queuedMsg;
-static void sendJavaMsg(jint lvl, const char* msg) {
-	sendJavaMsg(lvl, std::string(msg));
-}
 static void sendJavaMsg(jint lvl, std::string msg) {
 	pthread_mutex_lock (&_mtx);
   queuedMsg.emplace_back(lvl, msg);
@@ -81,6 +78,9 @@ static void sendJavaMsg(jint lvl, std::string msg) {
     global_jvm->DetachCurrentThread ();
   }
 	pthread_mutex_unlock (&_mtx);
+}
+static void sendJavaMsg(jint lvl, const char* msg) {
+	sendJavaMsg(lvl, std::string(msg));
 }
 //mine data holder
 struct mine_data_holder {

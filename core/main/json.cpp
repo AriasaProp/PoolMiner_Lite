@@ -102,6 +102,21 @@ static std::string json_escape (const std::string &str) {
 json::JSON::operator std::string () const {
   return (Type == json::JSON::Class::String) ? json_escape (*Internal.String) : std::string ("");
 }
+json::JSON::operator double () const {
+  return (Type == json::JSON::Class::Floating) ? Internal.Float : 0.0;
+}
+json::JSON::operator float () const {
+  return (Type == json::JSON::Class::Floating) ? (float)Internal.Float : 0.0f;
+}
+json::JSON::operator long () const {
+  return (Type == json::JSON::Class::Integral) ? Internal.Int : 0;
+}
+json::JSON::operator int () const {
+  return (Type == json::JSON::Class::Integral) ? (int)Internal.Int : 0.0f;
+}
+json::JSON::operator bool () const {
+  return (Type == json::JSON::Class::Boolean) ? Internal.Bool : false;
+}
 std::string json::JSON::dump (int depth, std::string tab) const {
     std::string pad = "";
     for (int i = 0; i < depth; ++i, pad += tab);

@@ -98,7 +98,7 @@ public:
 	void updateData(json::JSON d) {
 		if (!d.hasKey("id")) throw std::runtime_error("json data doesn't has id. it's invalid.");
 		if (d["id"].IsNull()) {
-			sendJavaMsg(0, (std::string)d);
+			sendJavaMsg(0, d.dump(1, "  "));
 		} else {
 			int id = d["id"];
 			switch (id) {

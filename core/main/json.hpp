@@ -180,21 +180,11 @@ struct JSON {
   bool IsNull () const { return Type == Class::Null; }
   
   operator std::string() const;
-  operator double () const {
-    return (Type == Class::Floating) ? Internal.Float : 0.0;
-  }
-  operator float () const {
-    return (Type == Class::Floating) ? (float)Internal.Float : 0.0f;
-  }
-  operator long () const {
-    return (Type == Class::Integral) ? Internal.Int : 0;
-  }
-  operator int () const {
-    return (Type == Class::Integral) ? (int)Internal.Int : 0.0f;
-  }
-  operator bool () const {
-    return (Type == Class::Boolean) ? Internal.Bool : false;
-  }
+  operator double () const;
+  operator float () const;
+  operator long () const;
+  operator int () const;
+  operator bool () const;
 
   JSONWrapper<std::unordered_map<std::string, JSON>> ObjectRange () {
     if (Type == Class::Object)

@@ -70,14 +70,20 @@ struct JSON {
   };
 
   JSON ();
+<<<<<<< HEAD
   JSON (std::initializer_list<JSON>);
   JSON (JSON &&);
   JSON (const JSON &);
 
   JSON &operator= (JSON &&);
+=======
+  JSON (Class);
+  JSON (JSON &&other);
+  JSON (const JSON &other);
+  
+  JSON &operator=(JSON &&);
+>>>>>>> main-3
   JSON &operator= (const JSON &);
-
-  ~JSON ();
 
   template <typename T>
   JSON (T b, typename std::enable_if<std::is_same<T, bool>::value>::type * = 0) : Internal (b), Type (Class::Boolean) {}
@@ -92,6 +98,7 @@ struct JSON {
   JSON (T s, typename std::enable_if<std::is_convertible<T, std::string>::value>::type * = 0) : Internal (std::string (s)), Type (Class::String) {}
 
   JSON (std::nullptr_t) : Internal (), Type (Class::Null) {}
+  ~JSON ();
 
   template <typename T>
   void append (T arg) {
@@ -142,6 +149,11 @@ struct JSON {
     return Internal.Map->operator[] (key);
   }
 
+  JSON &operator[] (int index) {
+    SetType (Class::Array);
+    if ((unsigned)index >= Internal.List->size ()) Internal.List->resize (index + 1);
+    return Internal.List->operator[] ((unsigned)index);
+  }
   JSON &operator[] (unsigned index) {
     SetType (Class::Array);
     if (index >= Internal.List->size ()) Internal.List->resize (index + 1);
@@ -174,6 +186,7 @@ struct JSON {
 
   /// Functions for getting primitives from the JSON object.
   bool IsNull () const { return Type == Class::Null; }
+<<<<<<< HEAD
 
   operator std::string () const;
   operator double () const {
@@ -191,6 +204,15 @@ struct JSON {
   operator bool () const {
     return (Type == Class::Boolean) ? Internal.Bool : false;
   }
+=======
+  
+  operator std::string() const;
+  operator double () const;
+  operator float () const;
+  operator long () const;
+  operator int () const;
+  operator bool () const;
+>>>>>>> main-3
 
   JSONWrapper<std::unordered_map<std::string, JSON>> ObjectRange () {
     if (Type == Class::Object)
@@ -265,7 +287,6 @@ struct JSON {
   friend std::ostream &operator<< (std::ostream &, const JSON &);
 };
 
-JSON Make (JSON::Class);
 JSON Parse (const std::string &);
 
 JSON Array ();

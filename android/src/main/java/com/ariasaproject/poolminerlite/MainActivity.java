@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         et_user = (AppCompatEditText) findViewById(R.id.user_et);
         et_pass = (AppCompatEditText) findViewById(R.id.password_et);
         sb_cpu = (AppCompatSeekBar) findViewById(R.id.cpuSeek);
-        sb_cpu.setMax(Math.max(Runtime.getRuntime().availableProcessors() - 1, 1));
+        sb_cpu.setMax(Math.max(Runtime.getRuntime().availableProcessors() - 2, 1));
         final AppCompatTextView cuv = (AppCompatTextView) findViewById(R.id.cpu_usage_view);
         sb_cpu.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
@@ -94,11 +94,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             sb_cpu.setProgress(ints[0]); // old
         } else {
             logList = new ConsoleItem.Lists();
+            /*
             logList.add(0, "Contoh Pesan Debug!");
             logList.add(1, "Contoh Pesan Informatif!");
             logList.add(2, "Contoh Pesan Sukses!");
             logList.add(3, "Contoh Pesan Peringatan!");
             logList.add(4, "Contoh Pesan Bahaya!");
+            */
             SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
             et_serv.setText(settings.getString(PREF_URL, DEFAULT_URL));
             et_port.setText(String.valueOf(settings.getInt(PREF_PORT, DEFAULT_PORT)));

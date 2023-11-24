@@ -68,7 +68,7 @@ void MinerService_OnUnload (JNIEnv *env) {
 static void sendJavaMsg(jint lvl, std::string msg) {
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-  	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second.c_str()));
+  	env->CallVoidMethod (local_globalRef, sendMessageConsole, lvl, env->NewStringUTF (msg.c_str()));
     global_jvm->DetachCurrentThread ();
   }
 }

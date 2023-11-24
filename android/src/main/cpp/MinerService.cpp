@@ -65,15 +65,17 @@ void MinerService_OnUnload (JNIEnv *env) {
   updateState = NULL;
   sendMessageConsole = NULL;
 }
-static std::vector<std::pair<jint, const char *>> queuedMsg;
-static void sendJavaMsg(jint lvl, const char* msg) {
+static std::vector<std::pair<jint, std::string>> queuedMsg;
+static void sendJavaMsg(jint lvl, std::string msg) {
+	sendJavaMsg(lvl, std::string(msg));
+}
+static void sendJavaMsg(jint lvl, std::string msg) {
 	pthread_mutex_lock (&_mtx);
   queuedMsg.emplace_back(lvl, msg);
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-  	for (std::pair<jint,const char*> m :queuedMsg) {
-    	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second));
-    	delete[] m.second;
+  	for (std::pair<jint,std::string> m :queuedMsg) {
+    	env->CallVoidMethod (local_globalRef, sendMessageConsole, m.first, env->NewStringUTF (m.second.c_str()));
   	}
   	queuedMsg.clear();
     global_jvm->DetachCurrentThread ();
@@ -103,7 +105,7 @@ public:
 	void updateData(json::JSON d) {
 		if (!d.hasKey("id")) throw std::runtime_error("json data doesn't has id. it's invalid.");
 		if (d["id"].IsNull()) {
-			sendJavaMsg(0, ((std::string)d).c_str());
+			sendJavaMsg(0, (std::string)d);
 		} else {
 			int id = d["id"];
 			switch (id) {

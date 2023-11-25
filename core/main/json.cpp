@@ -225,7 +225,7 @@ static json::JSON parse_string( const std::string &str, size_t &offset ) {
                         val += c;
                     else {
                         std::cerr << "ERROR: String: Expected hex character in unicode escape, found '" << c << "'\n";
-                        return json::JSON(json::JSON::Class::String ) );
+                        return json::JSON(json::JSON::Class::String);
                     }
                 }
                 offset += 4;
@@ -287,7 +287,7 @@ static json::JSON parse_number( const std::string &str, size_t &offset ) {
         else
             Number = std::stol( val );
     }
-    return Number );
+    return Number;
 }
 static json::JSON parse_bool( const std::string &str, size_t &offset ) {
     json::JSON Bool;
@@ -297,7 +297,7 @@ static json::JSON parse_bool( const std::string &str, size_t &offset ) {
         Bool = false;
     else {
         std::cerr << "ERROR: Bool: Expected 'true' or 'false', found '" << str.substr( offset, 5 ) << "'\n";
-        return json::JSON(json::JSON::Class::Null ) );
+        return json::JSON(json::JSON::Class::Null);
     }
     offset += ((bool)Bool ? 4 : 5);
     return Bool;

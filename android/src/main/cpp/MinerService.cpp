@@ -162,6 +162,14 @@ public:
 #define MAX_SEND 500
 #define CONNECT_MACHINE "PoolMiner-Lite"
 
+struct connectData {
+	int sockfd;
+	uint32_t port;
+	char *server;
+	char *auth_user;
+	char *auth_pass;
+};
+
 void *doWork (void *p) {
   const uint32_t start = static_cast<uint32_t> ((unsigned long)p);
   uint32_t nonce = start;
@@ -313,20 +321,6 @@ void *startConnect (void *p) {
     	throw er;
     }
   	close(dat->sockfd);
-/*
-    pthread_mutex_lock (&_mtx);
-    doingjob = true;
-    active_worker = 0;
-    pthread_mutex_unlock (&_mtx);
-    workers = new pthread_t[thread_use];
-    for (unsigned long i = 0; i < thread_use; ++i) {
-      pthread_attr_t thread_attr;
-      pthread_attr_init (&thread_attr);
-      pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-      pthread_create (workers + i, &thread_attr, doWork, (void *)i);
-      pthread_attr_destroy (&thread_attr);
-    }
-*/
   } catch (const std::exception &er) {
     sendJavaMsg(4, er.what());
   }

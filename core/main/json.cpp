@@ -146,7 +146,7 @@ std::string json::JSON::dump (int depth, std::string tab) const {
 
 //extras
 static json::JSON parse_next( const string &, size_t & );
-static json::JSON parse_object( const string &str, size_t &offset ) {
+static json::JSON parse_object( const std::string &str, size_t &offset ) {
     json::JSON Object = json::JSON(json::JSON::Class::Object);
     while(isspace(str[offset++]));
     
@@ -178,7 +178,7 @@ static json::JSON parse_object( const string &str, size_t &offset ) {
     }
     return Object;
 }
-static json::JSON parse_array( const string &str, size_t &offset ) {
+static json::JSON parse_array( const std::string &str, size_t &offset ) {
     json::JSON Array = json::JSON(json::JSON::Class::Array);
     unsigned index = 0;
     while(isspace(str[offset++]));
@@ -203,9 +203,9 @@ static json::JSON parse_array( const string &str, size_t &offset ) {
     }
     return Array;
 }
-static json::JSON parse_string( const string &str, size_t &offset ) {
+static json::JSON parse_string( const std::string &str, size_t &offset ) {
     json::JSON String;
-    string val;
+    std::string val;
     for( char c = str[++offset]; c != '\"' ; c = str[++offset] ) {
         if( c == '\\' ) {
             switch( str[ ++offset ] ) {
@@ -240,9 +240,9 @@ static json::JSON parse_string( const string &str, size_t &offset ) {
     String = val;
     return String ;
 }
-static json::JSON parse_number( const string &str, size_t &offset ) {
+static json::JSON parse_number( const std::string &str, size_t &offset ) {
     json::JSON Number;
-    string val, exp_str;
+    std::string val, exp_str;
     char c;
     bool isDouble = false;
     long exp = 0;
@@ -289,7 +289,7 @@ static json::JSON parse_number( const string &str, size_t &offset ) {
     }
     return Number );
 }
-static json::JSON parse_bool( const string &str, size_t &offset ) {
+static json::JSON parse_bool( const std::string &str, size_t &offset ) {
     json::JSON Bool;
     if( str.substr( offset, 4 ) == "true" )
         Bool = true;
@@ -302,7 +302,7 @@ static json::JSON parse_bool( const string &str, size_t &offset ) {
     offset += ((bool)Bool ? 4 : 5);
     return Bool;
 }
-static json::JSON parse_null( const string &str, size_t &offset ) {
+static json::JSON parse_null( const std::string &str, size_t &offset ) {
     json::JSON Null;
     if( str.substr( offset, 4 ) != "null" ) {
         std::cerr << "ERROR: Null: Expected 'null', found '" << str.substr( offset, 4 ) << "'\n";
@@ -311,10 +311,9 @@ static json::JSON parse_null( const string &str, size_t &offset ) {
     offset += 4;
     return Null;
 }
-static json::JSON parse_next( const string &str, size_t &offset ) {
-    char value;
+static json::JSON parse_next( const std::string &str, size_t &offset ) {
     while( isspace( str[offset] ) ) ++offset;
-    value = str[offset];
+    char value = str[offset];
     switch( value ) {
         case '[' : return parse_array( str, offset );
         case '{' : return parse_object( str, offset );

@@ -5,7 +5,6 @@
 #include <cmath>
 #include <cstdint>
 #include <deque>
-#include <initializer_list>
 #include <iostream>
 #include <ostream>
 #include <string>
@@ -70,19 +69,11 @@ struct JSON {
   };
 
   JSON ();
-<<<<<<< HEAD
-  JSON (std::initializer_list<JSON>);
-  JSON (JSON &&);
-  JSON (const JSON &);
-
-  JSON &operator= (JSON &&);
-=======
   JSON (Class);
   JSON (JSON &&other);
   JSON (const JSON &other);
   
   JSON &operator=(JSON &&);
->>>>>>> main-3
   JSON &operator= (const JSON &);
 
   template <typename T>
@@ -186,33 +177,13 @@ struct JSON {
 
   /// Functions for getting primitives from the JSON object.
   bool IsNull () const { return Type == Class::Null; }
-<<<<<<< HEAD
 
-  operator std::string () const;
-  operator double () const {
-    return (Type == Class::Floating) ? Internal.Float : 0.0;
-  }
-  operator float () const {
-    return (Type == Class::Floating) ? (float)Internal.Float : 0.0f;
-  }
-  operator long () const {
-    return (Type == Class::Integral) ? Internal.Int : 0;
-  }
-  operator int () const {
-    return (Type == Class::Integral) ? (int)Internal.Int : 0.0f;
-  }
-  operator bool () const {
-    return (Type == Class::Boolean) ? Internal.Bool : false;
-  }
-=======
-  
   operator std::string() const;
   operator double () const;
   operator float () const;
   operator long () const;
   operator int () const;
   operator bool () const;
->>>>>>> main-3
 
   JSONWrapper<std::unordered_map<std::string, JSON>> ObjectRange () {
     if (Type == Class::Object)

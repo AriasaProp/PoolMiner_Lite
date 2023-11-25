@@ -78,16 +78,15 @@ void MinerService_OnUnload (JNIEnv *env) {
 }
 static inline void sendJavaMsg(jint lvl, std::string msg) {
 	JNIEnv *env;
-  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    std::time_t time = std::chrono::system_clock::to_time_t(now);
-    std::tm tm_time = *std::localtime(&time);
-    static char timeString[9];
-    std::strftime(timeString, 9, "%T", &tm_time);
-  	jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF (timeString) ,env->NewStringUTF(msg.c_str()));
-  	env->CallVoidMethod (local_globalRef, sendMessageConsole, ci);
-    global_jvm->DetachCurrentThread ();
-  }
+  if (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) return;
+  std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+  std::time_t t = std::chrono::system_clock::to_time_t(now);
+  std::tm tm_time = *std::localtime(&t);
+  static char timeString[9];
+  std::strftime(timeString, 9, "%T", &tm_time);
+	jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF (timeString) ,env->NewStringUTF(msg.c_str()));
+	env->CallVoidMethod (local_globalRef, sendMessageConsole, ci);
+  global_jvm->DetachCurrentThread ();
 }
 
 static inline void sendJavaMsg(jint lvl, const char* msg) {
@@ -389,15 +388,16 @@ JNIF (jboolean, nativeRunning) (JNIEnv *, jobject) {
   return r;
 }
 void *toStopBackground (void *) {
-  if (!active_worker || !workers || !doingjob) pthread_exit (NULL);
-  pthread_mutex_lock (&_mtx);
-  doingjob = false;
-  while (active_worker > 0)
-    pthread_cond_wait (&_cond, &_mtx);
-  mineRunning = false;
-  pthread_mutex_unlock (&_mtx);
-  delete[] workers;
-  workers = nullptr;
+  if (active_worker && workers && doingjob) {
+	  pthread_mutex_lock (&_mtx);
+	  doingjob = false;
+	  while (active_worker > 0)
+	    pthread_cond_wait (&_cond, &_mtx);
+	  mineRunning = false;
+	  pthread_mutex_unlock (&_mtx);
+	  delete[] workers;
+	  workers = nullptr;
+  }
   pthread_exit (NULL);
 }
 JNIF (void, nativeStop) (JNIEnv *, jobject) {

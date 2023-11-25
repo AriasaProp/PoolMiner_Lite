@@ -145,7 +145,7 @@ std::string json::JSON::dump (int depth, std::string tab) const {
 }
 
 //extras
-static json::JSON parse_next( const string &, size_t & );
+static json::JSON parse_next( const std::string &, size_t & );
 static json::JSON parse_object( const std::string &str, size_t &offset ) {
     json::JSON Object = json::JSON(json::JSON::Class::Object);
     while(isspace(str[offset++]));
@@ -266,7 +266,7 @@ static json::JSON parse_number( const std::string &str, size_t &offset ) {
                 exp_str += c;
             else if( !isspace( c ) && c != ',' && c != ']' && c != '}' ) {
                 std::cerr << "ERROR: Number: Expected a number for exponent, found '" << c << "'\n";
-                return json::JSON(json::JSON::Class::Null ) );
+                return json::JSON(json::JSON::Class::Null );
             }
             else
                 break;
@@ -275,7 +275,7 @@ static json::JSON parse_number( const std::string &str, size_t &offset ) {
     }
     else if( !isspace( c ) && c != ',' && c != ']' && c != '}' ) {
         std::cerr << "ERROR: Number: unexpected character '" << c << "'\n";
-        return json::JSON(json::JSON::Class::Null ) );
+        return json::JSON(json::JSON::Class::Null );
     }
     --offset;
     

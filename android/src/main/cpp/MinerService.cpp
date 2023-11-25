@@ -54,11 +54,6 @@ static uint32_t active_worker = 0;
 static bool doingjob = false;
 static uint32_t thread_use;
 static pthread_t *workers = nullptr;
-static int conn_sockfd = -1;
-static uint32_t conn_port = 0;
-static char *conn_server = nullptr;
-static char *conn_auth_user = nullptr;
-static char *conn_auth_pass = nullptr;
 
 bool MinerService_OnLoad (JNIEnv *env) {
 	jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");

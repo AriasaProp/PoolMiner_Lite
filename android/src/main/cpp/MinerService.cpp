@@ -62,7 +62,7 @@ static char *conn_auth_pass = nullptr;
 
 bool MinerService_OnLoad (JNIEnv *env) {
 	jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
-  consoleItem = (*env)->FindClass(env, "com/ariasaproject/poolminerlite/ConsoleItem");
+  consoleItem = env->FindClass("com/ariasaproject/poolminerlite/ConsoleItem");
   if (!m_class || !consoleItem) return false;
 	updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
 	updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
@@ -84,8 +84,8 @@ void MinerService_OnUnload (JNIEnv *env) {
 static inline void sendJavaMsg(jint lvl, std::string msg) {
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    auto now = std::chrono::steady_clock::now();
-    auto time = std::chrono::system_clock::to_time_t(now);
+    std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+    std::time_t time = std::chrono::system_clock::to_time_t(now);
     std::tm tm_time = *std::localtime(&time);
     static char timeString[9];
     std::strftime(timeString, 9, "%T", &tm_time);

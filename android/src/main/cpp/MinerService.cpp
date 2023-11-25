@@ -79,9 +79,11 @@ void MinerService_OnUnload (JNIEnv *env) {
 static inline void sendJavaMsg(jint lvl, std::string msg) {
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) return;
+  /*
   std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
   std::time_t t = std::chrono::system_clock::to_time_t(now);
   std::tm tm_time = *std::localtime(&t);
+  */
   static char timeString[11];
   strcpy(timeString, "[00:00:00]");
   //std::strftime(timeString, 11, "%T", &tm_time);

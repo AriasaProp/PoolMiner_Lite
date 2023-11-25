@@ -82,8 +82,9 @@ static inline void sendJavaMsg(jint lvl, std::string msg) {
   std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
   std::time_t t = std::chrono::system_clock::to_time_t(now);
   std::tm tm_time = *std::localtime(&t);
-  static char timeString[9];
-  std::strftime(timeString, 9, "%T", &tm_time);
+  static char timeString[11];
+  strcpy(timeString, "[00:00:00]");
+  //std::strftime(timeString, 11, "%T", &tm_time);
 	jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF (timeString) ,env->NewStringUTF(msg.c_str()));
 	env->CallVoidMethod (local_globalRef, sendMessageConsole, ci);
   global_jvm->DetachCurrentThread ();

@@ -414,12 +414,3 @@ JNIF (void, nativeStop) (JNIEnv *, jobject) {
   pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
   pthread_attr_destroy (&thread_attr);
 }
-JNIF (void, nativeStop) (JNIEnv *, jobject) {
-	// send state for mine was stop
-	pthread_t stopping;
-	pthread_attr_t thread_attr;
-	pthread_attr_init (&thread_attr);
-	pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-	pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
-	pthread_attr_destroy (&thread_attr);
-}

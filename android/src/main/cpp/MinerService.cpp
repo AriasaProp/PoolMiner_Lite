@@ -194,11 +194,13 @@ void *startConnect (void *p) {
 	pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
+  /*
   sendJavaMsg(0, "Debug sample message!");
   sendJavaMsg(1, "Info sample message!");
   sendJavaMsg(2, "Success sample message!");
   sendJavaMsg(3, "Warning sample message!");
   sendJavaMsg(4, "Error sample message!");
+  */
   connectData *dat = (connectData *)p;
   try {
   	mine_data_holder mdh;

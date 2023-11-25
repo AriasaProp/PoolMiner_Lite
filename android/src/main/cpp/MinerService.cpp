@@ -15,6 +15,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <utility>
+#include <iomanip>
+#include <chrono>
+#include <ctime>
 
 #include "json.hpp"
 #include "util.hpp"
@@ -34,10 +37,13 @@ static JavaVMAttachArgs attachArgs {
 	.group = NULL
 };
 
+static jclass consoleItem;
+
 static jmethodID updateSpeed;
 static jmethodID updateResult;
 static jmethodID updateState;
 static jmethodID sendMessageConsole;
+static jmethodID consoleItemConstructor;
 
 // for mining data
 static bool mineRunning;
@@ -56,12 +62,16 @@ static char *conn_auth_pass = nullptr;
 
 bool MinerService_OnLoad (JNIEnv *env) {
 	jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
-	return (m_class &&
-		(updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V")) &&
-		(updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V")) &&
-		(updateState = env->GetMethodID (m_class, "updateState", "(I)V")) &&
-		(sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V")));
+  consoleItem = (*env)->FindClass(env, "com/ariasaproject/poolminerlite/ConsoleItem");
+  if (!m_class || !consoleItem) return false;
+	updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
+	updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
+	updateState = env->GetMethodID (m_class, "updateState", "(I)V");
+	sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(Lcom/ariasaproject/poolminerlite/ConsoleItem;)V");
+  consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
+  if (!updateSpeed || !updateResult || !updateState || !consoleItemConstructor) return false;
 	mineRunning = false;
+	return true;
 }
 void MinerService_OnUnload (JNIEnv *env) {
 	env->DeleteGlobalRef (local_globalRef);
@@ -71,13 +81,20 @@ void MinerService_OnUnload (JNIEnv *env) {
 	updateState = NULL;
 	sendMessageConsole = NULL;
 }
-static void sendJavaMsg(jint lvl, std::string msg) {
+static inline void sendJavaMsg(jint lvl, std::string msg) {
 	JNIEnv *env;
   if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-  	env->CallVoidMethod (local_globalRef, sendMessageConsole, lvl, env->NewStringUTF (msg.c_str()));
+    auto now = std::chrono::steady_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+    std::tm tm_time = *std::localtime(&time);
+    static char timeString[9];
+    std::strftime(timeString, 9, "%T", &tm_time);
+  	jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF (timeString) ,env->NewStringUTF(msg.c_str()));
+  	env->CallVoidMethod (local_globalRef, sendMessageConsole, ci);
     global_jvm->DetachCurrentThread ();
   }
 }
+
 static void sendJavaMsg(jint lvl, const char* msg) {
 	sendJavaMsg(lvl, std::string(msg));
 }
@@ -705,7 +722,6 @@ JNIF (void, nativeStop) (JNIEnv *, jobject) {
   pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
   pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
   pthread_attr_destroy (&thread_attr);
->>>>>>> main-3
 }
 JNIF (void, nativeStop) (JNIEnv *, jobject) {
 	// send state for mine was stop

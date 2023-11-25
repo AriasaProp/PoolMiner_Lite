@@ -23,15 +23,7 @@ public class MinerService extends Service {
         super.onCreate();
         mVM = ((MainApplication) getApplication()).getMinerViewModel();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-<<<<<<< HEAD
-            NotificationChannel channel =
-                    new NotificationChannel(
-                            NOTIFICATION_CHANNEL_ID,
-                            NOTIFICATION_TITLE,
-                            NotificationManager.IMPORTANCE_DEFAULT);
-=======
             NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_TITLE, NotificationManager.IMPORTANCE_DEFAULT);
->>>>>>> main-3
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
@@ -66,22 +58,6 @@ public class MinerService extends Service {
     @Keep
     private synchronized void updateState(int state) {
         switch (state) {
-<<<<<<< HEAD
-            case 0:
-                stopForeground(true);
-                break;
-            case 2:
-                startForeground(
-                        NOTIFICATION_ID,
-                        new NotificationCompat.Builder(MinerService.this, NOTIFICATION_CHANNEL_ID)
-                                .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                                .setContentTitle(NOTIFICATION_TITLE)
-                                .setContentText("Service is running in the foreground")
-                                .build());
-                break;
-            default:
-                ;
-=======
         		case 0:
         				stopForeground(true);
         				break;
@@ -94,14 +70,13 @@ public class MinerService extends Service {
                             .build());
         				break;
         		default:;
->>>>>>> main-3
         }
         mVM.postState(state);
     }
 
     @Keep
-    private synchronized void sendMessageConsole(int lvl, String msg) {
-        mVM.postLog(lvl, msg);
+    private synchronized void sendMessageConsole(ConsoleItem ci) {
+        mVM.postLog(ci);
     }
 
     private native void nativeStart(String[] strings, int[] ints);

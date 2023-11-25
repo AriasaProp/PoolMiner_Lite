@@ -14,7 +14,10 @@ public class ConsoleItem {
     public final int color;
 
     public ConsoleItem(int c, String m) {
-        time = logDateFormat.format(new Date());
+        this(c, logDateFormat.format(new Date()), m);
+    }
+    public ConsoleItem(int c, String d, String m) {
+        time = d;
         msg = m;
         color = c;
     }

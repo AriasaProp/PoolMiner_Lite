@@ -214,27 +214,31 @@ void *startConnect (void *p) {
 	    } while (tries < MAX_ATTEMPTS_TRY);
     	if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Connection tries is always failed!");
     }
-  	// try subscribe
+  	// try subscribe & authorize
   	char buffer[MAX_MESSAGE];
     {
-    	char message[52+strlen(CONNECT_MACHINE)];
+    	char message[106+strlen(CONNECT_MACHINE)+strlen(dat->auth_user)+strlen(dat->auth_pass)];
     	strcpy(message, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"");
     	strcat(message, CONNECT_MACHINE);
-    	strcat(message, "\"]}\n");
+    	strcat(message, "\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"");
+      strcat(message, dat->auth_user);
+      strcat(message, "\",\"");
+      strcat(message, dat->auth_pass);
+      strcat(message, "\"]}\n");
       tries = 0;
       for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
         int s = send (dat->sockfd, message + sended, length - sended, 0);
         if (s <= 0) ++tries; else sended += s;
       }
-      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending subscribe is always failed!");
-    }
-    //recv subscribe prove
+      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending subscribe & authorize is always failed!");
+  	}
+    //recv subscribe & authorize prove
     tries = 0;
     do {
 	    if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) > 0) {
 		  	std::string msgRcv(buffer);
 		    size_t pos = 0;
-      	while (((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.subscribed) {
+      	while (((pos = msgRcv.find("\n")) != std::string::npos) && !(mdh.subscribed && mdh.authorized)) {
 					json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
 					msgRcv.erase(0, pos+1);
 					if(rcv.IsNull()) continue;
@@ -242,52 +246,14 @@ void *startConnect (void *p) {
 				}
 	    }
   		sleep(1);
-    } while (!mdh.subscribed && (++tries < MAX_ATTEMPTS_TRY));
-  	if (!mdh.subscribed) throw std::runtime_error("Doesn't receive any subscribe message result!");
-    {
-	    JNIEnv *env;
-		  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("subscribe success"));
-			  global_jvm->DetachCurrentThread ();
-		  }
-	  }
-  	// try authorize
-  	{
-    	char message[55+strlen(dat->auth_user)+strlen(dat->auth_pass)];
-      strcpy (message, "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"");
-      strcat (message, dat->auth_user);
-      strcat (message, "\",\"");
-      strcat (message, dat->auth_pass);
-      strcat (message, "\"]}\n");
-      tries = 0;
-      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, message + sended, length - sended, 0);
-        if (s <= 0) ++tries; else sended += s;
-      }
-      if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending authorize is always failed!");
-  	}
-    //recv authorize prove
-    tries = 0;
-    do {
-	  	if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) > 0) {
-		  	std::string msgRcv(buffer);
-		    size_t pos = 0;
-      	while (((pos = msgRcv.find("\n")) != std::string::npos) && !mdh.authorized) {
-					json::JSON rcv = json::Parse(msgRcv.substr(0, pos));
-					msgRcv.erase(0, pos+1);
-					if(rcv.IsNull()) continue;
-					mdh.updateData(rcv);
-				}
-	    }
-  		sleep(1);
-    } while (!mdh.authorized && (++tries < MAX_ATTEMPTS_TRY));
-    if (!mdh.authorized) throw std::runtime_error("Doesn't receive any authorize message result!");
+    } while (!(mdh.subscribed && mdh.authorized)  && (++tries < MAX_ATTEMPTS_TRY));
+  	if (!mdh.subscribed || !mdh.authorized) throw std::runtime_error("Doesn't receive an subscribe or authorize message result!");
     //state start running
     {
       JNIEnv *env;
 	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	      env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("authorize success"));
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("subscribe & authorize success"));
 	      global_jvm->DetachCurrentThread ();
 	    }
     }
@@ -354,8 +320,7 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
 	  cd->port = integers[0];
 	  thread_use = integers[1];
 	  env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
-	}
-  {
+	  
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
     cd->server = new char[env->GetStringUTFLength (jserverName)];
     const char *serverName = env->GetStringUTFChars (jserverName, JNI_FALSE);
@@ -419,3 +384,5 @@ JNIF (void, nativeStop) (JNIEnv *, jobject) {
   pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
   pthread_attr_destroy (&thread_attr);
 }
+
+

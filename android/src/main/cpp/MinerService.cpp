@@ -87,8 +87,8 @@ static inline void sendJavaMsg(jint lvl, std::string msg) {
   strcpy(timeString, "[00:00:00]");
   */
   //std::strftime(timeString, 11, "%T", &tm_time);
-	jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF(msg.c_str()));
-	env->CallVoidMethod (local_globalRef, sendMessageConsole, ci);
+	//jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF(msg.c_str()));
+	env->CallVoidMethod (local_globalRef, sendMessageConsole, lvl, env->NewStringUTF(msg.c_str()));
   global_jvm->DetachCurrentThread ();
 }
 

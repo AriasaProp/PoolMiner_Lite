@@ -37,13 +37,13 @@ static JavaVMAttachArgs attachArgs {
 	.group = NULL
 };
 
-static jclass consoleItem;
+//static jclass consoleItem;
 
 static jmethodID updateSpeed;
 static jmethodID updateResult;
 static jmethodID updateState;
 static jmethodID sendMessageConsole;
-static jmethodID consoleItemConstructor;
+//static jmethodID consoleItemConstructor;
 
 // for mining data
 static bool mineRunning;
@@ -57,14 +57,14 @@ static pthread_t *workers = nullptr;
 
 bool MinerService_OnLoad (JNIEnv *env) {
 	jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
-  consoleItem = env->FindClass("com/ariasaproject/poolminerlite/ConsoleItem");
-  if (!m_class || !consoleItem) return false;
+  //consoleItem = env->FindClass("com/ariasaproject/poolminerlite/ConsoleItem");
+  if (!m_class /*|| !consoleItem*/) return false;
 	updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
 	updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
 	updateState = env->GetMethodID (m_class, "updateState", "(I)V");
-	sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(Lcom/ariasaproject/poolminerlite/ConsoleItem;)V");
-  consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
-  if (!updateSpeed || !updateResult || !updateState || !consoleItemConstructor) return false;
+	sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V");
+  //consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
+  if (!updateSpeed || !updateResult || !updateState/* || !consoleItemConstructor*/) return false;
 	mineRunning = false;
 	return true;
 }
@@ -83,11 +83,11 @@ static inline void sendJavaMsg(jint lvl, std::string msg) {
   std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
   std::time_t t = std::chrono::system_clock::to_time_t(now);
   std::tm tm_time = *std::localtime(&t);
-  */
   static char timeString[11];
   strcpy(timeString, "[00:00:00]");
+  */
   //std::strftime(timeString, 11, "%T", &tm_time);
-	jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF (timeString) ,env->NewStringUTF(msg.c_str()));
+	jobject ci = env->NewObject(consoleItem, consoleItemConstructor, lvl, env->NewStringUTF(msg.c_str()));
 	env->CallVoidMethod (local_globalRef, sendMessageConsole, ci);
   global_jvm->DetachCurrentThread ();
 }
@@ -222,8 +222,8 @@ void *startConnect (void *p) {
 	      ++tries;
 	      sleep (1);
 	    } while (tries < MAX_ATTEMPTS_TRY);
+    	if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Connection tries is always failed!");
     }
-    if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Connection tries is always failed!");
     try {
     	// try subscribe
     	char buffer[MAX_MESSAGE];

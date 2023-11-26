@@ -179,15 +179,17 @@ void *startConnect (void *p) {
 	pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
-  JNIEnv *env;
-  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-		env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Debug sample message!"));
-		env->CallVoidMethod (local_globalRef, sendMessageConsole, 1, env->NewStringUTF("Info sample message!"));
-		env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("Success sample message!"));
-		env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF("Warning sample message!"));
-		env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF("Error sample message!"));
-	  global_jvm->DetachCurrentThread ();
-  }
+  {
+	  JNIEnv *env;
+	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Debug sample message!"));
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 1, env->NewStringUTF("Info sample message!"));
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("Success sample message!"));
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF("Warning sample message!"));
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF("Error sample message!"));
+		  global_jvm->DetachCurrentThread ();
+	  }
+	}
   
   connectData *dat = (connectData *)p;
   try {
@@ -329,10 +331,12 @@ void *startConnect (void *p) {
   delete[] dat->auth_pass;
   delete dat;
   //set state mining to none
-  JNIEnv *env;
-  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-    global_jvm->DetachCurrentThread ();
+  {
+	  JNIEnv *env;
+	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+	    global_jvm->DetachCurrentThread ();
+	  }
   }
   pthread_mutex_lock (&_mtx);
   --active_worker;

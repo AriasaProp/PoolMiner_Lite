@@ -162,7 +162,7 @@ public:
 				if (params.size() < 8) throw std::runtime_error("mining.notify params has not enough informations!");
 				std::string infos = "mining.notify info:\n";
 				infos += "id: ";
-		    mnd.job_id = params[0];
+		    mnd.job_id = (std::string)params[0];
 		    infos += mnd.job_id;
 				infos += "\nprev: ";
 		    mnd.prev_hash = convert::hexString_toBiner(params[1]);
@@ -205,7 +205,7 @@ public:
 			  }
 			} else if (method == "client.get_version") {
 	      if (!d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) throw std::runtime_error("invalid version");
-	      version = d["jsonrpc"];
+	      version = (std::string)d["jsonrpc"];
 			} else {
 				//not yet handled method
 				std::string print = method + "\n" + d["params"].dump();

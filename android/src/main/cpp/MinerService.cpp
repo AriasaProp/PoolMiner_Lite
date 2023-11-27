@@ -113,9 +113,8 @@ public:
 			switch (id) {
 				case 1: {
 					//is subscribe
-		      if (!d.hasKey("result") || res.IsNull() || (d["result"].JSONType() != json::JSON::Class::Array)) throw std::runtime_error("hasn't valid result");
+		      if (!d.hasKey("result") || d["result"].IsNull() || (d["result"].JSONType() != json::JSON::Class::Array)) throw std::runtime_error("hasn't valid result");
 					json::JSON &res = d["result"];
-					if () throw std::runtime_error("subscribe result is null, how?");
 					// method data extraction
 					//1
 					{

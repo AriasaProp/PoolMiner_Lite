@@ -47,7 +47,7 @@ hex_array convert::hexString_toBiner (const std::string hex) {
 
 std::string convert::hexBiner_toString(const hex_array hex) {
   std::ostringstream oss;
-  for (hex_array::iterator it = hex.rbegin(); it < hex.rend(); ++it) {
+  for (hex_array::reverse_iterator it = hex.rbegin(); it < hex.rend(); ++it) {
     oss << std::hex << *it;
   }
   return oss.str();

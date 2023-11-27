@@ -143,6 +143,9 @@ std::string json::JSON::dump (int depth, std::string tab) const {
   }
   return "";
 }
+std::string json::JSON::dump () const {
+	return dump (1, "  ");
+}
 
 //extras
 static json::JSON parse_next( const std::string &, size_t & );

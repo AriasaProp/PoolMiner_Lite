@@ -210,6 +210,7 @@ struct JSON {
   }
 
   std::string dump (int, std::string) const;
+  std::string dump () const;
 
   void SetType (Class type) {
     if (type == Type) return;

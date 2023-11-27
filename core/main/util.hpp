@@ -11,6 +11,7 @@ typedef std::vector<hex_base> hex_array;
 namespace convert {
 extern hex_array hexString_toBiner (const char *);
 extern hex_array hexString_toBiner (const std::string);
+extern std::string hexBiner_toString (const hex_array);
 } // namespace convert
 
 

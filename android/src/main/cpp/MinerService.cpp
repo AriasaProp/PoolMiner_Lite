@@ -78,64 +78,150 @@ void MinerService_OnUnload (JNIEnv *env) {
 }
 
 //mine data holder
+struct mining_notify_data {
+	std::string job_id;
+  hex_array version;
+  std::vector<hex_array> merkle_arr;
+  hex_array ntime;
+  hex_array nbit;
+  bool clean;
+  hex_array prev_hash;
+  hex_array coinb1;
+  hex_array coinb2;
+};
 struct mine_data_holder {
 private:
 	hex_array session_id;
-	hex_array difficulty;
+	hex_array difficulty_;
+	double difficulty;
 	hex_array xnonce1;
 	size_t xnonce2_size;
-	void updateByMethod(std::string method, std::string value) {
-		if (method == "mining.notify") {
-			session_id = convert::hexString_toBiner(value);
-		}
-		if (method == "mining.set_difficulty") {
-			difficulty = convert::hexString_toBiner(value);
-		}
-	}
+	std::string version = "not set";
+	mining_notify_data mnd;
 public:
 	bool subscribed = false;
 	bool authorized = false;
 	
 	
 	void updateData(json::JSON d) {
-		if (!d.hasKey("id")) throw std::runtime_error("json data doesn't has id. it's invalid.");
-		if (d["id"].IsNull()) {
-			JNIEnv *env;
-		  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(d.dump(1, "  ").c_str()));
-			  global_jvm->DetachCurrentThread ();
-		  }
-		} else {
+		//throw error
+		if (d.hasKey("error") && !d["error"].IsNull()) throw std::runtime_error(((std::string) d["error"]).c_str());
+		//valid result
+		if (d.hasKey("id") && !d["id"].IsNull()) {
+			//statisfy any requested result
 			int id = d["id"];
 			switch (id) {
-				case 1:{ //subscribe proving
-					if (d.hasKey("error") && !d["error"].IsNull())
-						throw std::runtime_error(((std::string) d["error"]).c_str());
-					if (!d.hasKey("result")) throw std::runtime_error("hasn't result");
+				case 1: {
+					//is subscribe
+		      if (!d.hasKey("result") || res.IsNull() || (d["result"].JSONType() != json::JSON::Class::Array)) throw std::runtime_error("hasn't valid result");
 					json::JSON &res = d["result"];
-					if (res.IsNull()) throw std::runtime_error("subscribe result is null, how?");
+					if () throw std::runtime_error("subscribe result is null, how?");
 					// method data extraction
-					updateByMethod(res[0][0][0],res[0][0][1]);
-					updateByMethod(res[0][1][0],res[0][1][1]);
+					//1
+					{
+						std::string method = res[0][0][0];
+						std::string value = res[0][0][1];
+						if (method == "mining.notify") {
+							session_id = convert::hexString_toBiner(value);
+						}
+						if (method == "mining.set_difficulty") {
+							difficulty_ = convert::hexString_toBiner(value);
+						}
+					}
+					//2
+					{
+						std::string method = res[0][1][0];
+						std::string value = res[0][1][1];
+						if (method == "mining.notify") {
+							session_id = convert::hexString_toBiner(value);
+						}
+						if (method == "mining.set_difficulty") {
+							difficulty_ = convert::hexString_toBiner(value);
+						}
+					}
 					// xnonce1
 					xnonce1 = convert::hexString_toBiner(res[1]);
 					//xnonce2 size
 					xnonce2_size = (int)res[2];
 					subscribed = true;
-				}
-					break;
+				} break;
 				case 2: {
-					if (d.hasKey("error") && !d["error"].IsNull())
-						throw (((std::string) d["error"]).c_str());
-					if (d.hasKey("result")) {
-						if (d["result"].IsNull() && !((bool)d["result"])) throw std::runtime_error("authorize is failed");
-					}
+					//is authorize
+					if (d.hasKey("result") || d["result"].IsNull() || !((bool)d["result"])) throw std::runtime_error("authorize is invalid");
 					authorized = true;
-				}
-					break;
-				default:
-					break;
+				} break;
+				default:;
 			}
+		} else if (d.hasKey("method") && d.hasKey("params")) {
+			//statisfy any received method
+			std::string method = d["method"];
+			if (method == "mining.set_difficulty") {
+				difficulty = d["params"][0];
+			} else if (method == "mining.notify") {
+				json::JSON params = d["params"];
+				if (params.size() < 8) throw std::runtime_error("mining.notify params has not enough informations!");
+				std::string infos = "mining.notify info:\n";
+				infos += "id: ";
+		    mnd.job_id = params[0];
+		    infos += mnd.job_id;
+				infos += "\nprev: ";
+		    mnd.prev_hash = convert::hexString_toBiner(params[1]);
+				infos += convert::hexBiner_toString(mnd.prev_hash);
+		    
+				infos += "\ncoinbase1: ";
+		    mnd.coinb1 = convert::hexString_toBiner(params[2]);
+		    infos += convert::hexBiner_toString(mnd.coinb1);
+				infos += "\ncoinbase2: ";
+		    mnd.coinb2 = convert::hexString_toBiner(params[3]);
+		    infos += convert::hexBiner_toString(mnd.coinb2);
+		    // merkle_arr
+				infos += "\nmerkle_arr: ";
+		    {
+		  		json::JSON jm = params[4];
+		  		if (jm.JSONType() != json::JSON::Class::Array) throw std::runtime_error("merkle_array params is invalid!");
+		  		mnd.merkle_arr.clear();
+		  		mnd.merkle_arr.reserve(jm.size());
+		  		for (auto it = jm.ArrayRange().begin(); it < jm.ArrayRange().end(); ++it) {
+		  			mnd.merkle_arr.push_back(convert::hexString_toBiner(*it));
+						infos += "\n  " + convert::hexBiner_toString(mnd.merkle_arr.back());
+		  		}
+		    }
+				infos += "\nversion: ";
+		    mnd.version = convert::hexString_toBiner(params[5]);
+				infos += convert::hexBiner_toString(mnd.version);
+				infos += "\nnbit: ";
+		    mnd.nbit = convert::hexString_toBiner(params[6]);
+				infos += convert::hexBiner_toString(mnd.nbit);
+				infos += "\nntime: ";
+		    mnd.ntime = convert::hexString_toBiner(params[7]);
+				infos += convert::hexBiner_toString(mnd.ntime);
+		    mnd.clean = params[8];
+				if (mnd.clean) infos += "\n should clean";
+		    
+				JNIEnv *env;
+			  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(infos.c_str()));
+				  global_jvm->DetachCurrentThread ();
+			  }
+			} else if (method == "client.get_version") {
+	      if (!d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) throw std::runtime_error("invalid version");
+	      version = d["jsonrpc"];
+			} else {
+				//not yet handled method
+				std::string print = method + "\n" + d["params"].dump();
+				JNIEnv *env;
+			  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(print.c_str()));
+				  global_jvm->DetachCurrentThread ();
+			  }
+			}
+		} else {
+			//not yet handled
+			JNIEnv *env;
+		  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF(d.dump().c_str()));
+			  global_jvm->DetachCurrentThread ();
+		  }
 		}
 	}
 };
@@ -179,17 +265,6 @@ void *startConnect (void *p) {
 	pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
-  {
-	  JNIEnv *env;
-	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Debug sample message!"));
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 1, env->NewStringUTF("Info sample message!"));
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("Success sample message!"));
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF("Warning sample message!"));
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF("Error sample message!"));
-		  global_jvm->DetachCurrentThread ();
-	  }
-	}
   
   connectData *dat = (connectData *)p;
   try {

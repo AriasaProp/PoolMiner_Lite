@@ -146,7 +146,7 @@ public:
 				} break;
 				case 2: {
 					//is authorize
-					if (d.hasKey("result") || d["result"].IsNull() || !((bool)d["result"])) throw std::runtime_error("authorize is invalid");
+					if (!d.hasKey("result") || d["result"].IsNull() || !((bool)d["result"])) throw std::runtime_error("authorize is invalid");
 					authorized = true;
 				} break;
 				default:;
@@ -159,22 +159,12 @@ public:
 			} else if (method == "mining.notify") {
 				json::JSON params = d["params"];
 				if (params.size() < 8) throw std::runtime_error("mining.notify params has not enough informations!");
-				std::string infos = "mining.notify info:\n";
-				infos += "id: ";
 		    mnd.job_id = (std::string)params[0];
-		    infos += mnd.job_id;
-				infos += "\nprev: ";
 		    mnd.prev_hash = convert::hexString_toBiner(params[1]);
-				infos += convert::hexBiner_toString(mnd.prev_hash);
 		    
-				infos += "\ncoinbase1: ";
 		    mnd.coinb1 = convert::hexString_toBiner(params[2]);
-		    infos += convert::hexBiner_toString(mnd.coinb1);
-				infos += "\ncoinbase2: ";
 		    mnd.coinb2 = convert::hexString_toBiner(params[3]);
-		    infos += convert::hexBiner_toString(mnd.coinb2);
 		    // merkle_arr
-				infos += "\nmerkle_arr: ";
 		    {
 		  		json::JSON jm = params[4];
 		  		if (jm.JSONType() != json::JSON::Class::Array) throw std::runtime_error("merkle_array params is invalid!");
@@ -182,26 +172,12 @@ public:
 		  		mnd.merkle_arr.reserve(jm.size());
 		  		for (auto it = jm.ArrayRange().begin(); it < jm.ArrayRange().end(); ++it) {
 		  			mnd.merkle_arr.push_back(convert::hexString_toBiner(*it));
-						infos += "\n  " + convert::hexBiner_toString(mnd.merkle_arr.back());
 		  		}
 		    }
-				infos += "\nversion: ";
 		    mnd.version = convert::hexString_toBiner(params[5]);
-				infos += convert::hexBiner_toString(mnd.version);
-				infos += "\nnbit: ";
 		    mnd.nbit = convert::hexString_toBiner(params[6]);
-				infos += convert::hexBiner_toString(mnd.nbit);
-				infos += "\nntime: ";
 		    mnd.ntime = convert::hexString_toBiner(params[7]);
-				infos += convert::hexBiner_toString(mnd.ntime);
 		    mnd.clean = params[8];
-				if (mnd.clean) infos += "\n should clean";
-		    infos += "\ndone";
-				JNIEnv *env;
-			  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(infos.c_str()));
-				  global_jvm->DetachCurrentThread ();
-			  }
 			} else if (method == "client.get_version") {
 	      if (!d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) throw std::runtime_error("invalid version");
 	      version = (std::string)d["jsonrpc"];

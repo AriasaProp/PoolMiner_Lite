@@ -197,7 +197,7 @@ public:
 				infos += convert::hexBiner_toString(mnd.ntime);
 		    mnd.clean = params[8];
 				if (mnd.clean) infos += "\n should clean";
-		    
+		    infos += "\ndone";
 				JNIEnv *env;
 			  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(infos.c_str()));

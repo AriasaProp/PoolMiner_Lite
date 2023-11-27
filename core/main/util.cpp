@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 const size_t HEX_BASE_SIZE = sizeof(hex_base) * 8;
 const size_t HEX_BASE_SIZE_SHIFTED = HEX_BASE_SIZE - 4;
@@ -47,7 +48,7 @@ hex_array convert::hexString_toBiner (const std::string hex) {
 
 std::string convert::hexBiner_toString(const hex_array hex) {
   std::ostringstream oss;
-  for (hex_array::reverse_iterator it = hex.rbegin(); it < hex.rend(); ++it) {
+  for (hex_array::const_reverse_iterator it = hex.rbegin(); it < hex.rend(); ++it) {
     oss << std::hex << *it;
   }
   return oss.str();

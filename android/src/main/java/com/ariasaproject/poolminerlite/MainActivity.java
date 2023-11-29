@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         "<tr><th>Time</th><th>Messages</th></tr>" +
                         "<tr><td>9:00 AM</td><td>Hi there!</td></tr>" +
                         "<tr><td>10:30 AM</td><td>How are you?</td></tr>" +
+                        "<tr><td>11:30 AM</td><td>How are you?</td></tr>" +
                     "</table>";
         smpl.setText(HtmlCompat.fromHtml(htmlContent,HtmlCompat.FROM_HTML_MODE_LEGACY));
         tv_s = (AppCompatTextView) findViewById(R.id.speed_tv);

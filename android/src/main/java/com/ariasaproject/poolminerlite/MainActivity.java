@@ -120,26 +120,25 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         // log Adapter
         final RecyclerView cv = (RecyclerView) findViewById(R.id.console_view);
         cv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        adpt =
-                new Adapter<ConsoleItemHolder>() {
-                    final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+        adpt = new Adapter<ConsoleItemHolder>() {
+            final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
 
-                    @Override
-                    public ConsoleItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                        View itemView = inflater.inflate(R.layout.console_item, parent, false);
-                        return new ConsoleItemHolder(itemView);
-                    }
+            @Override
+            public ConsoleItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View itemView = inflater.inflate(R.layout.console_item, parent, false);
+                return new ConsoleItemHolder(itemView);
+            }
 
-                    @Override
-                    public void onBindViewHolder(ConsoleItemHolder holder, int position) {
-                        holder.bindLog(logList.get(position));
-                    }
+            @Override
+            public void onBindViewHolder(ConsoleItemHolder holder, int position) {
+                holder.bindLog(logList.get(position));
+            }
 
-                    @Override
-                    public int getItemCount() {
-                        return logList.SIZE;
-                    }
-                };
+            @Override
+            public int getItemCount() {
+                return logList.SIZE;
+            }
+        };
         cv.setAdapter(adpt);
         // check feature
         checkBatteryOptimizations();

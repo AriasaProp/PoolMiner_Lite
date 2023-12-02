@@ -264,6 +264,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:inputType="textMultiLine"
+        android:singleLine="false"
         android:text="None" />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/console_view"

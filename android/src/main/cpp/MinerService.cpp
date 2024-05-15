@@ -62,7 +62,7 @@ bool MinerService_OnLoad (JNIEnv *env) {
 	updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
 	updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
 	updateState = env->GetMethodID (m_class, "updateState", "(I)V");
-	sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V");
+	sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;Ljava/lang/String;)V");
   //consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
   if (!updateSpeed || !updateResult || !updateState/* || !consoleItemConstructor*/) return false;
 	mineRunning = false;
@@ -183,10 +183,9 @@ public:
 	      version = (std::string)d["jsonrpc"];
 			} else {
 				//not yet handled method
-				std::string print = method + "\n" + d["params"].dump();
 				JNIEnv *env;
 			  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(print.c_str()));
+					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(method), env->NewStringUTF(d["params"].dump()));
 				  global_jvm->DetachCurrentThread ();
 			  }
 			}
@@ -194,7 +193,7 @@ public:
 			//not yet handled
 			JNIEnv *env;
 		  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF(d.dump().c_str()));
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF("Unhandled message received"), env->NewStringUTF(d.dump().c_str()));
 			  global_jvm->DetachCurrentThread ();
 		  }
 		}
@@ -303,7 +302,7 @@ void *startConnect (void *p) {
       JNIEnv *env;
 	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	      env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("subscribe & authorize success"));
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("subscribe & authorize success"), env->NewStringUTF(""));
 	      global_jvm->DetachCurrentThread ();
 	    }
     }
@@ -334,7 +333,7 @@ void *startConnect (void *p) {
   } catch (const std::exception &er) {
     JNIEnv *env;
 	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF(er.what()));
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF("Connection Failed"), env->NewStringUTF(er.what()));
 		  global_jvm->DetachCurrentThread ();
 	  }
   }

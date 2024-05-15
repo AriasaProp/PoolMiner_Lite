@@ -59,8 +59,8 @@ public class MinerViewModel extends AndroidViewModel {
         Miner_State.postValue(state);
     }
 
-    public void postLog(int i, String msg) {
-        Miner_Log.postValue(new ConsoleItem(i,msg));
+    public void postLog(int i, String msg, String desc) {
+        Miner_Log.postValue(new ConsoleItem(i,msg,desc));
     }
 
     public float getSpeed() {

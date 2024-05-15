@@ -24,6 +24,7 @@ import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
@@ -158,16 +159,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Wellcome User!");
+                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Service mining failed to start!");
+                        logList.add(1, "Service failed to Start", "Mining Service failed to start because an reason.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1, "Jumped from running to none state, for now is imposible!");
+                        logList.add(1, "Skipped State", "This state was jumped from running to none state, for now is imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1, "Service mining successful to stop!");
+                        logList.add(1, "Service Stopped", "Service mining successful to stop!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -183,13 +184,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Service mining starting!");
+                        logList.add(1, "Starting", "Waiting for connecting, subscribing, authorizing and get the first job.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1, "Jumped from running to onStart, is imposible from now!");
+                        logList.add(1, "Skipped State", "Jumped from running to onStart, that imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1, "Jumped from onStop to onStart, is imposible for now!");
+                        logList.add(1, "Skipped State", "Jumped from onStop to onStart, that imposible!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -207,13 +208,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Jumped from none to running, is imposible from now!");
+                        logList.add(1,"Skipped State", "Jumped from none to running, is imposible from now!");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Service mining successful to start!");
+                        logList.add(1, "Started","Service mining successful to start!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1, "Jumped from onStop to running, is imposible from now!");
+                        logList.add(1, "Skipped Statel", "Jumped from onStop to running, is imposible from now!");
                         break;
                 }
                 accepted_result = rejected_result = 0;
@@ -231,14 +232,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Jumped from none to onStop, is imposible from now");
+                        logList.add(1, "Skipped State", "Jumped from none to onStop, is imposible from now");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(
-                                1, "Jumped from onStart to onStop state, for now is imposible!");
+                        logList.add(1, "Skipped State", "Jumped from onStart to onStop state, for now is imposible!");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1, "Service mining try to stop!");
+                        logList.add(1, "Stopping", "Service mining try to stop!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.VISIBLE);
@@ -416,21 +416,37 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private class ConsoleItemHolder extends RecyclerView.ViewHolder {
+        private ConstraintLayout root;
         private AppCompatTextView time;
         private AppCompatTextView msg;
+        private AppCompatTextView desc;
 
         public ConsoleItemHolder(View itemView) {
             super(itemView);
+            root = itemView.findViewById(R.id.console_item_root);
             time = itemView.findViewById(R.id.text1);
             msg = itemView.findViewById(R.id.text2);
+            desc = itemView.findViewById(R.id.text3);
+            root.setOnClickListener(new View.OnClickListener() {
+						    @Override
+						    public void onClick(View v) {
+						        if (desc.getVisibility() == View.VISIBLE) {
+						            desc.setVisibility(View.GONE);
+						        } else {
+						            desc.setVisibility(View.VISIBLE);
+						        }
+						    }
+						});
         }
 
         public void bindLog(ConsoleItem ci) {
             if (ci == null) {
                 time.setTextColor(getResources().getColor(R.color.console_text_debug));
                 msg.setTextColor(getResources().getColor(R.color.console_text_debug));
+                desc.setTextColor(getResources().getColor(R.color.console_text_debug));
                 time.setText("");
                 msg.setText("");
+                desc.setText("");
             } else {
                 int id;
                 switch (ci.color) {
@@ -453,8 +469,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 }
                 time.setTextColor(getResources().getColor(id));
                 msg.setTextColor(getResources().getColor(id));
+                desc.setTextColor(getResources().getColor(id));
                 time.setText(ci.time);
                 msg.setText(ci.msg);
+                desc.setText(ci.msg);
             }
         }
     }
@@ -486,11 +504,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public static final String PREF_CONSOLE = "CONSOLE";
 
     // default value
-    public static final String DEFAULT_URL = "stratum+tcp://us2.litecoinpool.org";
+    public static final String DEFAULT_URL = "us2.litecoinpool.org";
     public static final String DEFAULT_USER = "Ariasa.test";
     public static final String DEFAULT_PASS = "1234";
 
-    public static final int DEFAULT_PORT = 3333;
+    public static final int DEFAULT_PORT = 8080;
 
     // unit hash
     public static final String[] UnitHash =

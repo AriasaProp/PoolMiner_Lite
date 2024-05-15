@@ -10,33 +10,35 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3.5.2
-      - name: Filter Changes
-        uses: dorny/paths-filter@v2
+      - uses: actions/checkout@v4.1.1
+      - uses: dorny/paths-filter@v3.0.1
         id: changes
         with:
-          base: ${{ github.ref }}
           filters: |
             ifcore:
               - 'core/**'
             ifandroid:
               - 'android/**'
-      - name: Gradle Test Core
-        if: steps.changes.outputs.ifcore == 'true'
-        uses: gradle/gradle-build-action@v2.4.2
+
+      - uses: actions/setup-java@v4.2.1
         with:
-          gradle-version: 8.4
-          arguments: :core:test
-      - name: Gradle Test Android
-        if: steps.changes.outputs.ifandroid == 'true'
-        uses: gradle/gradle-build-action@v2.4.2
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.4
-          arguments: :android:build -Prelease
-      - name: Upload Android Artifacts
+          gradle-version: 8.7
+
+      - name: Core Test
+        run: :core:test
+      - name: Android Build
         if: steps.changes.outputs.ifandroid == 'true'
-        uses: actions/upload-artifact@v3.1.2
+        run: gradle :android:build -Prelease
+      - name: Upload Android
+        if: steps.changes.outputs.ifandroid == 'true'
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: APK
           path: ${{ github.workspace }}/android/build/outputs/apk/release/android-release.apk
+

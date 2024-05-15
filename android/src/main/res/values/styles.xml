@@ -16,6 +16,5 @@
         <item name="android:thumb">@drawable/seekbar_thumb</item>
         <item name="android:splitTrack">false</item>
     </style>
-    
-    
+
 </resources>

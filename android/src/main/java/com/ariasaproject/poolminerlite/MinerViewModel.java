@@ -3,12 +3,12 @@ package com.ariasaproject.poolminerlite;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
-public class MinerViewModel extends AndroidViewModel {
+public class MinerViewModel extends ViewModel {
     protected MutableLiveData<Float> Miner_Speed = new MutableLiveData(0.0f);
     protected MutableLiveData<Boolean> Miner_Result = new MutableLiveData();
     protected MutableLiveData<Integer> Miner_State = new MutableLiveData(0);

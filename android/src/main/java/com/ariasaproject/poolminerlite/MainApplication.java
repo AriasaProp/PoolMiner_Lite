@@ -3,7 +3,7 @@ package com.ariasaproject.poolminerlite;
 import android.app.Application;
 import android.content.res.Configuration;
 
-import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory;
 
 public class MainApplication extends Application {
     private MinerViewModel minerViewModel;
@@ -11,7 +11,7 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        minerViewModel = new ViewModelProvider(this).get(MinerViewModel.class);
+        minerViewModel = new AndroidViewModelFactory(this).get(MinerViewModel.class);
     }
 
     @Override

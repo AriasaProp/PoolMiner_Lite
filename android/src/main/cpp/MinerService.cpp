@@ -185,7 +185,7 @@ public:
 				//not yet handled method
 				JNIEnv *env;
 			  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(method), env->NewStringUTF(d["params"].dump()));
+					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(method.c_str()), env->NewStringUTF(d["params"].dump().c_str()));
 				  global_jvm->DetachCurrentThread ();
 			  }
 			}

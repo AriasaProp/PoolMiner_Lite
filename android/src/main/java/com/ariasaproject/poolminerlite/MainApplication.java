@@ -11,7 +11,7 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        minerViewModel = new AndroidViewModelFactory(this).get(MinerViewModel.class);
+        minerViewModel = new AndroidViewModelFactory(this).create(MinerViewModel.class);
     }
 
     @Override

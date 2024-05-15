@@ -30,8 +30,8 @@ jobs:
         with:
           gradle-version: 8.7
 
-      - name: Core Test
-        run: :core:test
+      - name: Core Check
+        run: gradle :core:check
       - name: Android Build
         if: steps.changes.outputs.ifandroid == 'true'
         run: gradle :android:build -Prelease

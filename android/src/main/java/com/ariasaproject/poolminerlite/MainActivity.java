@@ -50,14 +50,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         // define showInput
         tv_showInput = (AppCompatTextView) findViewById(R.id.show_userInput);
         // text status
-        AppCompatTextView smpl = (AppCompatTextView) findViewById(R.id.console_msg);
-        String htmlContent = "<html><body><table>" +
-                        "<tr><th>Time</th><th>Messages</th></tr>" +
-                        "<tr><td>9:00 AM</td><td>Hi there!</td></tr>" +
-                        "<tr><td>10:30 AM</td><td>How are you?</td></tr>" +
-                        "<tr><td>11:30 AM</td><td>How are you?</td></tr>" +
-                    "</table></body></html>";
-        smpl.setText(HtmlCompat.fromHtml(htmlContent,HtmlCompat.FROM_HTML_MODE_LEGACY));
         tv_s = (AppCompatTextView) findViewById(R.id.speed_tv);
         tv_ra = (AppCompatTextView) findViewById(R.id.resulta_tv);
         tv_rr = (AppCompatTextView) findViewById(R.id.resultr_tv);

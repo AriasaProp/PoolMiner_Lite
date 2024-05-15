@@ -76,7 +76,7 @@ public class MinerService extends Service {
 
     @Keep
     private synchronized void sendMessageConsole(int i, String msg,String desc) {
-        mVM.postLog(i, msg, desc0);
+        mVM.postLog(i, msg, desc);
     }
 
     private native void nativeStart(String[] strings, int[] ints);

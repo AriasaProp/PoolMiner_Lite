@@ -36,10 +36,10 @@ public class ConsoleItem {
                 if (strings[i * 4] == null) break;
                 logs[i] =
                         new ConsoleItem(
-                                Integer.parseInt(strings[i * 4])
+                                Integer.parseInt(strings[i * 4]),
                                 strings[i * 4 + 1],
                                 strings[i * 4 + 2],
-                                strings[i * 4 + 3],
+                                strings[i * 4 + 3]
                         );
             }
         }

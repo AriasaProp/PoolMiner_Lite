@@ -24,7 +24,6 @@ import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;

@@ -10,16 +10,19 @@
     android:focusable="true" >
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:clickable="false"
         android:focusable="false"
         android:gravity="top"/>
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text2"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -30,19 +33,19 @@
         android:gravity="top|left"/>
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text3"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/text2"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/text1"
         app:layout_constraintEnd_toEndOf="parent"
         android:clickable="false"
         android:focusable="false"
         android:visibility="gone"
-        android:gravity="top|left"/>
+        android:gravity="top|left"/>a
     <View 
         android:layout_width="match_parent"
-        android:layout_height="1.5dp"
+        android:layout_height="1dp"
         android:background="@color/opositeTransparent"
         app:layout_constraintTop_toBottomOf="@id/text3"
         app:layout_constraintBottom_toBottomOf="parent"

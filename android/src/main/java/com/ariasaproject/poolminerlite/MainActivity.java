@@ -160,6 +160,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     default:
                     case MINE_STATE_NONE:
                         logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
+                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
+                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
+                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
                         break;
                     case MINE_STATE_ONSTART:
                         logList.add(1, "Failed start", "Mining Service failed to start because an reason.");

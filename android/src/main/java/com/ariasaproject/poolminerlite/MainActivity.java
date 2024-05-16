@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Service failed to Start", "Mining Service failed to start because an reason.");
+                        logList.add(1, "Failed start", "Mining Service failed to start because an reason.");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(1, "Skipped State", "This state was jumped from running to none state, for now is imposible!");
@@ -427,16 +427,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             time = itemView.findViewById(R.id.text1);
             msg = itemView.findViewById(R.id.text2);
             desc = itemView.findViewById(R.id.text3);
-            root.setOnClickListener(new View.OnClickListener() {
-						    @Override
-						    public void onClick(View v) {
-						        if (desc.getVisibility() == View.VISIBLE) {
-						            desc.setVisibility(View.GONE);
-						        } else {
-						            desc.setVisibility(View.VISIBLE);
-						        }
-						    }
-						});
         }
 
         public void bindLog(ConsoleItem ci) {
@@ -447,7 +437,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 time.setText("");
                 msg.setText("");
                 desc.setText("");
+                root.setVisibility(View.GONE);
             } else {
+                root.setVisibility(View.VISIBLE);
                 int id;
                 switch (ci.color) {
                     default:
@@ -473,6 +465,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 time.setText(ci.time);
                 msg.setText(ci.msg);
                 desc.setText(ci.msg);
+                root.setOnClickListener(new View.OnClickListener() {
+								    @Override
+								    public void onClick(View v) {
+								        if (desc.getVisibility() == View.VISIBLE) {
+								            desc.setVisibility(View.GONE);
+								        } else {
+								            desc.setVisibility(View.VISIBLE);
+								        }
+								    }
+								});
             }
         }
     }

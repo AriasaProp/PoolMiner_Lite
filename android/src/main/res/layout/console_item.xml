@@ -7,7 +7,8 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
-    android:focusable="true" >
+    android:focusable="true"
+    android:animateLayoutChanges="true" >
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text1"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -42,7 +43,7 @@
         android:clickable="false"
         android:focusable="false"
         android:visibility="gone"
-        android:gravity="top|left"/>a
+        android:gravity="top|left"/>
     <View 
         android:layout_width="match_parent"
         android:layout_height="1dp"

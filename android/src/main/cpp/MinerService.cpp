@@ -228,6 +228,7 @@ void *doWork (void *p) {
     pthread_mutex_unlock (&_mtx);
     if (nn < nonce) break;
     nonce = nn;
+    //do hashing
   } while (loop);
   pthread_mutex_lock (&_mtx);
   --active_worker;
@@ -266,17 +267,16 @@ void *startConnect (void *p) {
   	// try subscribe & authorize
   	char buffer[MAX_MESSAGE];
     {
-    	char message[106+strlen(CONNECT_MACHINE)+strlen(dat->auth_user)+strlen(dat->auth_pass)];
-    	strcpy(message, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"");
-    	strcat(message, CONNECT_MACHINE);
-    	strcat(message, "\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"");
-      strcat(message, dat->auth_user);
-      strcat(message, "\",\"");
-      strcat(message, dat->auth_pass);
-      strcat(message, "\"]}\n");
+    	strcpy(buffer, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"");
+    	strcat(buffer, CONNECT_MACHINE);
+    	strcat(buffer, "\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"");
+      strcat(buffer, dat->auth_user);
+      strcat(buffer, "\",\"");
+      strcat(buffer, dat->auth_pass);
+      strcat(buffer, "\"]}\n\0");
       tries = 0;
-      for (int sended = 0, length = strlen (message); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
-        int s = send (dat->sockfd, message + sended, length - sended, 0);
+      for (int sended = 0, length = 106+strlen(CONNECT_MACHINE)+strlen(dat->auth_user)+strlen(dat->auth_pass); (tries < MAX_ATTEMPTS_TRY) && (sended < length);) {
+        int s = send (dat->sockfd, buffer + sended, length - sended, 0);
         if (s <= 0) ++tries; else sended += s;
       }
       if (tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error("Sending subscribe & authorize is always failed!");
@@ -302,7 +302,10 @@ void *startConnect (void *p) {
       JNIEnv *env;
 	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	      env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF("subscribe & authorize success"), env->NewStringUTF(""));
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 2,
+					env->NewStringUTF("subscribe & authorize success"),
+					env->NewStringUTF("authorize with username and pass as writen.")
+				);
 	      global_jvm->DetachCurrentThread ();
 	    }
     }
@@ -329,6 +332,7 @@ void *startConnect (void *p) {
 					}
 	      }
 	    }
+	    if (loop)
     }
   } catch (const std::exception &er) {
     JNIEnv *env;
@@ -401,6 +405,7 @@ JNIF (void, nativeStart) (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     env->CallVoidMethod (o, updateState, STATE_NONE);
   } else {
     mineRunning = true;
+    doingjob = true;
   }
   pthread_mutex_unlock (&_mtx);
   pthread_attr_destroy (&thread_attr);

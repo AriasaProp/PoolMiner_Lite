@@ -464,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 desc.setTextColor(getResources().getColor(id));
                 time.setText(ci.time);
                 msg.setText(ci.msg);
-                desc.setText(ci.msg);
+                desc.setText(ci.desc);
                 root.setOnClickListener(new View.OnClickListener() {
 								    @Override
 								    public void onClick(View v) {

@@ -332,7 +332,6 @@ void *startConnect (void *p) {
 					}
 	      }
 	    }
-	    if (loop)
     }
   } catch (const std::exception &er) {
     JNIEnv *env;

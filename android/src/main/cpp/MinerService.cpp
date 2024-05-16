@@ -416,15 +416,14 @@ JNIF (jboolean, nativeRunning) (JNIEnv *, jobject) {
   return r;
 }
 void *toStopBackground (void *) {
-  if (active_worker && workers && doingjob) {
+  if (active_worker && doingjob) {
 	  pthread_mutex_lock (&_mtx);
 	  doingjob = false;
 	  while (active_worker > 0)
 	    pthread_cond_wait (&_cond, &_mtx);
 	  mineRunning = false;
 	  pthread_mutex_unlock (&_mtx);
-	  delete[] workers;
-	  workers = nullptr;
+	  if (workers) delete[] workers, workers = nullptr;
   }
   pthread_exit (NULL);
 }

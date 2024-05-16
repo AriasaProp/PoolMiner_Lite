@@ -44,7 +44,7 @@
     <View 
         android:layout_width="match_parent"
         android:layout_height="5dp"
-        android:backgroundColor="@color/opositeTransparent"
+        android:background="@color/opositeTransparent"
         app:layout_constraintTop_toTopOf="@id/text3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="parent"

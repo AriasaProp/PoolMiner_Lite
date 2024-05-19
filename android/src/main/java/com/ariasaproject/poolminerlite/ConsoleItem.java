@@ -24,7 +24,7 @@ public class ConsoleItem {
     }
 
     public static class Lists extends Object implements Parcelable {
-        public final int SIZE = 50;
+        public static final int SIZE = 100;
         private final ConsoleItem[] logs = new ConsoleItem[SIZE];
 
         public Lists() {}

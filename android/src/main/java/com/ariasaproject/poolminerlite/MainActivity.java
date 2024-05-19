@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
             @Override
             public int getItemCount() {
-                return logList.SIZE;
+                return ConsoleItem.Lists.SIZE;
             }
         };
         cv.setAdapter(adpt);

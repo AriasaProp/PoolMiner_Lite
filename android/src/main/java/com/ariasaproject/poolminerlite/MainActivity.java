@@ -19,6 +19,7 @@ import android.view.Window;
 import android.widget.SeekBar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar((Toolbar)findViewById(R.id.toolbar));
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
         status_container = (ViewGroup) findViewById(R.id.status_container);
@@ -122,8 +124,50 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             }
 
             @Override
-            public void onBindViewHolder(ConsoleItemHolder holder, int position) {
-                holder.bindLog(logList.get(position));
+            public void onBindViewHolder(ConsoleItemHolder h, int p) {
+                final ConsoleItem ci = logList.get(p);
+		            if (ci == null) {
+		                h.root.setVisibility(View.GONE);
+		            } else {
+		                h.root.setVisibility(View.VISIBLE);
+		                int id;
+		                switch (ci.color) {
+		                    default:
+		                    case 0:
+		                        id = R.color.console_text_debug;
+		                        break;
+		                    case 1:
+		                        id = R.color.console_text_info;
+		                        break;
+		                    case 2:
+		                        id = R.color.console_text_success;
+		                        break;
+		                    case 3:
+		                        id = R.color.console_text_warning;
+		                        break;
+		                    case 4:
+		                        id = R.color.console_text_error;
+		                        break;
+		                }
+		                h.time.setTextColor(getResources().getColor(id));
+		                h.msg.setTextColor(getResources().getColor(id));
+		                h.desc.setTextColor(getResources().getColor(id));
+		                h.time.setText(ci.time);
+		                h.msg.setText(ci.msg);
+		                h.desc.setText(ci.desc);
+				            h.desc.setVisibility(View.GONE);
+		                h.root.setOnClickListener(new View.OnClickListener() {
+										    @Override
+										    public void onClick(View v) {
+										        if (h.desc.getVisibility() == View.VISIBLE) {
+										            h.desc.setVisibility(View.GONE);
+										        } else {
+										            h.desc.setVisibility(View.VISIBLE);
+										        }
+										    }
+										});
+		            }
+                
             }
 
             @Override
@@ -419,10 +463,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private class ConsoleItemHolder extends RecyclerView.ViewHolder {
-        private ConstraintLayout root;
-        private AppCompatTextView time;
-        private AppCompatTextView msg;
-        private AppCompatTextView desc;
+        public ConstraintLayout root;
+        public AppCompatTextView time;
+        public AppCompatTextView msg;
+        public AppCompatTextView desc;
 
         public ConsoleItemHolder(View itemView) {
             super(itemView);
@@ -432,54 +476,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             desc = itemView.findViewById(R.id.text3);
         }
 
-        public void bindLog(ConsoleItem ci) {
-            if (ci == null) {
-                time.setTextColor(getResources().getColor(R.color.console_text_debug));
-                msg.setTextColor(getResources().getColor(R.color.console_text_debug));
-                desc.setTextColor(getResources().getColor(R.color.console_text_debug));
-                time.setText("");
-                msg.setText("");
-                desc.setText("");
-                root.setVisibility(View.GONE);
-            } else {
-                root.setVisibility(View.VISIBLE);
-                int id;
-                switch (ci.color) {
-                    default:
-                    case 0:
-                        id = R.color.console_text_debug;
-                        break;
-                    case 1:
-                        id = R.color.console_text_info;
-                        break;
-                    case 2:
-                        id = R.color.console_text_success;
-                        break;
-                    case 3:
-                        id = R.color.console_text_warning;
-                        break;
-                    case 4:
-                        id = R.color.console_text_error;
-                        break;
-                }
-                time.setTextColor(getResources().getColor(id));
-                msg.setTextColor(getResources().getColor(id));
-                desc.setTextColor(getResources().getColor(id));
-                time.setText(ci.time);
-                msg.setText(ci.msg);
-                desc.setText(ci.desc);
-                root.setOnClickListener(new View.OnClickListener() {
-								    @Override
-								    public void onClick(View v) {
-								        if (desc.getVisibility() == View.VISIBLE) {
-								            desc.setVisibility(View.GONE);
-								        } else {
-								            desc.setVisibility(View.VISIBLE);
-								        }
-								    }
-								});
-            }
-        }
     }
 
     ViewGroup input_container, status_container;

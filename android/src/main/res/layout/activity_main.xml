@@ -8,6 +8,7 @@
     android:padding="6dp" >
 		<androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
+        android:theme="@style/AppTheme.Toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -38,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:inputType="textUri"
-                android:text="stratum+tcp://us2.litecoinpool.org" />
+                android:text="us2.litecoinpool.org" />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/port_container"

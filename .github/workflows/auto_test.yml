@@ -31,6 +31,7 @@ jobs:
           gradle-version: 8.7
 
       - name: Core Check
+        if: steps.changes.outputs.ifcore == 'true'
         run: gradle :core:check
       - name: Android Build
         if: steps.changes.outputs.ifandroid == 'true'

@@ -15,7 +15,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" >
 				
+		    <com.google.android.material.tabs.TabLayout
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:id="@+id/tab_layout"
+		        android:background="@color/base"
+		        app:tabInlineLabel="true"
+		        app:tabTextColor="@color/oposite"
+		        app:tabIndicatorColor="@color/colorAccent"
+		        app:tabSelectedTextColor="@color/colorAccent"
+		        app:tabTextAppearance="@android:style/TextAppearance.AppCompat.Small">
+		    		<com.google.android.material.tabs.TabItem
+								android:text="One"/>
+		    		<com.google.android.material.tabs.TabItem
+								android:text="Two"/>
+		    		<com.google.android.material.tabs.TabItem
+								android:text="Three"/>
+		    </com.google.android.material.tabs.TabLayout>
 		</androidx.appcompat.widget.Toolbar>
+		
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/input_container"
         android:layout_width="match_parent"

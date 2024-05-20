@@ -9,6 +9,7 @@
     <style name="AppTheme" parent="BaseTheme">
         <item name="android:windowBackground">@drawable/main_background</item>
         <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
     
     <style name="BaseTheme.Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">

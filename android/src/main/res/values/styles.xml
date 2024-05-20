@@ -15,7 +15,6 @@
     		
     </style>
     <style name="AppTheme.Toolbar" parent="BaseTheme.Toolbar">
-        <item name="android:textAligment">center</item>
     		
     </style>
     

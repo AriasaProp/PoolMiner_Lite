@@ -106,7 +106,7 @@ public:
 		std::string _h = "handled";
 		//throw error
 		if (d.hasKey("error") && !d["error"].IsNull())
-			_h = d["error"];
+			_h = (std::string)d["error"];
 		//valid result
 		if (d.hasKey("id") && !d["id"].IsNull()) {
 			//statisfy any requested result
@@ -151,7 +151,7 @@ public:
 					authorized = true;
 				} break;
 				default:
-					_h = std::string("unhandled id ") + d["id"];
+					_h = std::string("unhandled id ") + (std::string)d["id"];
 			}
 		} else if (d.hasKey("method") && d.hasKey("params")) {
 			//statisfy any received method

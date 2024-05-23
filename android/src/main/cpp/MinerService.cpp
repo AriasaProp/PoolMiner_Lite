@@ -217,7 +217,7 @@ public:
 		result += "\nmerkle_root: ";
 		for (hex_array mr : mnd.merkle_arr)
 			result += "\n  " + convert::hexBiner_toString(mr);
-		result += "\nTime: " + convert::hexBiner_toString(mnd.ntime) + ", nbit: " + convert::hexBiner_toString(mnd.nbit) + ", clean: " + std::string(mnd.clean?"true"?"false");
+		result += "\nTime: " + convert::hexBiner_toString(mnd.ntime) + ", nbit: " + convert::hexBiner_toString(mnd.nbit) + ", clean: " + std::string(mnd.clean?"true":"false");
 		result += "\nPrevious hash: ", result += convert::hexBiner_toString(mnd.prev_hash);
 		result += "\nCoinbase 1: ", result += convert::hexBiner_toString(mnd.coinb1);
 		result += "\nCoinbase 2: ", result += convert::hexBiner_toString(mnd.coinb2);

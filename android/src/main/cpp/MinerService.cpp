@@ -102,10 +102,11 @@ public:
 	bool subscribed = false;
 	bool authorized = false;
 	
-	
 	void updateData(json::JSON d) {
+		std::string _h = "handled";
 		//throw error
-		if (d.hasKey("error") && !d["error"].IsNull()) throw std::runtime_error(((std::string) d["error"]).c_str());
+		if (d.hasKey("error") && !d["error"].IsNull())
+			_h = d["error"];
 		//valid result
 		if (d.hasKey("id") && !d["id"].IsNull()) {
 			//statisfy any requested result
@@ -149,7 +150,8 @@ public:
 					if (!d.hasKey("result") || d["result"].IsNull() || !((bool)d["result"])) throw std::runtime_error("authorize is invalid");
 					authorized = true;
 				} break;
-				default:;
+				default:
+					_h = std::string("unhandled id ") + d["id"];
 			}
 		} else if (d.hasKey("method") && d.hasKey("params")) {
 			//statisfy any received method
@@ -182,25 +184,48 @@ public:
 	      if (!d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) throw std::runtime_error("invalid version");
 	      version = (std::string)d["jsonrpc"];
 			} else {
-				//not yet handled method
-				JNIEnv *env;
-			  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-					env->CallVoidMethod (local_globalRef, sendMessageConsole, 3, env->NewStringUTF(method.c_str()), env->NewStringUTF(d["params"].dump().c_str()));
-				  global_jvm->DetachCurrentThread ();
-			  }
+				_h = std::string("unhandled method: ") + method;
 			}
 		} else {
-			//not yet handled
-			JNIEnv *env;
-		  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF("Unhandled message received"), env->NewStringUTF(d.dump().c_str()));
-			  global_jvm->DetachCurrentThread ();
-		  }
+			_h = d.dump();
 		}
+		if (_h != "handled") {
+			JNIEnv *env;
+	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4,
+					env->NewStringUTF("Json Parser or Data Error"),
+					env->NewStringUTF(mdhs.c_str())
+				);
+	      global_jvm->DetachCurrentThread ();
+	    }
+		}
+	}
+	
+	std::string getPreMiningData() {
+		std::string result;
+		result += "session id: ", result += convert::hexBiner_toString(session_id);
+		result += "\ndifficulty: ", result += convert::hexBiner_toString(difficulty_);
+		result += "\nxnonce 1: ", result += convert::hexBiner_toString(xnonce1);
+		result += "\nxnonce 2 size: ", result += xnonce2_size;
+		result += "\nversion: ", result += version;
+		return result;
+	}
+	std::string getMiningData() {
+		std::string result;
+		result += "job id: ", result += mnd.job_id;
+		result += "\nversion: ", result += convert::hexBiner_toString(mnd.version);
+		result += "\nmerkle_root: ";
+		for (hex_array mr : mnd.merkle_arr)
+			result += "\n  " + convert::hexBiner_toString(mr);
+		result += "\nTime: " + convert::hexBiner_toString(mnd.ntime) + ", nbit: " + convert::hexBiner_toString(mnd.nbit) + ", clean: " + std::string(mnd.clean?"true"?"false");
+		result += "\nPrevious hash: ", result += convert::hexBiner_toString(mnd.prev_hash);
+		result += "\nCoinbase 1: ", result += convert::hexBiner_toString(mnd.coinb1);
+		result += "\nCoinbase 2: ", result += convert::hexBiner_toString(mnd.coinb2);
+		return result;
 	}
 };
 
-// 5 kBytes => 40 kBit
+// 5 kBytes ~> 40 kBit
 #define MAX_MESSAGE 5000
 #define CONNECT_MACHINE "PoolMiner-Lite"
 
@@ -245,6 +270,8 @@ void *startConnect (void *p) {
   try {
   	mine_data_holder mdh;
     // check inputs parameter for mining
+    
+    //try make an connection
     size_t tries = 0;
     {
 	    struct hostent *host = gethostbyname (dat->server);
@@ -297,7 +324,7 @@ void *startConnect (void *p) {
   		sleep(1);
     } while (!(mdh.subscribed && mdh.authorized)  && (++tries < MAX_ATTEMPTS_TRY));
   	if (!mdh.subscribed || !mdh.authorized) throw std::runtime_error("Doesn't receive an subscribe or authorize message result!");
-    //state start running
+    //change state to state start running
     {
       JNIEnv *env;
 	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
@@ -319,6 +346,11 @@ void *startConnect (void *p) {
 	      pthread_mutex_unlock (&_mtx);
 	      if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
 	    		if (++tries > MAX_ATTEMPTS_TRY) throw std::runtime_error("failed to receive message socket!.");
+					JNIEnv *env;
+				  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+						env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF("Connection Failed"), env->NewStringUTF("Try connect again after a sec!"));
+					  global_jvm->DetachCurrentThread ();
+				  }
 					sleep (1);
 	      } else {
 		      if (tries) tries = 0;
@@ -329,8 +361,17 @@ void *startConnect (void *p) {
 						msgRcv.erase(0, pos+1);
 						if(rcv.IsNull()) continue;
 						mdh.updateData(rcv);
+						std::string _pmdata = mdh.getPreMiningData();
+						std::string _mdata = mdh.getMiningData();
+				    JNIEnv *env;
+					  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+							env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Pre-Mining Data"), env->NewStringUTF(_pmdata.c_str()));
+							env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data"), env->NewStringUTF(_mdata.c_str()));
+						  global_jvm->DetachCurrentThread ();
+					  }
 					}
 	      }
+	      
 	    }
     }
   } catch (const std::exception &er) {

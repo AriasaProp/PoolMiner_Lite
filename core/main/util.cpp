@@ -1,4 +1,5 @@
 #include "util.hpp"
+
 #include <cmath>
 #include <algorithm>
 #include <sstream>

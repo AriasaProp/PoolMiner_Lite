@@ -194,7 +194,7 @@ public:
 	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4,
 					env->NewStringUTF("Json Parser or Data Error"),
-					env->NewStringUTF(mdhs.c_str())
+					env->NewStringUTF(_h.c_str())
 				);
 	      global_jvm->DetachCurrentThread ();
 	    }

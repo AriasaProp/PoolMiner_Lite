@@ -11,9 +11,5 @@
     <style name="BaseTheme.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar" >
     	
     </style>
-    
-    <style name="BaseTheme.Toolbar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title" >
-    	
-    </style>
 
 </resources>

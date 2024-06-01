@@ -143,7 +143,7 @@ public:
 					// xnonce1
 					xnonce1 = convert::hexString_toBiner(res[1]);
 					//xnonce2 size
-					xnonce2_size = res[2];
+					xnonce2_size = (std::string)res[2];
 					subscribed = true;
 				} break;
 				case 2: {
@@ -187,7 +187,7 @@ public:
 				_h = std::string("unhandled method: ") + method;
 			}
 		} else {
-			_h = d.dump();
+			_h = d.dump(1, " ");
 		}
 		if (_h != "handled") {
 			error_list.push_back(_h);

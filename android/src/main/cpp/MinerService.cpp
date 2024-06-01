@@ -95,16 +95,15 @@ private:
 	hex_array difficulty_;
 	double difficulty;
 	hex_array xnonce1;
-	std::string xnonce2_size;
+	std::string xnonce2_size = "not set";
 	std::string version = "not set";
 	mining_notify_data mnd;
 public:
-  std::vector<std::string> error_list;
+  std::vector<std::string> json_list_a;
 	bool subscribed = false;
 	bool authorized = false;
 	
 	void updateData(json::JSON d) {
-		std::string _h = "handled";
 		//throw error
 		if (d.hasKey("error") && !d["error"].IsNull())
 			_h = (std::string)d["error"];
@@ -189,18 +188,9 @@ public:
 		} else {
 			_h = d.dump(1, " ");
 		}
+		
 		if (_h != "handled") {
-			error_list.push_back(_h);
-		/*
-			JNIEnv *env;
-	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4,
-					env->NewStringUTF("Json Parser or Data Error"),
-					env->NewStringUTF(_h.c_str())
-				);
-	      global_jvm->DetachCurrentThread ();
-	    }
-		*/
+			json_list_a.push_back(_h);
 		}
 	}
 	
@@ -394,14 +384,14 @@ void *startConnect (void *p) {
 		  _data_out += "\nMining out:\n";
 			_data_out += mdh.getMiningData();
 			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data Out"), env->NewStringUTF(_data_out.c_str()));
-			if (!mdh.error_list.empty()) {
+			if (!mdh.json_list_a.empty()) {
 				std::string error_parser_list;
-				for (std::string erl : mdh.error_list) {
+				for (std::string erl : mdh.json_list_a) {
 					error_parser_list += erl;
 					error_parser_list += "\n";
 				}
 				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Parsing Error"), env->NewStringUTF(error_parser_list.c_str()));
-	  		mdh.error_list.clear();
+	  		mdh.json_list_a.clear();
 			}
 		  global_jvm->DetachCurrentThread ();
 	  }

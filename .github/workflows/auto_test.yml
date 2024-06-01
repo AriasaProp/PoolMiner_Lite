@@ -38,19 +38,11 @@ jobs:
         if: steps.changes.outputs.ifcore == 'true'
         run: gradle :core:check
 
-      - name: Commit changes File
-        run: |
-          gradle spotlessApply
-          gradle spotlessCheck
-          git config --global user.email "ikomangwidiadaariasa12@gmail.com"
-          git config --global user.name "AriasaProp"
-          git add .
-          git commit -m "changes of formating"
-
-      - name: Publish in github
-        uses: ad-m/github-push-action@master
+      - name: Format Java Code
+        uses: axel-op/googlejavaformat-action@v3.6.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: "android/src/**/*.java"
+          args: "-r -a"
 
       - name: Android Build
         if: steps.changes.outputs.ifandroid == 'true'

@@ -177,7 +177,6 @@ struct JSON {
 
   /// Functions for getting primitives from the JSON object.
   bool IsNull () const { return Type == Class::Null; }
-
   operator std::string() const;
   operator double () const;
   operator float () const;
@@ -210,7 +209,6 @@ struct JSON {
   }
 
   std::string dump (int, std::string) const;
-  std::string dump () const;
 
   void SetType (Class type) {
     if (type == Type) return;

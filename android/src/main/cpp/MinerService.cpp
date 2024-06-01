@@ -95,10 +95,11 @@ private:
 	hex_array difficulty_;
 	double difficulty;
 	hex_array xnonce1;
-	size_t xnonce2_size;
+	std::string xnonce2_size;
 	std::string version = "not set";
 	mining_notify_data mnd;
 public:
+  std::vector<std::string> error_list;
 	bool subscribed = false;
 	bool authorized = false;
 	
@@ -142,7 +143,7 @@ public:
 					// xnonce1
 					xnonce1 = convert::hexString_toBiner(res[1]);
 					//xnonce2 size
-					xnonce2_size = (int)res[2];
+					xnonce2_size = res[2];
 					subscribed = true;
 				} break;
 				case 2: {
@@ -180,8 +181,7 @@ public:
 		    mnd.nbit = convert::hexString_toBiner(params[6]);
 		    mnd.ntime = convert::hexString_toBiner(params[7]);
 		    mnd.clean = params[8];
-			} else if (method == "client.get_version") {
-	      if (!d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) throw std::runtime_error("invalid version");
+			} else if ((method == "client.get_version") && d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) {
 	      version = (std::string)d["jsonrpc"];
 			} else {
 				_h = std::string("unhandled method: ") + method;
@@ -190,6 +190,8 @@ public:
 			_h = d.dump();
 		}
 		if (_h != "handled") {
+			error_list.push_back(_h);
+		/*
 			JNIEnv *env;
 	    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 				env->CallVoidMethod (local_globalRef, sendMessageConsole, 4,
@@ -198,6 +200,7 @@ public:
 				);
 	      global_jvm->DetachCurrentThread ();
 	    }
+		*/
 		}
 	}
 	
@@ -267,8 +270,8 @@ void *startConnect (void *p) {
   pthread_mutex_unlock (&_mtx);
   
   connectData *dat = (connectData *)p;
+	mine_data_holder mdh;
   try {
-  	mine_data_holder mdh;
     // check inputs parameter for mining
     
     //try make an connection
@@ -361,14 +364,6 @@ void *startConnect (void *p) {
 						msgRcv.erase(0, pos+1);
 						if(rcv.IsNull()) continue;
 						mdh.updateData(rcv);
-						std::string _pmdata = mdh.getPreMiningData();
-						std::string _mdata = mdh.getMiningData();
-				    JNIEnv *env;
-					  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-							env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Pre-Mining Data"), env->NewStringUTF(_pmdata.c_str()));
-							env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data"), env->NewStringUTF(_mdata.c_str()));
-						  global_jvm->DetachCurrentThread ();
-					  }
 					}
 	      }
 	      
@@ -391,12 +386,26 @@ void *startConnect (void *p) {
   delete dat;
   //set state mining to none
   {
-	  JNIEnv *env;
+	  std::string _pmdata = mdh.getPreMiningData();
+		std::string _mdata = mdh.getMiningData();
+    JNIEnv *env;
 	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-	    global_jvm->DetachCurrentThread ();
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Pre-Mining Data"), env->NewStringUTF(_pmdata.c_str()));
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data"), env->NewStringUTF(_mdata.c_str()));
+			if (!mdh.error_list.empty()) {
+				std::string error_parser_list;
+				for (std::string erl : mdh.error_list) {
+					error_parser_list += erl;
+					error_parser_list += "\n";
+				}
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Parsing Error"), env->NewStringUTF(error_parser_list.c_str()));
+	  		mdh.error_list.clear();
+			}
+		  global_jvm->DetachCurrentThread ();
 	  }
   }
+  
   pthread_mutex_lock (&_mtx);
   --active_worker;
   pthread_cond_broadcast (&_cond);

@@ -1,6 +1,6 @@
 #include "json.hpp"
 
-//define struct
+//define constructor
 json::JSON::JSON (): Internal (), Type (json::JSON::Class::Null) {}
 json::JSON::JSON (json::JSON::Class type): Internal () {
   SetType (type);
@@ -142,9 +142,6 @@ std::string json::JSON::dump (int depth, std::string tab) const {
     return "";
   }
   return "";
-}
-std::string json::JSON::dump () const {
-	return dump (1, "  ");
 }
 
 //extras

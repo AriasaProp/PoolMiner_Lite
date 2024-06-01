@@ -6,6 +6,10 @@ on:
       - 'core/**'
       - 'android/**'
 
+permissions:
+  actions: write
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -33,9 +37,25 @@ jobs:
       - name: Core Check
         if: steps.changes.outputs.ifcore == 'true'
         run: gradle :core:check
+
+      - name: Commit changes File
+        run: |
+          gradle spotlessApply
+          gradle spotlessCheck
+          git config --global user.email "ikomangwidiadaariasa12@gmail.com"
+          git config --global user.name "AriasaProp"
+          git add .
+          git commit -m "changes of formating"
+
+      - name: Publish in github
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Android Build
         if: steps.changes.outputs.ifandroid == 'true'
         run: gradle :android:build -Prelease
+
       - name: Upload Android
         if: steps.changes.outputs.ifandroid == 'true'
         uses: actions/upload-artifact@v4.3.3

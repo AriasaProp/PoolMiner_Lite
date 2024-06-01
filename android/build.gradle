@@ -1,4 +1,7 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'com.diffplug.spotless'
+}
 
 android {
     signingConfigs {
@@ -42,6 +45,13 @@ android {
         }
     }
 }
+
+spotless {
+    java {
+        googleJavaFormat()
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.5.1', {

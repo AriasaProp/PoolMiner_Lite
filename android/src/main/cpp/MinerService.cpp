@@ -386,13 +386,14 @@ void *startConnect (void *p) {
   delete dat;
   //set state mining to none
   {
-	  std::string _pmdata = mdh.getPreMiningData();
-		std::string _mdata = mdh.getMiningData();
     JNIEnv *env;
 	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Pre-Mining Data"), env->NewStringUTF(_pmdata.c_str()));
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data"), env->NewStringUTF(_mdata.c_str()));
+		  std::string _data_out = "Pre-Mining out:\n";
+		  _data_out += mdh.getPreMiningData();
+		  _data_out += "\nMining out:\n";
+			_data_out += mdh.getMiningData();
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data Out"), env->NewStringUTF(_data_out.c_str()));
 			if (!mdh.error_list.empty()) {
 				std::string error_parser_list;
 				for (std::string erl : mdh.error_list) {

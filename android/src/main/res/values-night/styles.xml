@@ -12,7 +12,7 @@
     	
     </style>
     
-    <style name="BaseTheme.Toolbar.Title" parent="ThemeOverlay.AppCompat.ActionBar.Title" >
+    <style name="BaseTheme.Toolbar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title" >
     	
     </style>
 

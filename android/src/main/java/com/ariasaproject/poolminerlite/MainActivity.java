@@ -1,11 +1,5 @@
 package com.ariasaproject.poolminerlite;
 
-import com.ariasaproject.poolminerlite.fragments.MinerFragment;
-import com.ariasaproject.poolminerlite.fragments.NewsFragment;
-import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
-
-import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -16,29 +10,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.SeekBar;
-
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.AppCompatCheckBox;
-import androidx.appcompat.widget.AppCompatEditText;
-import androidx.appcompat.widget.AppCompatSeekBar;
-import androidx.appcompat.widget.AppCompatTextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.Adapter;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+
+import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
+import com.ariasaproject.poolminerlite.fragments.MinerFragment;
+import com.ariasaproject.poolminerlite.fragments.NewsFragment;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection {
     static {
@@ -52,45 +34,51 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar)findViewById(R.id.toolbar));
-        //tabs and viewpager
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        // tabs and viewpager
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         ViewPager2 viewPager = findViewById(R.id.viewPager);
-        
-        viewPager.setAdapter(pagerAdapter = new FragmentStateAdapter (this) {
-				
-				    @NonNull
-				    @Override
-				    public Fragment createFragment(int position) {
-				        switch (position) {
-				            case 0:
-				                return new NewsFragment();
-				            default:
-				            case 1:
-				                return new MinerFragment();
-				            case 2:
-				                return new ConfigFragment();
-				        }
-				    }
-				
-				    @Override
-				    public int getItemCount() {
-				        return 3;
-				    }
-				});
-				new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
-            @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                switch (position) {
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        break;
-                }
-            }
-        }).attach();
+
+        viewPager.setAdapter(
+                pagerAdapter =
+                        new FragmentStateAdapter(this) {
+
+                            @NonNull
+                            @Override
+                            public Fragment createFragment(int position) {
+                                switch (position) {
+                                    case 0:
+                                        return new NewsFragment();
+                                    default:
+                                    case 1:
+                                        return new MinerFragment();
+                                    case 2:
+                                        return new ConfigFragment();
+                                }
+                            }
+
+                            @Override
+                            public int getItemCount() {
+                                return 3;
+                            }
+                        });
+        new TabLayoutMediator(
+                        tabLayout,
+                        viewPager,
+                        new TabLayoutMediator.TabConfigurationStrategy() {
+                            @Override
+                            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                                switch (position) {
+                                    case 0:
+                                        break;
+                                    case 1:
+                                        break;
+                                    case 2:
+                                        break;
+                                }
+                            }
+                        })
+                .attach();
         // check feature
         checkBatteryOptimizations();
         bindService(new Intent(this, MinerService.class), this, Context.BIND_AUTO_CREATE);
@@ -118,16 +106,35 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Failed start", "Mining Service failed to start because an reason.");
+                        logList.add(
+                                1,
+                                "Failed start",
+                                "Mining Service failed to start because an reason.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1, "Skipped State", "This state was jumped from running to none state, for now is imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "This state was jumped from running to none state, for now is"
+                                    + " imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
                         logList.add(1, "Service Stopped", "Service mining successful to stop!");
@@ -146,13 +153,23 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Starting", "Waiting for connecting, subscribing, authorizing and get the first job.");
+                        logList.add(
+                                1,
+                                "Starting",
+                                "Waiting for connecting, subscribing, authorizing and get the first"
+                                    + " job.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1, "Skipped State", "Jumped from running to onStart, that imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from running to onStart, that imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1, "Skipped State", "Jumped from onStop to onStart, that imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from onStop to onStart, that imposible!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -170,13 +187,19 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1,"Skipped State", "Jumped from none to running, is imposible from now!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from none to running, is imposible from now!");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Started","Service mining successful to start!");
+                        logList.add(1, "Started", "Service mining successful to start!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1, "Skipped Statel", "Jumped from onStop to running, is imposible from now!");
+                        logList.add(
+                                1,
+                                "Skipped Statel",
+                                "Jumped from onStop to running, is imposible from now!");
                         break;
                 }
                 accepted_result = rejected_result = 0;
@@ -194,10 +217,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Skipped State", "Jumped from none to onStop, is imposible from now");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from none to onStop, is imposible from now");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Skipped State", "Jumped from onStart to onStop state, for now is imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from onStart to onStop state, for now is imposible!");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(1, "Stopping", "Service mining try to stop!");

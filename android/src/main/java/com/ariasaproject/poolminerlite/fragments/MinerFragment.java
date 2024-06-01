@@ -1,18 +1,10 @@
 package com.ariasaproject.poolminerlite.fragments;
 
-import com.ariasaproject.poolminerlite.ConsoleItem;
-
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.PowerManager;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +20,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
+
+import com.ariasaproject.poolminerlite.ConsoleItem;
 
 public class MinerFragment extends Fragment {
     private final StringBuilder sb = new StringBuilder();
@@ -47,7 +41,10 @@ public class MinerFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         ViewGroup root = inflater.inflate(R.layout.fragment_miner, container, false);
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
@@ -117,69 +114,70 @@ public class MinerFragment extends Fragment {
         // log Adapter
         final RecyclerView cv = (RecyclerView) findViewById(R.id.console_view);
         cv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        adpt = new Adapter<ConsoleItemHolder>() {
-            final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+        adpt =
+                new Adapter<ConsoleItemHolder>() {
+                    final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
 
-            @Override
-            public ConsoleItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View itemView = inflater.inflate(R.layout.console_item, parent, false);
-                return new ConsoleItemHolder(itemView);
-            }
+                    @Override
+                    public ConsoleItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                        View itemView = inflater.inflate(R.layout.console_item, parent, false);
+                        return new ConsoleItemHolder(itemView);
+                    }
 
-            @Override
-            public void onBindViewHolder(ConsoleItemHolder h, int p) {
-                final ConsoleItem ci = logList.get(p);
-		            if (ci == null) {
-		                h.root.setVisibility(View.GONE);
-		            } else {
-		                h.root.setVisibility(View.VISIBLE);
-		                int id;
-		                switch (ci.color) {
-		                    default:
-		                    case 0:
-		                        id = R.color.console_text_debug;
-		                        break;
-		                    case 1:
-		                        id = R.color.console_text_info;
-		                        break;
-		                    case 2:
-		                        id = R.color.console_text_success;
-		                        break;
-		                    case 3:
-		                        id = R.color.console_text_warning;
-		                        break;
-		                    case 4:
-		                        id = R.color.console_text_error;
-		                        break;
-		                }
-		                h.time.setTextColor(getResources().getColor(id));
-		                h.msg.setTextColor(getResources().getColor(id));
-		                h.desc.setTextColor(getResources().getColor(id));
-		                h.time.setText(ci.time);
-		                h.msg.setText(ci.msg);
-		                h.desc.setText(ci.desc);
-				            h.desc.setVisibility(View.GONE);
-		                h.root.setOnClickListener(new View.OnClickListener() {
-										    @Override
-										    public void onClick(View v) {
-										        if (h.desc.getVisibility() == View.VISIBLE) {
-										            h.desc.setVisibility(View.GONE);
-										        } else {
-										            h.desc.setVisibility(View.VISIBLE);
-										        }
-										    }
-										});
-		            }
-                
-            }
+                    @Override
+                    public void onBindViewHolder(ConsoleItemHolder h, int p) {
+                        final ConsoleItem ci = logList.get(p);
+                        if (ci == null) {
+                            h.root.setVisibility(View.GONE);
+                        } else {
+                            h.root.setVisibility(View.VISIBLE);
+                            int id;
+                            switch (ci.color) {
+                                default:
+                                case 0:
+                                    id = R.color.console_text_debug;
+                                    break;
+                                case 1:
+                                    id = R.color.console_text_info;
+                                    break;
+                                case 2:
+                                    id = R.color.console_text_success;
+                                    break;
+                                case 3:
+                                    id = R.color.console_text_warning;
+                                    break;
+                                case 4:
+                                    id = R.color.console_text_error;
+                                    break;
+                            }
+                            h.time.setTextColor(getResources().getColor(id));
+                            h.msg.setTextColor(getResources().getColor(id));
+                            h.desc.setTextColor(getResources().getColor(id));
+                            h.time.setText(ci.time);
+                            h.msg.setText(ci.msg);
+                            h.desc.setText(ci.desc);
+                            h.desc.setVisibility(View.GONE);
+                            h.root.setOnClickListener(
+                                    new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            if (h.desc.getVisibility() == View.VISIBLE) {
+                                                h.desc.setVisibility(View.GONE);
+                                            } else {
+                                                h.desc.setVisibility(View.VISIBLE);
+                                            }
+                                        }
+                                    });
+                        }
+                    }
 
-            @Override
-            public int getItemCount() {
-                return ConsoleItem.Lists.SIZE;
-            }
-        };
+                    @Override
+                    public int getItemCount() {
+                        return ConsoleItem.Lists.SIZE;
+                    }
+                };
         cv.setAdapter(adpt);
-        
+
         return root;
     }
 
@@ -227,8 +225,7 @@ public class MinerFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
     }
-    
-    
+
     ViewGroup input_container, status_container;
     AppCompatTextView tv_s, tv_ra, tv_rr, tv_info;
     AppCompatTextView tv_showInput;
@@ -236,8 +233,7 @@ public class MinerFragment extends Fragment {
     AppCompatButton btn_startmine, btn_stopmine;
     AppCompatSeekBar sb_cpu;
     AppCompatCheckBox cb_screen_awake;
-    
-    
+
     private class ConsoleItemHolder extends RecyclerView.ViewHolder {
         public ConstraintLayout root;
         public AppCompatTextView time;
@@ -251,8 +247,5 @@ public class MinerFragment extends Fragment {
             msg = itemView.findViewById(R.id.text2);
             desc = itemView.findViewById(R.id.text3);
         }
-
     }
-
 }
-

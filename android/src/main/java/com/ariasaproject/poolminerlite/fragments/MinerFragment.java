@@ -28,7 +28,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     private ConsoleItem.Lists logList;
     private int accepted_result, rejected_result;
     Adapter adpt;
-    
+
     MinerService.LocalBinder dataService = null;
 
     @Override
@@ -40,7 +40,6 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         bindService(new Intent(this, MinerService.class), this, Context.BIND_AUTO_CREATE);
-        
     }
 
     @Nullable
@@ -51,44 +50,47 @@ public class MinerFragment extends Fragment implements ServiceConnection {
             @Nullable Bundle savedInstanceState) {
         ViewGroup root = inflater.inflate(R.layout.fragment_miner, container, false);
         // define button click listener
-        AppCompatButton button_startmine = (AppCompatButton) root.findViewById(R.id.button_startmine);
-        button_startmine.setOnClickListener(v -> {
-		        updateState(MINE_STATE_ONSTART);
-		        String[] dats = new String[4];
-		        dats[0] = sb.append(et_serv.getText()).toString();
-		        sb.setLength(0);
-		        dats[1] = sb.append(et_user.getText()).toString();
-		        sb.setLength(0);
-		        dats[2] = sb.append(et_pass.getText()).toString();
-		        sb.setLength(0);
-		        dats[3] = "";
-		
-		        int[] dati = new int[4];
-		        dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
-		        sb.setLength(0);
-		        dati[1] = sb_cpu.getProgress();
-		        dati[2] = 0;
-		        dati[3] = 0;
-		
-		        tv_showInput.setText(
-		                String.format(
-		                        "server = %s:%d \nauth = %s:%s\nuse %d threads",
-		                        dats[0], dati[0], dats[1], dats[2], dati[1]));
-		        SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
-		        editor.putString(PREF_URL, dats[0]);
-		        editor.putString(PREF_USER, dats[1]);
-		        editor.putString(PREF_PASS, dats[2]);
-		        editor.putInt(PREF_PORT, dati[0]);
-		        editor.putInt(PREF_CPU_USAGE, dati[1]);
-		        editor.commit();
-		
-		        dataService.StartMine(dats, dati);
-		    });
+        AppCompatButton button_startmine =
+                (AppCompatButton) root.findViewById(R.id.button_startmine);
+        button_startmine.setOnClickListener(
+                v -> {
+                    updateState(MINE_STATE_ONSTART);
+                    String[] dats = new String[4];
+                    dats[0] = sb.append(et_serv.getText()).toString();
+                    sb.setLength(0);
+                    dats[1] = sb.append(et_user.getText()).toString();
+                    sb.setLength(0);
+                    dats[2] = sb.append(et_pass.getText()).toString();
+                    sb.setLength(0);
+                    dats[3] = "";
+
+                    int[] dati = new int[4];
+                    dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
+                    sb.setLength(0);
+                    dati[1] = sb_cpu.getProgress();
+                    dati[2] = 0;
+                    dati[3] = 0;
+
+                    tv_showInput.setText(
+                            String.format(
+                                    "server = %s:%d \nauth = %s:%s\nuse %d threads",
+                                    dats[0], dati[0], dats[1], dats[2], dati[1]));
+                    SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
+                    editor.putString(PREF_URL, dats[0]);
+                    editor.putString(PREF_USER, dats[1]);
+                    editor.putString(PREF_PASS, dats[2]);
+                    editor.putInt(PREF_PORT, dati[0]);
+                    editor.putInt(PREF_CPU_USAGE, dati[1]);
+                    editor.commit();
+
+                    dataService.StartMine(dats, dati);
+                });
         AppCompatButton button_stopmine = (AppCompatButton) root.findViewById(R.id.button_stopmine);
-        button_stopmine.setOnClickListener(v -> {
-		        updateState(MINE_STATE_ONSTOP);
-		        dataService.StopMine();
-        });
+        button_stopmine.setOnClickListener(
+                v -> {
+                    updateState(MINE_STATE_ONSTOP);
+                    dataService.StopMine();
+                });
         // define section layout
         input_container = (ViewGroup) root.findViewById(R.id.input_container);
         status_container = (ViewGroup) root.findViewById(R.id.status_container);
@@ -123,7 +125,8 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     public void onStopTrackingTouch(SeekBar seekBar) {}
                 });
         // checkbox
-        cb_screen_awake = (AppCompatCheckBox) root.findViewById(R.id.settings_checkBox_keepscreenawake);
+        cb_screen_awake =
+                (AppCompatCheckBox) root.findViewById(R.id.settings_checkBox_keepscreenawake);
         sb_cpu.setProgress(1); // main
         if (savedInstanceState != null) {
             logList = savedInstanceState.getParcelable(KEYBUNDLE_CONSOLE);
@@ -260,7 +263,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                                 1,
                                 "Skipped State",
                                 "This state was jumped from running to none state, for now is"
-                                    + " imposible!");
+                                        + " imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
                         logList.add(1, "Service Stopped", "Service mining successful to stop!");
@@ -283,7 +286,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                                 1,
                                 "Starting",
                                 "Waiting for connecting, subscribing, authorizing and get the first"
-                                    + " job.");
+                                        + " job.");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(
@@ -382,9 +385,9 @@ public class MinerFragment extends Fragment implements ServiceConnection {
         dataService.StopMine();
         dataService = null;
     }
-    
-		@Override
-		public void onSaveInstanceState(@NonNull Bundle outState) {
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(KEYBUNDLE_CONSOLE, logList);
         CharSequence[] texts = new CharSequence[8];
@@ -504,8 +507,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
             desc = itemView.findViewById(R.id.text3);
         }
     }
-    
-    
+
     // key bundles in temporary safe
     private static final String KEYBUNDLE_CONSOLE = "bundle_console";
     private static final String KEYBUNDLE_TEXTS = "bundle_texts";

@@ -58,9 +58,9 @@ public class MainActivity extends AppCompatActivity {
 	          public int getItemCount() {
 	              return 3;
 	          }
-        }
+        };
         viewPager.setAdapter(pagerAdapter);
-        new TabLayoutMediator(tabLayout, viewPager,(tab, pos) -> {
+        new TabLayoutMediator(tabLayout, viewPager, (tab, pos) -> {
                 switch (pos) {
                     case 0:
                         break;

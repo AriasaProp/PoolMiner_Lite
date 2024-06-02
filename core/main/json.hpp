@@ -72,8 +72,8 @@ struct JSON {
   JSON (Class);
   JSON (JSON &&other);
   JSON (const JSON &other);
-  
-  JSON &operator=(JSON &&);
+
+  JSON &operator= (JSON &&);
   JSON &operator= (const JSON &);
 
   template <typename T>
@@ -177,7 +177,7 @@ struct JSON {
 
   /// Functions for getting primitives from the JSON object.
   bool IsNull () const { return Type == Class::Null; }
-  operator std::string() const;
+  operator std::string () const;
   operator double () const;
   operator float () const;
   operator long () const;

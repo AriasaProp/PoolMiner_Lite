@@ -18,7 +18,7 @@ typedef signed int int32_t;
 #include <cstdint>
 #endif
 
-//32bit hex
+// 32bit hex
 typedef uint32_t hex_base;
 typedef std::vector<hex_base> hex_array;
 
@@ -27,6 +27,5 @@ hex_array hexString_toBiner (const char *);
 hex_array hexString_toBiner (const std::string);
 std::string hexBiner_toString (const hex_array);
 } // namespace convert
-
 
 #endif //_UTIL_INCLUDE_

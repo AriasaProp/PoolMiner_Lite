@@ -61,15 +61,14 @@ public class MainActivity extends AppCompatActivity {
         };
         viewPager.setAdapter(pagerAdapter);
         new TabLayoutMediator(tabLayout, viewPager, (tab, pos) -> {
-                switch (pos) {
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        break;
-                }
-            }
+          switch (pos) {
+              case 0:
+                  break;
+              case 1:
+                  break;
+              case 2:
+                  break;
+          }
         }).attach();
         // check feature
         checkBatteryOptimizations();

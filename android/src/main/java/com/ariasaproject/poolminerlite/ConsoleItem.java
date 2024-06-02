@@ -16,6 +16,7 @@ public class ConsoleItem {
     public ConsoleItem(int c, String m, String dsc) {
         this(c, logDateFormat.format(new Date()), m, dsc);
     }
+
     protected ConsoleItem(int c, String d, String m, String dsc) {
         time = d;
         msg = m;
@@ -39,8 +40,7 @@ public class ConsoleItem {
                                 Integer.parseInt(strings[i * 4]),
                                 strings[i * 4 + 1],
                                 strings[i * 4 + 2],
-                                strings[i * 4 + 3]
-                        );
+                                strings[i * 4 + 3]);
             }
         }
 

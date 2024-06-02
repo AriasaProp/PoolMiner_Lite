@@ -19,12 +19,12 @@ import android.view.Window;
 import android.widget.SeekBar;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar)findViewById(R.id.toolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // define section layout
         input_container = (ViewGroup) findViewById(R.id.input_container);
         status_container = (ViewGroup) findViewById(R.id.status_container);
@@ -114,67 +114,68 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         // log Adapter
         final RecyclerView cv = (RecyclerView) findViewById(R.id.console_view);
         cv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        adpt = new Adapter<ConsoleItemHolder>() {
-            final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+        adpt =
+                new Adapter<ConsoleItemHolder>() {
+                    final LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
 
-            @Override
-            public ConsoleItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View itemView = inflater.inflate(R.layout.console_item, parent, false);
-                return new ConsoleItemHolder(itemView);
-            }
+                    @Override
+                    public ConsoleItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                        View itemView = inflater.inflate(R.layout.console_item, parent, false);
+                        return new ConsoleItemHolder(itemView);
+                    }
 
-            @Override
-            public void onBindViewHolder(ConsoleItemHolder h, int p) {
-                final ConsoleItem ci = logList.get(p);
-		            if (ci == null) {
-		                h.root.setVisibility(View.GONE);
-		            } else {
-		                h.root.setVisibility(View.VISIBLE);
-		                int id;
-		                switch (ci.color) {
-		                    default:
-		                    case 0:
-		                        id = R.color.console_text_debug;
-		                        break;
-		                    case 1:
-		                        id = R.color.console_text_info;
-		                        break;
-		                    case 2:
-		                        id = R.color.console_text_success;
-		                        break;
-		                    case 3:
-		                        id = R.color.console_text_warning;
-		                        break;
-		                    case 4:
-		                        id = R.color.console_text_error;
-		                        break;
-		                }
-		                h.time.setTextColor(getResources().getColor(id));
-		                h.msg.setTextColor(getResources().getColor(id));
-		                h.desc.setTextColor(getResources().getColor(id));
-		                h.time.setText(ci.time);
-		                h.msg.setText(ci.msg);
-		                h.desc.setText(ci.desc);
-				            h.desc.setVisibility(View.GONE);
-		                h.root.setOnClickListener(new View.OnClickListener() {
-										    @Override
-										    public void onClick(View v) {
-										        if (h.desc.getVisibility() == View.VISIBLE) {
-										            h.desc.setVisibility(View.GONE);
-										        } else {
-										            h.desc.setVisibility(View.VISIBLE);
-										        }
-										    }
-										});
-		            }
-                
-            }
+                    @Override
+                    public void onBindViewHolder(ConsoleItemHolder h, int p) {
+                        final ConsoleItem ci = logList.get(p);
+                        if (ci == null) {
+                            h.root.setVisibility(View.GONE);
+                        } else {
+                            h.root.setVisibility(View.VISIBLE);
+                            int id;
+                            switch (ci.color) {
+                                default:
+                                case 0:
+                                    id = R.color.console_text_debug;
+                                    break;
+                                case 1:
+                                    id = R.color.console_text_info;
+                                    break;
+                                case 2:
+                                    id = R.color.console_text_success;
+                                    break;
+                                case 3:
+                                    id = R.color.console_text_warning;
+                                    break;
+                                case 4:
+                                    id = R.color.console_text_error;
+                                    break;
+                            }
+                            h.time.setTextColor(getResources().getColor(id));
+                            h.msg.setTextColor(getResources().getColor(id));
+                            h.desc.setTextColor(getResources().getColor(id));
+                            h.time.setText(ci.time);
+                            h.msg.setText(ci.msg);
+                            h.desc.setText(ci.desc);
+                            h.desc.setVisibility(View.GONE);
+                            h.root.setOnClickListener(
+                                    new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            if (h.desc.getVisibility() == View.VISIBLE) {
+                                                h.desc.setVisibility(View.GONE);
+                                            } else {
+                                                h.desc.setVisibility(View.VISIBLE);
+                                            }
+                                        }
+                                    });
+                        }
+                    }
 
-            @Override
-            public int getItemCount() {
-                return ConsoleItem.Lists.SIZE;
-            }
-        };
+                    @Override
+                    public int getItemCount() {
+                        return ConsoleItem.Lists.SIZE;
+                    }
+                };
         cv.setAdapter(adpt);
         // check feature
         checkBatteryOptimizations();
@@ -203,16 +204,35 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
-                        logList.add(1, "Wellcome User!", "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!",
+                                "This is the first log message that youp should receive.");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Failed start", "Mining Service failed to start because an reason.");
+                        logList.add(
+                                1,
+                                "Failed start",
+                                "Mining Service failed to start because an reason.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1, "Skipped State", "This state was jumped from running to none state, for now is imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "This state was jumped from running to none state, for now is"
+                                    + " imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
                         logList.add(1, "Service Stopped", "Service mining successful to stop!");
@@ -231,13 +251,23 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Starting", "Waiting for connecting, subscribing, authorizing and get the first job.");
+                        logList.add(
+                                1,
+                                "Starting",
+                                "Waiting for connecting, subscribing, authorizing and get the first"
+                                    + " job.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1, "Skipped State", "Jumped from running to onStart, that imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from running to onStart, that imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1, "Skipped State", "Jumped from onStop to onStart, that imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from onStop to onStart, that imposible!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -255,13 +285,19 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1,"Skipped State", "Jumped from none to running, is imposible from now!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from none to running, is imposible from now!");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Started","Service mining successful to start!");
+                        logList.add(1, "Started", "Service mining successful to start!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1, "Skipped Statel", "Jumped from onStop to running, is imposible from now!");
+                        logList.add(
+                                1,
+                                "Skipped Statel",
+                                "Jumped from onStop to running, is imposible from now!");
                         break;
                 }
                 accepted_result = rejected_result = 0;
@@ -279,10 +315,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1, "Skipped State", "Jumped from none to onStop, is imposible from now");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from none to onStop, is imposible from now");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1, "Skipped State", "Jumped from onStart to onStop state, for now is imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State",
+                                "Jumped from onStart to onStop state, for now is imposible!");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(1, "Stopping", "Service mining try to stop!");
@@ -475,7 +517,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             msg = itemView.findViewById(R.id.text2);
             desc = itemView.findViewById(R.id.text3);
         }
-
     }
 
     ViewGroup input_container, status_container;

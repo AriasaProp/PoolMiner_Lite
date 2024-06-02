@@ -27,4 +27,4 @@ jobs:
         uses: axel-op/googlejavaformat-action@v3.6.0
         with:
           files: "android/src/**/*.java"
-          args: "-r -a"
+          args: "-r -a --fix-imports-only"

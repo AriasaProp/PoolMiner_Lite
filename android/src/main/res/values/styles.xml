@@ -12,7 +12,7 @@
         <item name="windowNoTitle">true</item>
     </style>
     
-    <style name="BaseTheme.Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <style name="BaseTheme.Toolbar" parent="Theme.AppCompat.Dark.ActionBar">
     		
     </style>
     <style name="AppTheme.Toolbar" parent="BaseTheme.Toolbar">

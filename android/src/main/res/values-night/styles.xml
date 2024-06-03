@@ -8,7 +8,7 @@
     </style>
     
     
-    <style name="BaseTheme.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar" >
+    <style name="BaseTheme.Toolbar" parent="Theme.AppCompat.ActionBar" >
     	
     </style>
 

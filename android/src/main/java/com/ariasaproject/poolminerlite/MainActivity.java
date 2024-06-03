@@ -12,7 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
+<<<<<<< HEAD
+=======
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.android.material.tabs.TabLayout;
+
+>>>>>>> 67d1a85 (fixing in 03/06/2024)
 import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
 import com.ariasaproject.poolminerlite.fragments.MinerFragment;
 import com.ariasaproject.poolminerlite.fragments.NewsFragment;

@@ -175,7 +175,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 });
         // log Adapter
         final RecyclerView cv = (RecyclerView) root.findViewById(R.id.console_view);
-        cv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        cv.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         adpt =
                 new Adapter<ConsoleItemHolder>() {
                     final LayoutInflater inflater = LayoutInflater.from(getActivity());

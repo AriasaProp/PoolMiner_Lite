@@ -8,7 +8,7 @@
     </style>
     
     
-    <style name="BaseTheme.Toolbar" parent="Widget.AppCompat.DayNight.ActionBar" >
+    <style name="BaseTheme.Toolbar" parent="Widget.AppCompat.ActionBar" >
     	
     </style>
 

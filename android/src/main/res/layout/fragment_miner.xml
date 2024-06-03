@@ -222,25 +222,6 @@
             android:paddingRight="5dp"
             android:text=" Rejected" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:id="@+id/information_label"
-            app:layout_constraintTop_toBottomOf="@id/result_label"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Information:" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:id="@+id/extra_tv"
-            app:layout_constraintTop_toBottomOf="@id/result_label"
-            app:layout_constraintStart_toEndOf="@id/information_label"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No Information" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatCheckBox

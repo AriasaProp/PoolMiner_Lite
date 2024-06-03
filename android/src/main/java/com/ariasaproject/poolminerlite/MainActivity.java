@@ -1,11 +1,16 @@
 package com.ariasaproject.poolminerlite;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,16 +19,12 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-<<<<<<< HEAD
-=======
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.tabs.TabLayout;
 
->>>>>>> 67d1a85 (fixing in 03/06/2024)
 import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
 import com.ariasaproject.poolminerlite.fragments.MinerFragment;
 import com.ariasaproject.poolminerlite.fragments.NewsFragment;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 public class MainActivity extends AppCompatActivity {
     static {
@@ -41,43 +42,38 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         ViewPager2 viewPager = findViewById(R.id.viewPager);
 
-        pagerAdapter =
-                new FragmentStateAdapter(this) {
-
-                    @NonNull
-                    @Override
-                    public Fragment createFragment(int position) {
-                        switch (position) {
-                            case 0:
-                                return new NewsFragment();
-                            default:
-                            case 1:
-                                return new MinerFragment();
-                            case 2:
-                                return new ConfigFragment();
-                        }
-                    }
-
-                    @Override
-                    public int getItemCount() {
-                        return 3;
-                    }
-                };
+        pagerAdapter = new FragmentStateAdapter(this) {
+	
+	          @NonNull
+	          @Override
+	          public Fragment createFragment(int position) {
+	              switch (position) {
+	                  case 0:
+	                      return new NewsFragment();
+	                  default:
+	                  case 1:
+	                      return new MinerFragment();
+	                  case 2:
+	                      return new ConfigFragment();
+	              }
+	          }
+	
+	          @Override
+	          public int getItemCount() {
+	              return 3;
+	          }
+        };
         viewPager.setAdapter(pagerAdapter);
-        new TabLayoutMediator(
-                        tabLayout,
-                        viewPager,
-                        (tab, pos) -> {
-                            switch (pos) {
-                                case 0:
-                                    break;
-                                case 1:
-                                    break;
-                                case 2:
-                                    break;
-                            }
-                        })
-                .attach();
+        new TabLayoutMediator(tabLayout, viewPager, (tab, pos) -> {
+          switch (pos) {
+              case 0:
+                  break;
+              case 1:
+                  break;
+              case 2:
+                  break;
+          }
+        }).attach();
         // check feature
         checkBatteryOptimizations();
     }

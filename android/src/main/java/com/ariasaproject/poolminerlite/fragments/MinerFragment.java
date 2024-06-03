@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.ariasaproject.poolminerlite.ConsoleItem;
 import com.ariasaproject.poolminerlite.MainApplication;

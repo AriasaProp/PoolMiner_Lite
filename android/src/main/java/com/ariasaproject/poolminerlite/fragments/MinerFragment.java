@@ -27,8 +27,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ariasaproject.poolminerlite.MainApplication;
 import com.ariasaproject.poolminerlite.ConsoleItem;
+import com.ariasaproject.poolminerlite.MainApplication;
 import com.ariasaproject.poolminerlite.MinerService;
 import com.ariasaproject.poolminerlite.MinerViewModel;
 import com.ariasaproject.poolminerlite.R;
@@ -60,39 +60,42 @@ public class MinerFragment extends Fragment implements ServiceConnection {
             @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_miner, container, false);
         // define button click listener
-        AppCompatButton button_startmine = (AppCompatButton) root.findViewById(R.id.button_startmine);
-        button_startmine.setOnClickListener(v -> {
-		        updateState(MINE_STATE_ONSTART);
-		        String[] dats = new String[4];
-		        dats[0] = sb.append(et_serv.getText()).toString();
-		        sb.setLength(0);
-		        dats[1] = sb.append(et_user.getText()).toString();
-		        sb.setLength(0);
-		        dats[2] = sb.append(et_pass.getText()).toString();
-		        sb.setLength(0);
-		        dats[3] = "";
-		
-		        int[] dati = new int[4];
-		        dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
-		        sb.setLength(0);
-		        dati[1] = sb_cpu.getProgress();
-		        dati[2] = 0;
-		        dati[3] = 0;
-		
-		        tv_showInput.setText(
-		                String.format(
-		                        "server = %s:%d \nauth = %s:%s\nuse %d threads",
-		                        dats[0], dati[0], dats[1], dats[2], dati[1]));
-		        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
-		        editor.putString(PREF_URL, dats[0]);
-		        editor.putString(PREF_USER, dats[1]);
-		        editor.putString(PREF_PASS, dats[2]);
-		        editor.putInt(PREF_PORT, dati[0]);
-		        editor.putInt(PREF_CPU_USAGE, dati[1]);
-		        editor.commit();
-		
-		        dataService.StartMine(dats, dati);
-		    });
+        AppCompatButton button_startmine =
+                (AppCompatButton) root.findViewById(R.id.button_startmine);
+        button_startmine.setOnClickListener(
+                v -> {
+                    updateState(MINE_STATE_ONSTART);
+                    String[] dats = new String[4];
+                    dats[0] = sb.append(et_serv.getText()).toString();
+                    sb.setLength(0);
+                    dats[1] = sb.append(et_user.getText()).toString();
+                    sb.setLength(0);
+                    dats[2] = sb.append(et_pass.getText()).toString();
+                    sb.setLength(0);
+                    dats[3] = "";
+
+                    int[] dati = new int[4];
+                    dati[0] = Integer.parseInt(sb.append(et_port.getText()).toString());
+                    sb.setLength(0);
+                    dati[1] = sb_cpu.getProgress();
+                    dati[2] = 0;
+                    dati[3] = 0;
+
+                    tv_showInput.setText(
+                            String.format(
+                                    "server = %s:%d \nauth = %s:%s\nuse %d threads",
+                                    dats[0], dati[0], dats[1], dats[2], dati[1]));
+                    SharedPreferences.Editor editor =
+                            getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+                    editor.putString(PREF_URL, dats[0]);
+                    editor.putString(PREF_USER, dats[1]);
+                    editor.putString(PREF_PASS, dats[2]);
+                    editor.putInt(PREF_PORT, dati[0]);
+                    editor.putInt(PREF_CPU_USAGE, dati[1]);
+                    editor.commit();
+
+                    dataService.StartMine(dats, dati);
+                });
         AppCompatButton button_stopmine = (AppCompatButton) root.findViewById(R.id.button_stopmine);
         button_stopmine.setOnClickListener(
                 v -> {

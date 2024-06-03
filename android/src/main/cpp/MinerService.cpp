@@ -104,7 +104,7 @@ public:
 	bool authorized = false;
 	
 	void updateData(json::JSON d) {
-		std::string _h = "";
+		std::string _h;
 		//throw error
 		if (d.hasKey("error") && !d["error"].IsNull())
 			_h = (std::string)d["error"];
@@ -190,7 +190,7 @@ public:
 			_h = d.dump(1, " ");
 		}
 		
-		if (_h) {
+		if (_h.empty()) {
 			json_list_a.push_back(_h);
 		}
 	}

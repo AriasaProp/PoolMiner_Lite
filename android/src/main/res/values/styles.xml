@@ -16,7 +16,7 @@
     		
     </style>
     <style name="AppTheme.Toolbar" parent="BaseTheme.Toolbar">
-        <item android:background>?android:attr/colorPrimary</item>
+        <item name="android:background">?android:attr/colorPrimary</item>
     </style>
     
     <style name="BaseTheme.Toolbar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">

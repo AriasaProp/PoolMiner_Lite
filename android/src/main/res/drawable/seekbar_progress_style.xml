@@ -2,12 +2,12 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/secondaryProgress">
         <shape>
-            <corners android:radius="5dp" />
+            <corners android:radius="2dp" />
             <gradient
                 android:angle="270"
                 android:centerY="0.5"
-                android:endColor="#00000000"
-                android:centerColor="#00000000"
+                android:endColor="@color/oposite"
+                android:centerColor="@color/oposite"
                 android:startColor="@color/opositeTransparent"
                 android:type="linear" />
         </shape>
@@ -15,8 +15,8 @@
     <item android:id="@android:id/progress">
         <clip>
             <shape android:shape="rectangle" >
-                <size android:height="3dp" />
-                <corners android:radius="5dp" />
+                <size android:height="2dp" />
+                <corners android:radius="2dp" />
                 <solid android:color="@color/opositeTransparent" />
             </shape>
         </clip>

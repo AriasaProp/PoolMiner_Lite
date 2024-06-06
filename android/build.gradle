@@ -1,4 +1,6 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
     signingConfigs {
@@ -42,6 +44,7 @@ android {
         }
     }
 }
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.5.1', {
@@ -58,5 +61,4 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.11.0-M1'
 }
-
 

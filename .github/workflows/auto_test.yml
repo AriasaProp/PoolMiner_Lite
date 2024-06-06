@@ -6,6 +6,10 @@ on:
       - 'core/**'
       - 'android/**'
 
+permissions:
+  actions: write
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -33,9 +37,17 @@ jobs:
       - name: Core Check
         if: steps.changes.outputs.ifcore == 'true'
         run: gradle :core:check
+
+      - name: Format Java Code
+        uses: axel-op/googlejavaformat-action@v3.6.0
+        with:
+          files: "android/src/**/*.java"
+          args: "-r -a"
+
       - name: Android Build
         if: steps.changes.outputs.ifandroid == 'true'
         run: gradle :android:build -Prelease
+
       - name: Upload Android
         if: steps.changes.outputs.ifandroid == 'true'
         uses: actions/upload-artifact@v4.3.3

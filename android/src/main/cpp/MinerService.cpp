@@ -88,142 +88,132 @@ struct mining_notify_data {
 };
 struct mine_data_holder {
 private:
-  hex_array session_id;
-  hex_array difficulty_;
-  double difficulty;
-  hex_array xnonce1;
-  std::string xnonce2_size;
-  std::string version = "not set";
-  mining_notify_data mnd;
-
+	hex_array session_id;
+	hex_array difficulty_;
+	double difficulty;
+	hex_array xnonce1;
+	std::string xnonce2_size = "not set";
+	std::string version = "not set";
+	mining_notify_data mnd;
 public:
-  std::vector<std::string> error_list;
-  bool subscribed = false;
-  bool authorized = false;
-
-  void updateData (json::JSON d) {
-    std::string _h = "handled";
-    // throw error
-    if (d.hasKey ("error") && !d["error"].IsNull ())
-      _h = (std::string)d["error"];
-    // valid result
-    if (d.hasKey ("id") && !d["id"].IsNull ()) {
-      // statisfy any requested result
-      int id = d["id"];
-      switch (id) {
-      case 1: {
-        // is subscribe
-        if (!d.hasKey ("result") || d["result"].IsNull () || (d["result"].JSONType () != json::JSON::Class::Array)) throw std::runtime_error ("hasn't valid result");
-        json::JSON &res = d["result"];
-        // method data extraction
-        // 1
-        {
-          std::string method = res[0][0][0];
-          std::string value = res[0][0][1];
-          if (method == "mining.notify") {
-            session_id = convert::hexString_toBiner (value);
-          }
-          if (method == "mining.set_difficulty") {
-            difficulty_ = convert::hexString_toBiner (value);
-          }
-        }
-        // 2
-        {
-          std::string method = res[0][1][0];
-          std::string value = res[0][1][1];
-          if (method == "mining.notify") {
-            session_id = convert::hexString_toBiner (value);
-          }
-          if (method == "mining.set_difficulty") {
-            difficulty_ = convert::hexString_toBiner (value);
-          }
-        }
-        // xnonce1
-        xnonce1 = convert::hexString_toBiner (res[1]);
-        // xnonce2 size
-        xnonce2_size = (std::string)res[2];
-        subscribed = true;
-      } break;
-      case 2: {
-        // is authorize
-        if (!d.hasKey ("result") || d["result"].IsNull () || !((bool)d["result"])) throw std::runtime_error ("authorize is invalid");
-        authorized = true;
-      } break;
-      default:
-        _h = std::string ("unhandled id ") + (std::string)d["id"];
-      }
-    } else if (d.hasKey ("method") && d.hasKey ("params")) {
-      // statisfy any received method
-      std::string method = d["method"];
-      if (method == "mining.set_difficulty") {
-        difficulty = d["params"][0];
-      } else if (method == "mining.notify") {
-        json::JSON params = d["params"];
-        if (params.size () < 8) throw std::runtime_error ("mining.notify params has not enough informations!");
-        mnd.job_id = (std::string)params[0];
-        mnd.prev_hash = convert::hexString_toBiner (params[1]);
-
-        mnd.coinb1 = convert::hexString_toBiner (params[2]);
-        mnd.coinb2 = convert::hexString_toBiner (params[3]);
-        // merkle_arr
-        {
-          json::JSON jm = params[4];
-          if (jm.JSONType () != json::JSON::Class::Array) throw std::runtime_error ("merkle_array params is invalid!");
-          mnd.merkle_arr.clear ();
-          mnd.merkle_arr.reserve (jm.size ());
-          for (auto it = jm.ArrayRange ().begin (); it < jm.ArrayRange ().end (); ++it) {
-            mnd.merkle_arr.push_back (convert::hexString_toBiner (*it));
-          }
-        }
-        mnd.version = convert::hexString_toBiner (params[5]);
-        mnd.nbit = convert::hexString_toBiner (params[6]);
-        mnd.ntime = convert::hexString_toBiner (params[7]);
-        mnd.clean = params[8];
-      } else if ((method == "client.get_version") && d.hasKey ("jsonrpc") && d["jsonrpc"].IsNull ()) {
-        version = (std::string)d["jsonrpc"];
-      } else {
-        _h = std::string ("unhandled method: ") + method;
-      }
-    } else {
-      _h = d.dump (1, " ");
-    }
-    if (_h != "handled") {
-      error_list.push_back (_h);
-      /*
-        JNIEnv *env;
-        if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-          env->CallVoidMethod (local_globalRef, sendMessageConsole, 4,
-            env->NewStringUTF("Json Parser or Data Error"),
-            env->NewStringUTF(_h.c_str())
-          );
-          global_jvm->DetachCurrentThread ();
-        }
-      */
-    }
-  }
-
-  std::string getPreMiningData () {
-    std::string result;
-    result += "session id: ", result += convert::hexBiner_toString (session_id);
-    result += "\ndifficulty: ", result += convert::hexBiner_toString (difficulty_);
-    result += "\nxnonce 1: ", result += convert::hexBiner_toString (xnonce1);
-    result += "\nxnonce 2 size: ", result += xnonce2_size;
-    result += "\nversion: ", result += version;
-    return result;
-  }
-  std::string getMiningData () {
-    std::string result;
-    result += "job id: ", result += mnd.job_id;
-    result += "\nversion: ", result += convert::hexBiner_toString (mnd.version);
-    result += "\nmerkle_root: ";
-    for (hex_array mr : mnd.merkle_arr)
-      result += "\n  " + convert::hexBiner_toString (mr);
-    result += "\nTime: " + convert::hexBiner_toString (mnd.ntime) + ", nbit: " + convert::hexBiner_toString (mnd.nbit) + ", clean: " + std::string (mnd.clean ? "true" : "false");
-    result += "\nPrevious hash: ", result += convert::hexBiner_toString (mnd.prev_hash);
-    result += "\nCoinbase 1: ", result += convert::hexBiner_toString (mnd.coinb1);
-    result += "\nCoinbase 2: ", result += convert::hexBiner_toString (mnd.coinb2);
-    return result;
-  }
+  std::vector<std::string> json_list_a;
+	bool subscribed = false;
+	bool authorized = false;
+	
+	void updateData(json::JSON d) {
+		std::string _h;
+		//throw error
+		if (d.hasKey("error") && !d["error"].IsNull())
+			_h = (std::string)d["error"];
+		//valid result
+		if (d.hasKey("id") && !d["id"].IsNull()) {
+			//statisfy any requested result
+			int id = d["id"];
+			switch (id) {
+				case 1: {
+					//is subscribe
+		      if (!d.hasKey("result") || d["result"].IsNull() || (d["result"].JSONType() != json::JSON::Class::Array)) throw std::runtime_error("hasn't valid result");
+					json::JSON &res = d["result"];
+					// method data extraction
+					//1
+					{
+						std::string method = res[0][0][0];
+						std::string value = res[0][0][1];
+						if (method == "mining.notify") {
+							session_id = convert::hexString_toBiner(value);
+						}
+						if (method == "mining.set_difficulty") {
+							difficulty_ = convert::hexString_toBiner(value);
+						}
+					}
+					//2
+					{
+						std::string method = res[0][1][0];
+						std::string value = res[0][1][1];
+						if (method == "mining.notify") {
+							session_id = convert::hexString_toBiner(value);
+						}
+						if (method == "mining.set_difficulty") {
+							difficulty_ = convert::hexString_toBiner(value);
+						}
+					}
+					// xnonce1
+					xnonce1 = convert::hexString_toBiner(res[1]);
+					//xnonce2 size
+					xnonce2_size = (std::string)res[2];
+					subscribed = true;
+				} break;
+				case 2: {
+					//is authorize
+					if (!d.hasKey("result") || d["result"].IsNull() || !((bool)d["result"])) throw std::runtime_error("authorize is invalid");
+					authorized = true;
+				} break;
+				default:
+					_h = std::string("unhandled id ") + (std::string)d["id"];
+			}
+		} else if (d.hasKey("method") && d.hasKey("params")) {
+			//statisfy any received method
+			std::string method = d["method"];
+			if (method == "mining.set_difficulty") {
+				difficulty = d["params"][0];
+			} else if (method == "mining.notify") {
+				json::JSON params = d["params"];
+				if (params.size() < 8) throw std::runtime_error("mining.notify params has not enough informations!");
+		    mnd.job_id = (std::string)params[0];
+		    mnd.prev_hash = convert::hexString_toBiner(params[1]);
+		    
+		    mnd.coinb1 = convert::hexString_toBiner(params[2]);
+		    mnd.coinb2 = convert::hexString_toBiner(params[3]);
+		    // merkle_arr
+		    {
+		  		json::JSON jm = params[4];
+		  		if (jm.JSONType() != json::JSON::Class::Array) throw std::runtime_error("merkle_array params is invalid!");
+		  		mnd.merkle_arr.clear();
+		  		mnd.merkle_arr.reserve(jm.size());
+		  		for (auto it = jm.ArrayRange().begin(); it < jm.ArrayRange().end(); ++it) {
+		  			mnd.merkle_arr.push_back(convert::hexString_toBiner(*it));
+		  		}
+		    }
+		    mnd.version = convert::hexString_toBiner(params[5]);
+		    mnd.nbit = convert::hexString_toBiner(params[6]);
+		    mnd.ntime = convert::hexString_toBiner(params[7]);
+		    mnd.clean = params[8];
+			} else if ((method == "client.get_version") && d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) {
+	      version = (std::string)d["jsonrpc"];
+			} else {
+				_h = std::string("unhandled method: ") + method;
+			}
+		} else {
+			_h = d.dump(1, " ");
+		}
+		
+		if (_h.empty()) {
+			json_list_a.push_back(_h);
+		}
+	}
+	
+	std::string getPreMiningData() {
+		std::string result;
+		result += "session id: ", result += convert::hexBiner_toString(session_id);
+		result += "\ndifficulty: ", result += convert::hexBiner_toString(difficulty_);
+		result += "\nxnonce 1: ", result += convert::hexBiner_toString(xnonce1);
+		result += "\nxnonce 2 size: ", result += xnonce2_size;
+		result += "\nversion: ", result += version;
+		return result;
+	}
+	std::string getMiningData() {
+		std::string result;
+		result += "job id: ", result += mnd.job_id;
+		result += "\nversion: ", result += convert::hexBiner_toString(mnd.version);
+		result += "\nmerkle_root: ";
+		for (hex_array mr : mnd.merkle_arr)
+			result += "\n  " + convert::hexBiner_toString(mr);
+		result += "\nTime: " + convert::hexBiner_toString(mnd.ntime) + ", nbit: " + convert::hexBiner_toString(mnd.nbit) + ", clean: " + std::string(mnd.clean?"true":"false");
+		result += "\nPrevious hash: ", result += convert::hexBiner_toString(mnd.prev_hash);
+		result += "\nCoinbase 1: ", result += convert::hexBiner_toString(mnd.coinb1);
+		result += "\nCoinbase 2: ", result += convert::hexBiner_toString(mnd.coinb2);
+		return result;
+	}
 };
 
 // 5 kBytes ~> 40 kBit
@@ -384,24 +374,24 @@ void *startConnect (void *p) {
   // set state mining to none
   {
     JNIEnv *env;
-    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-      env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-      std::string _data_out = "Pre-Mining out:\n";
-      _data_out += mdh.getPreMiningData ();
-      _data_out += "\nMining out:\n";
-      _data_out += mdh.getMiningData ();
-      env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF ("Mining Data Out"), env->NewStringUTF (_data_out.c_str ()));
-      if (!mdh.error_list.empty ()) {
-        std::string error_parser_list;
-        for (std::string erl : mdh.error_list) {
-          error_parser_list += erl;
-          error_parser_list += "\n";
-        }
-        env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF ("Parsing Error"), env->NewStringUTF (error_parser_list.c_str ()));
-        mdh.error_list.clear ();
-      }
-      global_jvm->DetachCurrentThread ();
-    }
+	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+		  std::string _data_out = "Pre-Mining out:\n";
+		  _data_out += mdh.getPreMiningData();
+		  _data_out += "\nMining out:\n";
+			_data_out += mdh.getMiningData();
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data Out"), env->NewStringUTF(_data_out.c_str()));
+			if (!mdh.json_list_a.empty()) {
+				std::string error_parser_list;
+				for (std::string erl : mdh.json_list_a) {
+					error_parser_list += erl;
+					error_parser_list += "\n";
+				}
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Parsing Error"), env->NewStringUTF(error_parser_list.c_str()));
+	  		mdh.json_list_a.clear();
+			}
+		  global_jvm->DetachCurrentThread ();
+	  }
   }
 
   pthread_mutex_lock (&_mtx);

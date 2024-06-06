@@ -220,7 +220,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                         logList.add(
                                 1,
                                 "Wellcome User!, This is the first log message that youp should"
-                                    + " receive.");
+                                        + " receive.");
                         break;
                     case MINE_STATE_ONSTART:
                         logList.add(1, "Failed to start.");
@@ -229,7 +229,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                         logList.add(
                                 1,
                                 "Skipped State: This state was jumped from running to none state,"
-                                    + " for now is imposible!");
+                                        + " for now is imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
                         logList.add(1, "Service mining successful to stop!");
@@ -251,7 +251,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                         logList.add(
                                 1,
                                 "Starting, Waiting for connecting, subscribing, authorizing and get"
-                                    + " the first job.");
+                                        + " the first job.");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(
@@ -281,7 +281,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                         logList.add(
                                 1,
                                 "Skipped State: Jumped from none to running, is imposible from"
-                                    + " now!");
+                                        + " now!");
                         break;
                     case MINE_STATE_ONSTART:
                         logList.add(1, "Service mining successful to start!");
@@ -290,7 +290,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                         logList.add(
                                 1,
                                 "Skipped State: Jumped from onStop to running, is imposible from"
-                                    + " now!");
+                                        + " now!");
                         break;
                 }
                 accepted_result = rejected_result = 0;
@@ -316,7 +316,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                         logList.add(
                                 1,
                                 "Skipped State: Jumped from onStart to onStop state, for now is"
-                                    + " imposible!");
+                                        + " imposible!");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(1, "Service mining try to stop!");

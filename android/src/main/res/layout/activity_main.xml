@@ -35,7 +35,7 @@
 				        app:tabMode="fixed"
 				        app:tabGravity="fill"
 				        app:tabRippleColor="@null"
-				        app:tabIndicatorColor="?android:attr/colorPrimaryDark"
+				        app:tabIndicatorColor="@color/colorPrimaryDark"
 				        app:tabIndicatorAnimationMode="elastic"
 				        android:layout_width="match_parent"
 				        android:layout_height="wrap_content"

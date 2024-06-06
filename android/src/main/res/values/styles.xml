@@ -30,7 +30,6 @@
     <style name="AppTheme.TabLayout" parent="Widget.Design.TabLayout">
     		
         <item name="android:background">@drawable/tablayout_background</item>
-        <item name="app:tabIndicatorColor">@color/colorPrimaryDark</item>
     </style>
 
     <style name="AppTheme.SeekBar" parent="Widget.AppCompat.SeekBar">

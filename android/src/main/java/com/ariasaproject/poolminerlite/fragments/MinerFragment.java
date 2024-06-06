@@ -45,7 +45,8 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        context.bindService(new Intent(context, MinerService.class), this, Context.BIND_AUTO_CREATE);
+        context.bindService(
+                new Intent(context, MinerService.class), this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -62,16 +63,16 @@ public class MinerFragment extends Fragment implements ServiceConnection {
         View root = inflater.inflate(R.layout.fragment_miner, container, false);
         // define button click listener
         // define section layout
-        input_container = root.findViewById<ViewGroup>(R.id.input_container);
-        status_container = root.findViewById<ViewGroup>(R.id.status_container);
+        input_container = root.findViewById < ViewGroup > (R.id.input_container);
+        status_container = root.findViewById < ViewGroup > (R.id.status_container);
         // define showInput
-        tv_showInput = root.findViewById<AppCompatTextView>(R.id.show_userInput);
+        tv_showInput = root.findViewById < AppCompatTextView > (R.id.show_userInput);
         // text status
-        tv_s = root.findViewById<AppCompatTextView>(R.id.speed_tv);
-        tv_ra = root.findViewById<AppCompatTextView>(R.id.resulta_tv);
-        tv_rr = root.findViewById<AppCompatTextView>(R.id.resultr_tv);
+        tv_s = root.findViewById < AppCompatTextView > (R.id.speed_tv);
+        tv_ra = root.findViewById < AppCompatTextView > (R.id.resulta_tv);
+        tv_rr = root.findViewById < AppCompatTextView > (R.id.resultr_tv);
         // button
-        btn_startmine = root.findViewById<AppCompatButton>(R.id.button_startmine);
+        btn_startmine = root.findViewById < AppCompatButton > (R.id.button_startmine);
         btn_startmine.setOnClickListener(
                 v -> {
                     updateState(MINE_STATE_ONSTART);
@@ -106,20 +107,20 @@ public class MinerFragment extends Fragment implements ServiceConnection {
 
                     dataService.StartMine(dats, dati);
                 });
-        btn_stopmine = root.findViewById<AppCompatButton>(R.id.button_stopmine);
+        btn_stopmine = root.findViewById < AppCompatButton > (R.id.button_stopmine);
         btn_stopmine.setOnClickListener(
                 v -> {
                     updateState(MINE_STATE_ONSTOP);
                     dataService.StopMine();
                 });
         // editable
-        et_serv = root.findViewById<AppCompatEditText>(R.id.server_et);
-        et_port = root.findViewById<AppCompatEditText>(R.id.port_et);
-        et_user = root.findViewById<AppCompatEditText>(R.id.user_et);
-        et_pass = root.findViewById<AppCompatEditText>(R.id.password_et);
-        sb_cpu = root.findViewById<AppCompatSeekBar>(R.id.cpuSeek);
+        et_serv = root.findViewById < AppCompatEditText > (R.id.server_et);
+        et_port = root.findViewById < AppCompatEditText > (R.id.port_et);
+        et_user = root.findViewById < AppCompatEditText > (R.id.user_et);
+        et_pass = root.findViewById < AppCompatEditText > (R.id.password_et);
+        sb_cpu = root.findViewById < AppCompatSeekBar > (R.id.cpuSeek);
         sb_cpu.setMax(Math.max(Runtime.getRuntime().availableProcessors() - 2, 1));
-        final AppCompatTextView cuv = root.findViewById<AppCompatTextView>(R.id.cpu_usage_view);
+        final AppCompatTextView cuv = root.findViewById < AppCompatTextView > (R.id.cpu_usage_view);
         sb_cpu.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
                     @Override
@@ -134,7 +135,8 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     public void onStopTrackingTouch(SeekBar seekBar) {}
                 });
         // checkbox
-        cb_screen_awake = root.findViewById<AppCompatCheckBox>(R.id.settings_checkBox_keepscreenawake);
+        cb_screen_awake =
+                root.findViewById < AppCompatCheckBox > (R.id.settings_checkBox_keepscreenawake);
         sb_cpu.setProgress(1); // main
         if (savedInstanceState != null) {
             logList = savedInstanceState.getParcelable(KEYBUNDLE_CONSOLE);
@@ -166,8 +168,9 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     else window.clearFlags(FLAG_KEEP_SCREEN_ON);
                 });
         // log Adapter
-        final RecyclerView cv = root.findViewById<RecyclerView>(R.id.console_view);
-        cv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        final RecyclerView cv = root.findViewById < RecyclerView > (R.id.console_view);
+        cv.setLayoutManager(
+                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         adpt =
                 new Adapter<ConsoleItemHolder>() {
                     final LayoutInflater inflater = LayoutInflater.from(getActivity());
@@ -511,10 +514,10 @@ public class MinerFragment extends Fragment implements ServiceConnection {
 
         public ConsoleItemHolder(View itemView) {
             super(itemView);
-            root = itemView.findViewById<ConstraintLayout>(R.id.console_item_root);
-            time = itemView.findViewById<AppCompatTextView>(R.id.text1);
-            msg = itemView.findViewById<AppCompatTextView>(R.id.text2);
-            desc = itemView.findViewById<AppCompatTextView>(R.id.text3);
+            root = itemView.findViewById < ConstraintLayout > (R.id.console_item_root);
+            time = itemView.findViewById < AppCompatTextView > (R.id.text1);
+            msg = itemView.findViewById < AppCompatTextView > (R.id.text2);
+            desc = itemView.findViewById < AppCompatTextView > (R.id.text3);
         }
     }
 

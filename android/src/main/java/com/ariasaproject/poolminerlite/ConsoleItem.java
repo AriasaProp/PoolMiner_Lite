@@ -42,12 +42,12 @@ public class ConsoleItem {
             }
         }
 
-        public void add(int lvl, String msg, String dsc) {
+        public void add(int lvl, String msg) {
             for (int i = SIZE - 1; i > 0; --i) {
                 if (logs[i - 1] == null) continue;
                 logs[i] = logs[i - 1];
             }
-            logs[0] = new ConsoleItem(lvl, msg, dsc);
+            logs[0] = new ConsoleItem(lvl, msg);
         }
 
         public void add(ConsoleItem ci) {

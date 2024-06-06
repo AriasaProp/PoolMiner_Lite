@@ -59,7 +59,7 @@ bool MinerService_OnLoad (JNIEnv *env) {
   updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
   updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
   updateState = env->GetMethodID (m_class, "updateState", "(I)V");
-  sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;Ljava/lang/String;)V");
+  sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V");
   // consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
   if (!updateSpeed || !updateResult || !updateState /* || !consoleItemConstructor*/) return false;
   mineRunning = false;
@@ -323,7 +323,7 @@ void *startConnect (void *p) {
       JNIEnv *env;
       if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
         env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("subscribe & authorize success"), env->NewStringUTF ("authorize with username and pass as writen."));
+        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("subscribe & authorize success"));
         global_jvm->DetachCurrentThread ();
       }
     }
@@ -339,7 +339,7 @@ void *startConnect (void *p) {
           if (++tries > MAX_ATTEMPTS_TRY) throw std::runtime_error ("failed to receive message socket!.");
           JNIEnv *env;
           if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-            env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF ("Connection Failed"), env->NewStringUTF ("Try connect again after a sec!"));
+            env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF ("Connection Failed, Try connect again after a sec!"));
             global_jvm->DetachCurrentThread ();
           }
           sleep (1);
@@ -359,7 +359,9 @@ void *startConnect (void *p) {
   } catch (const std::exception &er) {
     JNIEnv *env;
     if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF ("Connection Failed"), env->NewStringUTF (er.what ()));
+    	std::string _msg = "Connection Failed, because ";
+    	_msg += er.what();
+      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (_msg.c_str ()));
       global_jvm->DetachCurrentThread ();
     }
   }
@@ -376,18 +378,18 @@ void *startConnect (void *p) {
     JNIEnv *env;
 	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-		  std::string _data_out = "Pre-Mining out:\n";
+		  std::string _data_out = "Data\nPre-Mining out:\n";
 		  _data_out += mdh.getPreMiningData();
 		  _data_out += "\nMining out:\n";
 			_data_out += mdh.getMiningData();
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Mining Data Out"), env->NewStringUTF(_data_out.c_str()));
+			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(_data_out.c_str()));
 			if (!mdh.json_list_a.empty()) {
-				std::string error_parser_list;
+				_data_out = "";
 				for (std::string erl : mdh.json_list_a) {
-					error_parser_list += erl;
-					error_parser_list += "\n";
+					_data_out += erl;
+					_data_out += "\n";
 				}
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF("Parsing Error"), env->NewStringUTF(error_parser_list.c_str()));
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(_data_out.c_str()));
 	  		mdh.json_list_a.clear();
 			}
 		  global_jvm->DetachCurrentThread ();

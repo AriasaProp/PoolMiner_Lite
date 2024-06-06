@@ -10,17 +10,16 @@ import java.util.Date;
 public class ConsoleItem {
     private static final DateFormat logDateFormat = new SimpleDateFormat("[HH:mm:ss] ");
 
-    public final String time, msg, desc;
+    public final String time, msg;
     public final int color;
 
-    public ConsoleItem(int c, String m, String dsc) {
-        this(c, logDateFormat.format(new Date()), m, dsc);
+    public ConsoleItem(int c, String m) {
+        this(c, logDateFormat.format(new Date()), m);
     }
 
-    protected ConsoleItem(int c, String d, String m, String dsc) {
+    protected ConsoleItem(int c, String d, String m) {
         time = d;
         msg = m;
-        desc = dsc;
         color = c;
     }
 
@@ -31,16 +30,15 @@ public class ConsoleItem {
         public Lists() {}
 
         protected Lists(Parcel in) {
-            String[] strings = new String[4 * SIZE];
+            String[] strings = new String[3 * SIZE];
             in.readStringArray(strings);
             for (int i = 0; i < SIZE; ++i) {
-                if (strings[i * 4] == null) break;
+                if (strings[i * 3] == null) break;
                 logs[i] =
                         new ConsoleItem(
-                                Integer.parseInt(strings[i * 4]),
-                                strings[i * 4 + 1],
-                                strings[i * 4 + 2],
-                                strings[i * 4 + 3]);
+                                Integer.parseInt(strings[i * 3]),
+                                strings[i * 3 + 1],
+                                strings[i * 3 + 2]);
             }
         }
 
@@ -84,13 +82,12 @@ public class ConsoleItem {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            String[] strings = new String[4 * SIZE];
+            String[] strings = new String[3 * SIZE];
             for (int i = 0; i < SIZE; ++i) {
                 if (logs[i] == null) break;
-                strings[i * 4] = String.valueOf(logs[i].color);
-                strings[i * 4 + 1] = logs[i].time;
-                strings[i * 4 + 2] = logs[i].msg;
-                strings[i * 4 + 3] = logs[i].desc;
+                strings[i * 3] = String.valueOf(logs[i].color);
+                strings[i * 3 + 1] = logs[i].time;
+                strings[i * 3 + 2] = logs[i].msg;
             }
             dest.writeStringArray(strings);
         }

@@ -135,7 +135,8 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     public void onStopTrackingTouch(SeekBar seekBar) {}
                 });
         // checkbox
-        cb_screen_awake = (AppCompatCheckBox) root.findViewById(R.id.settings_checkBox_keepscreenawake);
+        cb_screen_awake =
+                (AppCompatCheckBox) root.findViewById(R.id.settings_checkBox_keepscreenawake);
         sb_cpu.setProgress(1); // main
         if (savedInstanceState != null) {
             logList = savedInstanceState.getParcelable(KEYBUNDLE_CONSOLE);
@@ -168,7 +169,8 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 });
         // log Adapter
         final RecyclerView cv = (RecyclerView) root.findViewById(R.id.console_view);
-        cv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        cv.setLayoutManager(
+                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         adpt =
                 new Adapter<ConsoleItemHolder>() {
                     final LayoutInflater inflater = LayoutInflater.from(getActivity());

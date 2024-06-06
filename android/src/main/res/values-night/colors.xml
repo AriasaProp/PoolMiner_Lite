@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
     <color name="btnMine_startLighten">#0044FF</color>
     <color name="btnMine_startDarken">#00209C</color>
     <color name="btnMine_startDisable">#6000209C</color>
@@ -15,10 +14,4 @@
     
     <color name="background_start">#006000</color>
     <color name="background_end">#000000</color>
-    
-    <color name="console_text_debug">#A0A0A0</color>
-    <color name="console_text_info">#FFFFFF</color>
-    <color name="console_text_success">#27AE60</color>
-    <color name="console_text_warning">#F1C40F</color>
-    <color name="console_text_error">#E74C3C</color>
 </resources>

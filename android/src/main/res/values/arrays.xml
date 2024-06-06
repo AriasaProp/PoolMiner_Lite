@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="console_text_colors">
+        <item>#606060</item>
+        <item>#000000</item>
+        <item>#27AE60</item>
+        <item>#F1C40F</item>
+        <item>#E74C3C</item>
+    </array>
+</resources>

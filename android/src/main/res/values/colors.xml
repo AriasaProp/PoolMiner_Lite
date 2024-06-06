@@ -19,11 +19,4 @@
     <color name="background_start">#AFFFAF</color>
     <color name="background_end">#FFFFFF</color>
     
-    <color name="console_text_debug">#606060</color>
-    <color name="console_text_info">#000000</color>
-    <color name="console_text_success">#27AE60</color>
-    <color name="console_text_warning">#F1C40F</color>
-    <color name="console_text_error">#E74C3C</color>
-    
-    
 </resources>

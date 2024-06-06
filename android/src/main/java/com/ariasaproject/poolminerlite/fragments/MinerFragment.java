@@ -56,7 +56,10 @@ public class MinerFragment extends Fragment implements ServiceConnection {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_miner, container, false);
         // define button click listener
         // define section layout
@@ -132,7 +135,8 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     public void onStopTrackingTouch(SeekBar seekBar) {}
                 });
         // checkbox
-        cb_screen_awake = (AppCompatCheckBox) root.findViewById(R.id.settings_checkBox_keepscreenawake);
+        cb_screen_awake =
+                (AppCompatCheckBox) root.findViewById(R.id.settings_checkBox_keepscreenawake);
         sb_cpu.setProgress(1); // main
         if (savedInstanceState != null) {
             logList = savedInstanceState.getParcelable(KEYBUNDLE_CONSOLE);
@@ -165,10 +169,12 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 });
         // log Adapter
         final RecyclerView cv = (RecyclerView) root.findViewById(R.id.console_view);
-        cv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        adpt = new Adapter<ConsoleItemHolder>() {
+        cv.setLayoutManager(
+                new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        adpt =
+                new Adapter<ConsoleItemHolder>() {
                     final LayoutInflater inflater = LayoutInflater.from(getActivity());
-										final TypedArray colors = getResources().obtainTypedArray(R.array.colors);
+                    final TypedArray colors = getResources().obtainTypedArray(R.array.colors);
 
                     @Override
                     public ConsoleItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -183,7 +189,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                             h.root.setVisibility(View.GONE);
                         } else {
                             h.root.setVisibility(View.VISIBLE);
-														int color = colors.getColor(ci.color, 0);
+                            int color = colors.getColor(ci.color, 0);
                             h.time.setTextColor(color);
                             h.msg.setTextColor(color);
                             h.time.setText(ci.time);
@@ -210,16 +216,22 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1,"Wellcome User!, This is the first log message that youp should receive.");
+                        logList.add(
+                                1,
+                                "Wellcome User!, This is the first log message that youp should"
+                                    + " receive.");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1,"Failed to start.");
+                        logList.add(1, "Failed to start.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1,"Skipped State: This state was jumped from running to none state, for now is imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State: This state was jumped from running to none state,"
+                                    + " for now is imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1,"Service mining successful to stop!");
+                        logList.add(1, "Service mining successful to stop!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -235,13 +247,19 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1,"Starting, Waiting for connecting, subscribing, authorizing and get the first job.");
+                        logList.add(
+                                1,
+                                "Starting, Waiting for connecting, subscribing, authorizing and get"
+                                    + " the first job.");
                         break;
                     case MINE_STATE_RUNNING:
-                        logList.add(1,"Skipped State: Jumped from running to onStart, that imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State: Jumped from running to onStart, that imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1,"Skipped State: Jumped from onStop to onStart, that imposible!");
+                        logList.add(
+                                1, "Skipped State: Jumped from onStop to onStart, that imposible!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -259,13 +277,19 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1,"Skipped State: Jumped from none to running, is imposible from now!");
+                        logList.add(
+                                1,
+                                "Skipped State: Jumped from none to running, is imposible from"
+                                    + " now!");
                         break;
                     case MINE_STATE_ONSTART:
                         logList.add(1, "Service mining successful to start!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        logList.add(1,"Skipped State: Jumped from onStop to running, is imposible from now!");
+                        logList.add(
+                                1,
+                                "Skipped State: Jumped from onStop to running, is imposible from"
+                                    + " now!");
                         break;
                 }
                 accepted_result = rejected_result = 0;
@@ -283,10 +307,15 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 switch (mainStateCurrent) {
                     default:
                     case MINE_STATE_NONE:
-                        logList.add(1,"Skipped State: Jumped from none to onStop, is imposible from now");
+                        logList.add(
+                                1,
+                                "Skipped State: Jumped from none to onStop, is imposible from now");
                         break;
                     case MINE_STATE_ONSTART:
-                        logList.add(1,"Skipped State: Jumped from onStart to onStop state, for now is imposible!");
+                        logList.add(
+                                1,
+                                "Skipped State: Jumped from onStart to onStop state, for now is"
+                                    + " imposible!");
                         break;
                     case MINE_STATE_RUNNING:
                         logList.add(1, "Service mining try to stop!");

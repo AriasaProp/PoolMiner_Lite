@@ -14,7 +14,9 @@
     
     <color name="colorPrimaryDark">#68BBE3</color>
     <color name="colorPrimary">#0E86D4</color>
+    <color name="textColorPrimary">#000000</color>
     <!-- 055C9D -->
+    <color name="textColor">#000000</color>
     <color name="colorAccent">#003060</color>
     
     <color name="background_start">#055C9D</color>

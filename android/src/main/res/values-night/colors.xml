@@ -14,7 +14,9 @@
     
     <color name="colorPrimaryDark">#050A30</color>
     <color name="colorPrimary">#000C66</color>
+    <color name="textColorPrimary">#FFFFFF</color>
     <!-- 0000FF-->
+    <color name="textColor">#FFFFFF</color>
     <color name="colorAccent">#7EC8E3</color>
     
     <color name="background_start">#0000FF</color>

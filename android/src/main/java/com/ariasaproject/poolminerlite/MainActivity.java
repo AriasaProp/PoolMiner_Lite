@@ -1,5 +1,9 @@
 package com.ariasaproject.poolminerlite;
 
+import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING;
+import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE;
+import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,6 +12,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -18,7 +23,6 @@ import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
 import com.ariasaproject.poolminerlite.fragments.MinerFragment;
 import com.ariasaproject.poolminerlite.fragments.NewsFragment;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 public class MainActivity extends AppCompatActivity {
     static {
@@ -33,49 +37,68 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // tabs and viewpager
-        TabLayout tabLayout = findViewById(R.id.tabLayout);
-        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        final TabLayout tabLayout = findViewById(R.id.tabLayout);
+        final ViewPager2 viewPager = findViewById(R.id.viewPager);
 
-        pagerAdapter =
-                new FragmentStateAdapter(this) {
-                    @NonNull
-                    @Override
-                    public Fragment createFragment(int position) {
-                        switch (position) {
-                            case 0:
-                                return new NewsFragment();
-                            default:
-                            case 1:
-                                return new MinerFragment();
-                            case 2:
-                                return new ConfigFragment();
-                        }
-                    }
+        pagerAdapter = new FragmentStateAdapter(this) {
+            @NonNull
+            @Override
+            public Fragment createFragment(int position) {
+                switch (position) {
+                    case 0:
+                        return new NewsFragment();
+                    default:
+                    case 1:
+                        return new MinerFragment();
+                    case 2:
+                        return new ConfigFragment();
+                }
+            }
 
-                    @Override
-                    public int getItemCount() {
-                        return 3;
-                    }
-                };
+            @Override
+            public int getItemCount() {
+                return 3;
+            }
+        };
         viewPager.setAdapter(pagerAdapter);
-        new TabLayoutMediator(
-                        tabLayout,
-                        viewPager,
-                        (tab, pos) -> {
-                            switch (pos) {
-                                case 0:
-                                    tab.setText("News");
-                                    break;
-                                default:
-                                case 1:
-                                    tab.setText("Miner");
-                                    break;
-                                case 2:
-                                    tab.setText("Config");
-                                    break;
-                            }
-                        })
-                .attach();
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+				    private int previousScrollState = SCROLL_STATE_IDLE;
+				    private int scrollState = SCROLL_STATE_IDLE;
+				    
+				    @Override
+				    public void onPageScrollStateChanged(final int state) {
+				      previousScrollState = scrollState;
+				      scrollState = state;
+			        tabLayout.updateViewPagerScrollState(scrollState);
+				    }
+				
+				    @Override
+				    public void onPageScrolled(int p, float positionOffset, int positionOffsetPixels) {
+			        boolean updateSelectedTabView = scrollState != SCROLL_STATE_SETTLING || previousScrollState == SCROLL_STATE_DRAGGING;
+			        boolean updateIndicator = !(scrollState == SCROLL_STATE_SETTLING && previousScrollState == SCROLL_STATE_IDLE);
+			        tabLayout.setScrollPosition(p, positionOffset, updateSelectedTabView, updateIndicator, false);
+				    }
+				
+				    @Override
+				    public void onPageSelected(final int position) {
+				      if (tabLayout.getSelectedTabPosition() != position) {
+				        boolean updateIndicator = scrollState == SCROLL_STATE_IDLE || (scrollState == SCROLL_STATE_SETTLING && previousScrollState == SCROLL_STATE_IDLE);
+				        tabLayout.selectTab(tabLayout.getTabAt(position), updateIndicator);
+				      }
+				    }
+			  });
+			  tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+				    @Override
+				    public void onTabSelected(@NonNull TabLayout.Tab tab) {
+				      viewPager.setCurrentItem(tab.getPosition(), true);
+				    }
+				    @Override
+				    public void onTabUnselected(TabLayout.Tab tab) {}
+				
+				    @Override
+				    public void onTabReselected(TabLayout.Tab tab) {}
+			  });
+	      viewPager.setCurrentItem(1, false);
         // check feature
         checkBatteryOptimizations();
     }
@@ -113,3 +136,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+

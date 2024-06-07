@@ -35,16 +35,14 @@
 				        app:tabGravity="fill"
 				        app:tabRippleColor="@null"
 				        app:tabIndicatorColor="@color/colorPrimaryDark"
-				        app:tabIndicatorAnimationMode="elastic"
 				        android:layout_width="match_parent"
-				        android:layout_height="wrap_content"
-		            android:padding="5dp" >
+				        android:layout_height="wrap_content" >
 
 				    		<com.google.android.material.tabs.TabItem
 				        		android:text="Chat"/>
 
 				    		<com.google.android.material.tabs.TabItem
-				        		android:text="Main"/>
+				        		android:text="Miner"/>
 
 				    		<com.google.android.material.tabs.TabItem
 				        		android:text="Config"/>

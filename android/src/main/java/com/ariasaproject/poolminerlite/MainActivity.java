@@ -61,56 +61,44 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
         viewPager.setAdapter(pagerAdapter);
-        viewPager.registerOnPageChangeCallback(
-                new ViewPager2.OnPageChangeCallback() {
-                    private int previousScrollState = SCROLL_STATE_IDLE;
-                    private int scrollState = SCROLL_STATE_IDLE;
-
-                    @Override
-                    public void onPageScrollStateChanged(final int state) {
-                        previousScrollState = scrollState;
-                        scrollState = state;
-                        tabLayout.updateViewPagerScrollState(scrollState);
-                    }
-
-                    @Override
-                    public void onPageScrolled(
-                            int p, float positionOffset, int positionOffsetPixels) {
-                        boolean updateSelectedTabView =
-                                scrollState != SCROLL_STATE_SETTLING
-                                        || previousScrollState == SCROLL_STATE_DRAGGING;
-                        boolean updateIndicator =
-                                !(scrollState == SCROLL_STATE_SETTLING
-                                        && previousScrollState == SCROLL_STATE_IDLE);
-                        tabLayout.setScrollPosition(
-                                p, positionOffset, updateSelectedTabView, updateIndicator, false);
-                    }
-
-                    @Override
-                    public void onPageSelected(final int position) {
-                        if (tabLayout.getSelectedTabPosition() != position) {
-                            boolean updateIndicator =
-                                    scrollState == SCROLL_STATE_IDLE
-                                            || (scrollState == SCROLL_STATE_SETTLING
-                                                    && previousScrollState == SCROLL_STATE_IDLE);
-                            tabLayout.selectTab(tabLayout.getTabAt(position), updateIndicator);
-                        }
-                    }
-                });
-        tabLayout.addOnTabSelectedListener(
-                new TabLayout.OnTabSelectedListener() {
-                    @Override
-                    public void onTabSelected(@NonNull TabLayout.Tab tab) {
-                        viewPager.setCurrentItem(tab.getPosition(), true);
-                    }
-
-                    @Override
-                    public void onTabUnselected(TabLayout.Tab tab) {}
-
-                    @Override
-                    public void onTabReselected(TabLayout.Tab tab) {}
-                });
-        viewPager.setCurrentItem(1, false);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+				    private int previousScrollState = SCROLL_STATE_IDLE;
+				    private int scrollState = SCROLL_STATE_IDLE;
+				    
+				    @Override
+				    public void onPageScrollStateChanged(final int state) {
+				      previousScrollState = scrollState;
+				      scrollState = state;
+			        //tabLayout.updateViewPagerScrollState(scrollState);
+				    }
+				
+				    @Override
+				    public void onPageScrolled(int p, float positionOffset, int positionOffsetPixels) {
+			        boolean updateSelectedTabView = scrollState != SCROLL_STATE_SETTLING || previousScrollState == SCROLL_STATE_DRAGGING;
+			        boolean updateIndicator = !(scrollState == SCROLL_STATE_SETTLING && previousScrollState == SCROLL_STATE_IDLE);
+			        tabLayout.setScrollPosition(p, positionOffset, updateSelectedTabView, updateIndicator);
+				    }
+				
+				    @Override
+				    public void onPageSelected(final int position) {
+				      if (tabLayout.getSelectedTabPosition() != position) {
+				        boolean updateIndicator = scrollState == SCROLL_STATE_IDLE || (scrollState == SCROLL_STATE_SETTLING && previousScrollState == SCROLL_STATE_IDLE);
+				        tabLayout.selectTab(tabLayout.getTabAt(position), updateIndicator);
+				      }
+				    }
+			  });
+			  tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+				    @Override
+				    public void onTabSelected(@NonNull TabLayout.Tab tab) {
+				      viewPager.setCurrentItem(tab.getPosition(), true);
+				    }
+				    @Override
+				    public void onTabUnselected(TabLayout.Tab tab) {}
+				
+				    @Override
+				    public void onTabReselected(TabLayout.Tab tab) {}
+			  });
+	      viewPager.setCurrentItem(1, false);
         // check feature
         checkBatteryOptimizations();
     }

@@ -22,6 +22,6 @@ public:
   void hash (const uint8_t *, const uint32_t);
   void hash (const uint8_t *); //combined nonce
 };
-void hashN (const uint8_t *, uint8_t[SHA256_HASH_SIZE]);
+void hashN (const uint8_t *, const uint8_t *);
 
 #endif // HASHING_H_

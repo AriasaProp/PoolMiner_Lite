@@ -10,7 +10,7 @@ bool mine_test () {
   std::cout << "Header : " << refHeader << std::endl;
   
   hex_array result;
-  hashN(refHeader.array(), result.array());
+  hashN((uint8_t*)refHeader.array(), (uint8_t*)result.array());
   std::cout << "Result  : " << result << std::endl;
   
   hex_array refExpected = convert::hexString_toBiner(expected);

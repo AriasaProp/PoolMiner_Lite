@@ -248,7 +248,7 @@ void hashing::innerHash() {
   Sha256Finalise (&context, H);
 }
 
-void hashN (const uint8_t *header, uint8_t H[SHA256_HASH_SIZE]) {
+void hashN (const uint8_t *header, const uint8_t *H) {
   uint8_t B[132];
   uint32_t X[32];
   uint32_t V[32768];

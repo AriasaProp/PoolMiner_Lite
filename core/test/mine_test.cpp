@@ -1,4 +1,5 @@
 #include "algorithm/hashing.hpp"
+#include "util.hpp"
 #include <iostream>
 
 bool mine_test () {

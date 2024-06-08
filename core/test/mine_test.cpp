@@ -11,6 +11,7 @@ bool mine_test () {
   std::cout << "Header : " << refHeader << std::endl;
   
   hex_array result;
+  result.reserve(16);
   hashN((uint8_t*)refHeader.data(), (uint8_t*)result.data());
   std::cout << "Result  : " << result << std::endl;
   

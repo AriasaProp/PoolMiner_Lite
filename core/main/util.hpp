@@ -3,17 +3,13 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+
 
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
-typedef signed __int16 int16_t;
-typedef unsigned __int16 uint16_t;
-typedef signed __int32 int32_t;
 typedef unsigned __int32 uint32_t;
 #elif defined(__SYMBIAN32__)
-typedef unsigned short uint16_t;
-typedef signed short int16_t;
 typedef unsigned int uint32_t;
-typedef signed int int32_t;
 #else
 #include <cstdint>
 #endif
@@ -27,5 +23,6 @@ hex_array hexString_toBiner (const char *);
 hex_array hexString_toBiner (const std::string);
 std::string hexBiner_toString (const hex_array);
 } // namespace convert
+std::ostream& operator<<(std::ostream&, const hex_array&);
 
 #endif //_UTIL_INCLUDE_

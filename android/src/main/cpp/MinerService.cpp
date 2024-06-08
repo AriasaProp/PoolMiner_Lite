@@ -85,6 +85,7 @@ struct mining_notify_data {
   hex_array prev_hash;
   hex_array coinb1;
   hex_array coinb2;
+  hex_array xnonce2;
 };
 struct mine_data_holder {
 private:
@@ -192,29 +193,38 @@ public:
 		}
 	}
 	
-	std::string getPreMiningData() {
-		std::string result;
-		result += "session id: ", result += convert::hexBiner_toString(session_id);
-		result += "\ndifficulty: ", result += convert::hexBiner_toString(difficulty_);
-		result += "\nxnonce 1: ", result += convert::hexBiner_toString(xnonce1);
-		result += "\nxnonce 2 size: ", result += xnonce2_size;
-		result += "\nversion: ", result += version;
-		return result;
-	}
-	std::string getMiningData() {
-		std::string result;
-		result += "job id: ", result += mnd.job_id;
-		result += "\nversion: ", result += convert::hexBiner_toString(mnd.version);
-		result += "\nmerkle_root: ";
-		for (hex_array mr : mnd.merkle_arr)
-			result += "\n  " + convert::hexBiner_toString(mr);
-		result += "\nTime: " + convert::hexBiner_toString(mnd.ntime) + ", nbit: " + convert::hexBiner_toString(mnd.nbit) + ", clean: " + std::string(mnd.clean?"true":"false");
-		result += "\nPrevious hash: ", result += convert::hexBiner_toString(mnd.prev_hash);
-		result += "\nCoinbase 1: ", result += convert::hexBiner_toString(mnd.coinb1);
-		result += "\nCoinbase 2: ", result += convert::hexBiner_toString(mnd.coinb2);
-		return result;
+/*
+	void doJob() {
+		make header
+		
+        // Increment extranonce2
+        HexArray xnonce2 = this._xnonce2;
+        String xnonce2_str = xnonce2.getStr();
+        for (int i = 0; i < xnonce2.getLength() && (0 == (++xnonce2.refHex()[i])); i++)
+            ;
+
+        // Assemble block header
+        HexArray work_data = new HexArray(this._notify.version);
+        work_data.append(this._notify.prev_hash);
+        work_data.append(this._merkle_loot, 0, 32);
+        work_data.append(this._notify.ntime);
+        work_data.append(this._notify.nbit);
+        work_data.append(new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0x80});
+        work_data.append(new byte[40]);
+        work_data.append(new byte[] {(byte) 0x80, 0x02, 0x00, 0x00});
+        return new StratumMiningWork(
+                work_data,
+                diff2target(this._difficulty / 65536.0),
+                this._notify.job_id,
+                xnonce2_str);
+    // Increment extranonce2
+    
+    // Assemble block header
+    std::string header = convert::hexBiner_toString(mnd.version);
+    header += convert::hexBiner_toString(mnd.prev_hash);
 	}
 };
+		*/
 
 // 5 kBytes ~> 40 kBit
 #define MAX_MESSAGE 5000
@@ -378,11 +388,6 @@ void *startConnect (void *p) {
     JNIEnv *env;
 	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-		  std::string _data_out = "Data\nPre-Mining out:\n";
-		  _data_out += mdh.getPreMiningData();
-		  _data_out += "\nMining out:\n";
-			_data_out += mdh.getMiningData();
-			env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(_data_out.c_str()));
 			if (!mdh.json_list_a.empty()) {
 				_data_out = "";
 				for (std::string erl : mdh.json_list_a) {

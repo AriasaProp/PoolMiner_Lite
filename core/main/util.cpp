@@ -13,10 +13,13 @@ hex_array convert::hexString_toBiner (const char *hex) {
   hex_array result;
   if (hex) { // hex not nullptr
     {
-      double temp = double (strlen (hex));
-      temp /= double (sizeof (hex_base) * 2.0);
-      size_t reserve = static_cast<size_t> (ceil (temp));
-      result.reserve (reserve > 1 ? reserve : 1);
+      size_t temp = strlen (hex);
+      size_t a = temp & 0x7;
+    	temp >>= 3;
+      if (a) {
+      	++temp;
+      }
+      result.reserve (temp > 1 ? temp : 1);
     }
     hex_base h_b = 0, t;
     while (*hex) { // while char '\0' stop iteration
@@ -29,8 +32,7 @@ hex_array convert::hexString_toBiner (const char *hex) {
         // is invalid hex? but just let it
         continue;
       }
-      for (hex_array::iterator i = result.begin (); i < result.end (); ++i) {
-        hex_base &c = *i;
+      for (hex_base& c : result) {
         t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
         c <<= 4;
         c |= h_b;
@@ -53,6 +55,12 @@ std::string convert::hexBiner_toString (const hex_array hex) {
     oss << std::hex << *it;
   }
   return oss.str ();
+}
+std::ostream& operator<<(std::ostream& os, const hex_array& h) {
+    for (const hex_base& num : h) {
+        os << std::hex << std::setw(8) << std::setfill('0') << num;
+    }
+    return os;
 }
 
 // parsing json foward

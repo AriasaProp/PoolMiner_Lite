@@ -57,7 +57,7 @@ std::string convert::hexBiner_toString (const hex_array h) {
   return oss.str ();
 }
 std::ostream& operator<<(std::ostream& os, const hex_array& h) {
-  for (hex_array::const_reverse_iterator i = h.crbegin(); i != h.crend(); ++i)
+  for (hex_array::const_reverse_iterator i = h.crbegin(); i != h.crend(); ++i) {
     os << std::hex << std::setw(8) << std::setfill('0') << *i;
   }
   return os;

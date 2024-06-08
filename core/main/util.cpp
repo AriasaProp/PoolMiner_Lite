@@ -39,7 +39,7 @@ hex_array convert::hexString_toBiner (const char *hex) {
         h_b = t;
       }
       if (h_b) {
-        result.emplace (result.begin(), h_b);
+        result.push_back (h_b);
       }
     }
   }

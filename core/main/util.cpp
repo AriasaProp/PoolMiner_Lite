@@ -39,7 +39,7 @@ hex_array convert::hexString_toBiner (const char *hex) {
         h_b = t;
       }
       if (h_b) {
-        result.push_back (h_b);
+        result.emplace (result.begin(), h_b);
       }
     }
   }
@@ -49,18 +49,18 @@ hex_array convert::hexString_toBiner (const std::string hex) {
   return convert::hexString_toBiner (hex.c_str ());
 }
 
-std::string convert::hexBiner_toString (const hex_array hex) {
+std::string convert::hexBiner_toString (const hex_array h) {
   std::ostringstream oss;
-  for (hex_array::const_reverse_iterator it = hex.rbegin (); it < hex.rend (); ++it) {
-    oss << std::hex << *it;
+  for (hex_array::const_reverse_iterator i = h.crbegin (); i != h.crend (); ++i) {
+    oss << std::hex << std::setw(8) << std::setfill('0') << *i;
   }
   return oss.str ();
 }
 std::ostream& operator<<(std::ostream& os, const hex_array& h) {
-    for (const hex_base& num : h) {
-        os << std::hex << std::setw(8) << std::setfill('0') << num;
-    }
-    return os;
+  for (hex_array::const_reverse_iterator i = h.crbegin(); i != h.crend(); ++i)
+    os << std::hex << std::setw(8) << std::setfill('0') << *i;
+  }
+  return os;
 }
 
 // parsing json foward

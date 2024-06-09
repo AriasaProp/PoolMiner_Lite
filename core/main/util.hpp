@@ -22,14 +22,17 @@ struct hex_array {
 private:
 	std::vector<uint32_t> arr;
 public:
+	uint32_t* data() {
+		return arr.data();
+	}
 	uint32_t operator[](size_t index) const {
-    return arr_.at(index);
+    return arr.at(index);
   }
 
 	friend hex_array& operator=(hex_array&, const char *);
 	friend hex_array& operator=(hex_array&, const std::string);
-	friend std::string& operator=(std_string&, const hex_array);
-	friend std::ostream& operator<<(std::ostream&, const hex_array&);
+	friend std::string& operator=(std::string&, const hex_array);
+	friend std::ostream& operator<<(std::ostream&, const hex_array);
 }
 
 //hashing

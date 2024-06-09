@@ -22,6 +22,9 @@ struct hex_array {
 private:
 	std::vector<uint32_t> arr;
 public:
+	hex_array(){}
+	hex_array(const char *);
+	hex_array(const std::string);
 	uint32_t* data() {
 		return arr.data();
 	}

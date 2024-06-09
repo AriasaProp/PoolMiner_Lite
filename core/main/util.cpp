@@ -8,7 +8,77 @@
 
 const size_t HEX_BASE_SIZE = sizeof (uint32_t) * 8;
 const size_t HEX_BASE_SIZE_SHIFTED = HEX_BASE_SIZE - 4;
-
+hex_array::hex_array(const char *r) {
+	arr.clear();
+  if (r) { // hex not nullptr
+    {
+      size_t temp = strlen (r);
+      size_t a = temp & 0x7;
+    	temp >>= 3;
+      if (a) {
+      	++temp;
+      }
+      arr.reserve (temp);
+    }
+    uint32_t h_b = 0, t;
+    while (*r) { // while char '\0' stop iteration
+      char h = *(r++);
+      if (h >= '0' && h <= '9') {
+        h_b = h - '0';
+      } else if (h >= 'a' && h <= 'f') {
+        h_b = h - 'a' + 10;
+      } else {
+        // is invalid hex? but just let it
+        continue;
+      }
+      for (uint32_t& c : l.arr) {
+        t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
+        c <<= 4;
+        c |= h_b;
+        h_b = t;
+      }
+      if (h_b) {
+        arr.push_back (h_b);
+      }
+    }
+  }
+}
+hex_array::hex_array(const std::string s) {
+	arr.clear();
+	const char *r = s.c_str();
+  if (r) { // hex not nullptr
+    {
+      size_t temp = strlen (r);
+      size_t a = temp & 0x7;
+    	temp >>= 3;
+      if (a) {
+      	++temp;
+      }
+      arr.reserve (temp);
+    }
+    uint32_t h_b = 0, t;
+    while (*r) { // while char '\0' stop iteration
+      char h = *(r++);
+      if (h >= '0' && h <= '9') {
+        h_b = h - '0';
+      } else if (h >= 'a' && h <= 'f') {
+        h_b = h - 'a' + 10;
+      } else {
+        // is invalid hex? but just let it
+        continue;
+      }
+      for (uint32_t& c : l.arr) {
+        t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
+        c <<= 4;
+        c |= h_b;
+        h_b = t;
+      }
+      if (h_b) {
+        arr.push_back (h_b);
+      }
+    }
+  }
+}
 hex_array& operator=(hex_array &l, const char *r) {
 	l.arr.clear();
   if (r) { // hex not nullptr
@@ -19,7 +89,7 @@ hex_array& operator=(hex_array &l, const char *r) {
       if (a) {
       	++temp;
       }
-      l.reserve (temp);
+      l.arr.reserve (temp);
     }
     uint32_t h_b = 0, t;
     while (*r) { // while char '\0' stop iteration

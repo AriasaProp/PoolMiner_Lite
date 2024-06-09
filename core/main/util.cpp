@@ -8,6 +8,9 @@
 
 const size_t HEX_BASE_SIZE = sizeof (uint32_t) * 8;
 const size_t HEX_BASE_SIZE_SHIFTED = HEX_BASE_SIZE - 4;
+hex_array::hex_array(size_t s) {
+	arr.reserve(s);
+}
 hex_array::hex_array(const char *r) {
 	arr.clear();
   if (r) { // hex not nullptr
@@ -31,7 +34,7 @@ hex_array::hex_array(const char *r) {
         // is invalid hex? but just let it
         continue;
       }
-      for (uint32_t& c : l.arr) {
+      for (uint32_t& c : arr) {
         t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
         c <<= 4;
         c |= h_b;
@@ -67,7 +70,7 @@ hex_array::hex_array(const std::string s) {
         // is invalid hex? but just let it
         continue;
       }
-      for (uint32_t& c : l.arr) {
+      for (uint32_t& c : arr) {
         t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
         c <<= 4;
         c |= h_b;
@@ -393,8 +396,7 @@ void hashing::innerHash() {
 hex_array hashN (const hex_array &header) {
   uint8_t B[132];
   uint32_t X[32];
-  hex_array H;
-  H.reserve(8);
+  hex_array H(8);
   uint32_t V[32768];
   uint32_t xs[16];
 

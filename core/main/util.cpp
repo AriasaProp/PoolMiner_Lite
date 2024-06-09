@@ -6,122 +6,62 @@
 #include <iomanip>
 #include <sstream>
 
-const size_t HEX_BASE_SIZE = sizeof (uint32_t) * 8;
-const size_t HEX_BASE_SIZE_SHIFTED = HEX_BASE_SIZE - 4;
+const size_t HEX_BASE_SIZE_SHIFTED = (sizeof (uint32_t) * 8) - 4;
+
+static void fromCharToHexArray(const char *r, std::vector<uint32_t> &arr) {
+  if (!r) return;
+  {
+    size_t temp = strlen (r);
+    size_t a = temp & 0x7;
+  	temp >>= 3;
+    if (a) {
+    	++temp;
+    }
+    arr.reserve (temp);
+  }
+  uint32_t h_b = 0, t;
+  while (*r) { // while char '\0' stop iteration
+    char h = *(r++);
+    if (h >= '0' && h <= '9') {
+      h_b = h - '0';
+    } else if (h >= 'a' && h <= 'f') {
+      h_b = h - 'a' + 10;
+    } else {
+      // is invalid hex? but just let it
+      continue;
+    }
+    for (uint32_t& c : arr) {
+      t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
+      c <<= 4;
+      c |= h_b;
+      h_b = t;
+    }
+    if (h_b) {
+      arr.push_back (h_b);
+    }
+  }
+}
+
 hex_array::hex_array() {}
 hex_array::~hex_array() {}
 hex_array::hex_array(size_t s) {
 	arr.reserve(s);
 }
 hex_array::hex_array(const char *r) {
-	arr.clear();
-  if (r) { // hex not nullptr
-    {
-      size_t temp = strlen (r);
-      size_t a = temp & 0x7;
-    	temp >>= 3;
-      if (a) {
-      	++temp;
-      }
-      arr.reserve (temp);
-    }
-    uint32_t h_b = 0, t;
-    while (*r) { // while char '\0' stop iteration
-      char h = *(r++);
-      if (h >= '0' && h <= '9') {
-        h_b = h - '0';
-      } else if (h >= 'a' && h <= 'f') {
-        h_b = h - 'a' + 10;
-      } else {
-        // is invalid hex? but just let it
-        continue;
-      }
-      for (uint32_t& c : arr) {
-        t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
-        c <<= 4;
-        c |= h_b;
-        h_b = t;
-      }
-      if (h_b) {
-        arr.push_back (h_b);
-      }
-    }
-  }
+	fromCharToHexArray(r, arr);
 }
 hex_array::hex_array(const std::string s) {
+	fromCharToHexArray(s.c_str(), arr);
+}
+hex_array& hex_array::operator=(const char *r) {
 	arr.clear();
-	const char *r = s.c_str();
-  if (r) { // hex not nullptr
-    {
-      size_t temp = strlen (r);
-      size_t a = temp & 0x7;
-    	temp >>= 3;
-      if (a) {
-      	++temp;
-      }
-      arr.reserve (temp);
-    }
-    uint32_t h_b = 0, t;
-    while (*r) { // while char '\0' stop iteration
-      char h = *(r++);
-      if (h >= '0' && h <= '9') {
-        h_b = h - '0';
-      } else if (h >= 'a' && h <= 'f') {
-        h_b = h - 'a' + 10;
-      } else {
-        // is invalid hex? but just let it
-        continue;
-      }
-      for (uint32_t& c : arr) {
-        t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
-        c <<= 4;
-        c |= h_b;
-        h_b = t;
-      }
-      if (h_b) {
-        arr.push_back (h_b);
-      }
-    }
-  }
+	fromCharToHexArray(r, arr);
+  return *this;
 }
-hex_array& operator=(hex_array &l, const char *r) {
-	l.arr.clear();
-  if (r) { // hex not nullptr
-    {
-      size_t temp = strlen (r);
-      size_t a = temp & 0x7;
-    	temp >>= 3;
-      if (a) {
-      	++temp;
-      }
-      l.arr.reserve (temp);
-    }
-    uint32_t h_b = 0, t;
-    while (*r) { // while char '\0' stop iteration
-      char h = *(r++);
-      if (h >= '0' && h <= '9') {
-        h_b = h - '0';
-      } else if (h >= 'a' && h <= 'f') {
-        h_b = h - 'a' + 10;
-      } else {
-        // is invalid hex? but just let it
-        continue;
-      }
-      for (uint32_t& c : l.arr) {
-        t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
-        c <<= 4;
-        c |= h_b;
-        h_b = t;
-      }
-      if (h_b) {
-        l.arr.push_back (h_b);
-      }
-    }
-  }
-  return l;
-}
-hex_array& operator=(hex_array &l, const std::string r) {
-  return (l = r.c_str());
+hex_array& hex_array::operator=(const std::string r) {
+	arr.clear();
+	fromCharToHexArray(r.c_str(), arr);
+  return *this;
 }
 
 std::string& operator=(std::string &l, const hex_array r) {

@@ -34,8 +34,8 @@ public:
     return arr.at(index);
   }
 
-	friend hex_array& operator=(hex_array&, const char *);
-	friend hex_array& operator=(hex_array&, const std::string);
+	hex_array& operator=(const char *);
+	hex_array& operator=(const std::string);
 	friend std::string& operator=(std::string&, const hex_array);
 	friend std::ostream& operator<<(std::ostream&, const hex_array);
 };

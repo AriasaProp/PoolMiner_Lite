@@ -626,6 +626,6 @@ hex_array hashN (const hex_array &header) {
   memcpy (B, X, 128);
   B[131] = 1;
   Sha256Update (&context, B, 132);
-  Sha256Finalise (&context, H.data());
+  Sha256Finalise (&context, (uint8_t*)H.data());
   return H;
 }

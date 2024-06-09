@@ -33,7 +33,7 @@ public:
 	friend hex_array& operator=(hex_array&, const std::string);
 	friend std::string& operator=(std::string&, const hex_array);
 	friend std::ostream& operator<<(std::ostream&, const hex_array);
-}
+};
 
 //hashing
 #include "algorithm/sha256.hpp"

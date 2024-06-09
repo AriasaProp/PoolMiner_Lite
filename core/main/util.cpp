@@ -360,6 +360,8 @@ hex_array hashN (const hex_array &header) {
     Sha256Finalise (&context, (uint8_t*) H.data());
     memcpy (X + (i * 8), H.data(), 32);
   }
+  
+  std::cout << "H! " << H << std::endl;
 
   for (i = 0; i < 32768; i += 32) {
     memcpy (V + i, X, 32);
@@ -647,5 +649,6 @@ hex_array hashN (const hex_array &header) {
   B[131] = 1;
   Sha256Update (&context, B, 132);
   Sha256Finalise (&context, (uint8_t*)H.data());
+  std::cout << "H! " << H << std::endl;
   return H;
 }

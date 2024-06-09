@@ -344,7 +344,7 @@ void hashing::innerHash() {
 hex_array hashN (const hex_array &header) {
   uint8_t B[132];
   uint32_t X[32];
-  hex_array H(8);
+  hex_array H = "0000000000000000000000000000000000000000000000000000000000000000";
   uint32_t V[32768];
   uint32_t xs[16];
 

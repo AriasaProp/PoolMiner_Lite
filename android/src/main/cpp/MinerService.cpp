@@ -121,10 +121,10 @@ public:
 						std::string method = res[0][0][0];
 						std::string value = res[0][0][1];
 						if (method == "mining.notify") {
-							session_id = convert::hexString_toBiner(value);
+							session_id = value;
 						}
 						if (method == "mining.set_difficulty") {
-							difficulty_ = convert::hexString_toBiner(value);
+							difficulty_ = value;
 						}
 					}
 					//2
@@ -132,14 +132,14 @@ public:
 						std::string method = res[0][1][0];
 						std::string value = res[0][1][1];
 						if (method == "mining.notify") {
-							session_id = convert::hexString_toBiner(value);
+							session_id = value;
 						}
 						if (method == "mining.set_difficulty") {
-							difficulty_ = convert::hexString_toBiner(value);
+							difficulty_ = value;
 						}
 					}
 					// xnonce1
-					xnonce1 = convert::hexString_toBiner(res[1]);
+					xnonce1 = res[1];
 					//xnonce2 size
 					xnonce2_size = (std::string)res[2];
 					subscribed = true;
@@ -161,10 +161,10 @@ public:
 				json::JSON params = d["params"];
 				if (params.size() < 8) throw std::runtime_error("mining.notify params has not enough informations!");
 		    mnd.job_id = (std::string)params[0];
-		    mnd.prev_hash = convert::hexString_toBiner(params[1]);
+		    mnd.prev_hash = params[1];
 		    
-		    mnd.coinb1 = convert::hexString_toBiner(params[2]);
-		    mnd.coinb2 = convert::hexString_toBiner(params[3]);
+		    mnd.coinb1 = params[2];
+		    mnd.coinb2 = params[3];
 		    // merkle_arr
 		    {
 		  		json::JSON jm = params[4];
@@ -172,12 +172,12 @@ public:
 		  		mnd.merkle_arr.clear();
 		  		mnd.merkle_arr.reserve(jm.size());
 		  		for (auto it = jm.ArrayRange().begin(); it < jm.ArrayRange().end(); ++it) {
-		  			mnd.merkle_arr.push_back(convert::hexString_toBiner(*it));
+		  			mnd.merkle_arr.push_back(*it);
 		  		}
 		    }
-		    mnd.version = convert::hexString_toBiner(params[5]);
-		    mnd.nbit = convert::hexString_toBiner(params[6]);
-		    mnd.ntime = convert::hexString_toBiner(params[7]);
+		    mnd.version = params[5];
+		    mnd.nbit = params[6];
+		    mnd.ntime = params[7];
 		    mnd.clean = params[8];
 			} else if ((method == "client.get_version") && d.hasKey("jsonrpc") && d["jsonrpc"].IsNull()) {
 	      version = (std::string)d["jsonrpc"];
@@ -220,8 +220,9 @@ public:
     // Increment extranonce2
     
     // Assemble block header
-    std::string header = convert::hexBiner_toString(mnd.version);
-    header += convert::hexBiner_toString(mnd.prev_hash);
+    std::string header = mnd.version;
+    std::string prev = mnd.prev_hash;
+    header += prev;
 	}
 };
 		*/

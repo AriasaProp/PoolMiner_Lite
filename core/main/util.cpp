@@ -6,24 +6,24 @@
 #include <iomanip>
 #include <sstream>
 
-const size_t HEX_BASE_SIZE = sizeof (hex_base) * 8;
+const size_t HEX_BASE_SIZE = sizeof (uint32_t) * 8;
 const size_t HEX_BASE_SIZE_SHIFTED = HEX_BASE_SIZE - 4;
 
-hex_array convert::hexString_toBiner (const char *hex) {
-  hex_array result;
-  if (hex) { // hex not nullptr
+hex_array& operator=(hex_array &l, const char *r) {
+	l.arr.clear();
+  if (r) { // hex not nullptr
     {
-      size_t temp = strlen (hex);
+      size_t temp = strlen (r);
       size_t a = temp & 0x7;
     	temp >>= 3;
       if (a) {
       	++temp;
       }
-      result.reserve (temp > 1 ? temp : 1);
+      l.reserve (temp);
     }
-    hex_base h_b = 0, t;
-    while (*hex) { // while char '\0' stop iteration
-      char h = *(hex++);
+    uint32_t h_b = 0, t;
+    while (*r) { // while char '\0' stop iteration
+      char h = *(r++);
       if (h >= '0' && h <= '9') {
         h_b = h - '0';
       } else if (h >= 'a' && h <= 'f') {
@@ -32,35 +32,35 @@ hex_array convert::hexString_toBiner (const char *hex) {
         // is invalid hex? but just let it
         continue;
       }
-      for (hex_base& c : result) {
+      for (uint32_t& c : l.arr) {
         t = (c >> HEX_BASE_SIZE_SHIFTED) & 0xf;
         c <<= 4;
         c |= h_b;
         h_b = t;
       }
       if (h_b) {
-        result.push_back (h_b);
+        l.arr.push_back (h_b);
       }
     }
   }
-  return result;
+  return l;
 }
-hex_array convert::hexString_toBiner (const std::string hex) {
-  return convert::hexString_toBiner (hex.c_str ());
+hex_array& operator=(hex_array &l, const std::string r) {
+  return (l = r.c_str());
 }
 
-std::string convert::hexBiner_toString (const hex_array h) {
+std::string& operator=(std::string &l, const hex_array r) {
   std::ostringstream oss;
-  for (hex_array::const_reverse_iterator i = h.crbegin (); i != h.crend (); ++i) {
+  for (std::vector<uint32_t>::const_reverse_iterator i = r.arr.crbegin(); i != r.arr.crend(); ++i) {
     oss << std::hex << std::setw(8) << std::setfill('0') << *i;
   }
-  return oss.str ();
+  return (l = oss.str ());
 }
-std::ostream& operator<<(std::ostream& os, const hex_array& h) {
-  for (hex_array::const_reverse_iterator i = h.crbegin(); i != h.crend(); ++i) {
-    os << std::hex << std::setw(8) << std::setfill('0') << *i;
+std::ostream& operator<<(std::ostream& l, const hex_array& r) {
+  for (std::vector<uint32_t>::const_reverse_iterator i = r.arr.crbegin(); i != r.arr.crend(); ++i) {
+    l << std::hex << std::setw(8) << std::setfill('0') << *i;
   }
-  return os;
+  return l;
 }
 
 // parsing json foward

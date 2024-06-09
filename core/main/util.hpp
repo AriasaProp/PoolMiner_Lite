@@ -18,16 +18,19 @@ typedef unsigned char uint8_t;
 #endif
 
 //hex Array
-typedef uint32_t hex_base;
-typedef std::vector<hex_base> hex_array;
+struct hex_array {
+private:
+	std::vector<uint32_t> arr;
+public:
+	uint32_t operator[](size_t index) const {
+    return arr_.at(index);
+  }
 
-namespace convert {
-hex_array hexString_toBiner (const char *);
-hex_array hexString_toBiner (const std::string);
-std::string hexBiner_toString (const hex_array);
-} // namespace convert
-std::ostream& operator<<(std::ostream&, const hex_array&);
-
+	friend hex_array& operator=(hex_array&, const char *);
+	friend hex_array& operator=(hex_array&, const std::string);
+	friend std::string& operator=(std_string&, const hex_array);
+	friend std::ostream& operator<<(std::ostream&, const hex_array&);
+}
 
 //hashing
 #include "algorithm/sha256.hpp"

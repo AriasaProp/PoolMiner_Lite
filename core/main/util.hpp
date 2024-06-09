@@ -40,8 +40,6 @@ public:
 	friend std::ostream& operator<<(std::ostream&, const hex_array);
 };
 
-hex_array& operator=(hex_array&, const char *);
-hex_array& operator=(hex_array&, const std::string);
 std::string& operator=(std::string&, const hex_array);
 std::ostream& operator<<(std::ostream&, const hex_array);
 

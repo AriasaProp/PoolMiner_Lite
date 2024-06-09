@@ -64,12 +64,12 @@ hex_array& hex_array::operator=(const std::string r) {
   return *this;
 }
 
-std::string& operator=(std::string &l, const hex_array r) {
+hex_array::operator std::string() {
   std::ostringstream s;
-  for (std::vector<uint32_t>::const_reverse_iterator i = r.arr.crbegin(); i != r.arr.crend(); ++i) {
+  for (std::vector<uint32_t>::const_reverse_iterator i = arr.crbegin(); i != arr.crend(); ++i) {
     s << std::hex << std::setw(8) << std::setfill('0') << *i;
   }
-  return (l = s.str ());
+  return s.str ();
 }
 std::ostream& operator<<(std::ostream &l, const hex_array r) {
   for (std::vector<uint32_t>::const_reverse_iterator i = r.arr.crbegin(); i != r.arr.crend(); ++i) {

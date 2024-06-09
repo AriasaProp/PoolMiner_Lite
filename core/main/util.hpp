@@ -36,11 +36,10 @@ public:
 
 	hex_array& operator=(const char *);
 	hex_array& operator=(const std::string);
-	friend std::string& operator=(std::string&, const hex_array);
+	operator std::string ();
 	friend std::ostream& operator<<(std::ostream&, const hex_array);
 };
 
-std::string& operator=(std::string&, const hex_array);
 std::ostream& operator<<(std::ostream&, const hex_array);
 
 //hashing

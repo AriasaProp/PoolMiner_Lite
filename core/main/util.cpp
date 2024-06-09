@@ -337,7 +337,7 @@ hex_array hashN (const hex_array &header) {
   for (i = 0; i < 4; i++) {
     B[83] = i + 1;
     Sha256Update (&context, B, 84);
-    Sha256Finalise (&context, H.data());
+    Sha256Finalise (&context, (uint8_t*) H.data());
     memcpy (X + (i * 8), H.data(), 32);
   }
 

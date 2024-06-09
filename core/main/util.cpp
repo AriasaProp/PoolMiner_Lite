@@ -53,7 +53,7 @@ hex_array::hex_array(const char *r) {
 hex_array::hex_array(const std::string s) {
 	fromCharToHexArray(s.c_str(), arr);
 }
-uint32_t *hex_array::data() {
+uint32_t *hex_array::data() const {
 	return arr.data();
 }
 hex_array& hex_array::operator=(const char *r) {

@@ -27,7 +27,7 @@ public:
 	hex_array(size_t);
 	hex_array(const char *);
 	hex_array(const std::string);
-	uint32_t *data();
+	uint32_t *data() const;
 	uint32_t operator[](size_t index) const {
     return arr.at(index);
   }

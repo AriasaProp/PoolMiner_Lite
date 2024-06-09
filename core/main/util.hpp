@@ -22,7 +22,8 @@ struct hex_array {
 private:
 	std::vector<uint32_t> arr;
 public:
-	hex_array(){}
+	hex_array();
+	~hex_array();
 	hex_array(size_t);
 	hex_array(const char *);
 	hex_array(const std::string);
@@ -38,6 +39,11 @@ public:
 	friend std::string& operator=(std::string&, const hex_array);
 	friend std::ostream& operator<<(std::ostream&, const hex_array);
 };
+
+hex_array& operator=(hex_array&, const char *);
+hex_array& operator=(hex_array&, const std::string);
+std::string& operator=(std::string&, const hex_array);
+std::ostream& operator<<(std::ostream&, const hex_array);
 
 //hashing
 #include "algorithm/sha256.hpp"

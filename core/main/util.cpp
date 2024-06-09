@@ -8,6 +8,8 @@
 
 const size_t HEX_BASE_SIZE = sizeof (uint32_t) * 8;
 const size_t HEX_BASE_SIZE_SHIFTED = HEX_BASE_SIZE - 4;
+hex_array::hex_array() {}
+hex_array::~hex_array() {}
 hex_array::hex_array(size_t s) {
 	arr.reserve(s);
 }
@@ -123,13 +125,13 @@ hex_array& operator=(hex_array &l, const std::string r) {
 }
 
 std::string& operator=(std::string &l, const hex_array r) {
-  std::ostringstream oss;
+  std::ostringstream s;
   for (std::vector<uint32_t>::const_reverse_iterator i = r.arr.crbegin(); i != r.arr.crend(); ++i) {
-    oss << std::hex << std::setw(8) << std::setfill('0') << *i;
+    s << std::hex << std::setw(8) << std::setfill('0') << *i;
   }
-  return (l = oss.str ());
+  return (l = s.str ());
 }
-std::ostream& operator<<(std::ostream& l, const hex_array r) {
+std::ostream& operator<<(std::ostream &l, const hex_array r) {
   for (std::vector<uint32_t>::const_reverse_iterator i = r.arr.crbegin(); i != r.arr.crend(); ++i) {
     l << std::hex << std::setw(8) << std::setfill('0') << *i;
   }

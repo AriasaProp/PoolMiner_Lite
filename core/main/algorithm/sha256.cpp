@@ -27,7 +27,7 @@ static const uint32_t K[64] = {0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5d
   d += t0;                                          \
   h = t0 + t1;
 
-static void TransformFunction (Sha256Context *Context, uint8_t const *Buffer) {
+static void TransformFunction (Context *Context, uint8_t const *Buffer) {
   uint32_t S[8];
   uint32_t W[64];
   uint32_t t0;
@@ -76,100 +76,102 @@ static void TransformFunction (Sha256Context *Context, uint8_t const *Buffer) {
   }
 }
 
-void Sha256Initialise (Sha256Context *Context) {
-  Context->curlen = 0;
-  Context->length = 0;
-  Context->state[0] = 0x6A09E667UL;
-  Context->state[1] = 0xBB67AE85UL;
-  Context->state[2] = 0x3C6EF372UL;
-  Context->state[3] = 0xA54FF53AUL;
-  Context->state[4] = 0x510E527FUL;
-  Context->state[5] = 0x9B05688CUL;
-  Context->state[6] = 0x1F83D9ABUL;
-  Context->state[7] = 0x5BE0CD19UL;
+void Sha256::Initialise (Sha256::Context *c) {
+  c->curlen = 0;
+  c->length = 0;
+  c->state[0] = 0x6A09E667UL;
+  c->state[1] = 0xBB67AE85UL;
+  c->state[2] = 0x3C6EF372UL;
+  c->state[3] = 0xA54FF53AUL;
+  c->state[4] = 0x510E527FUL;
+  c->state[5] = 0x9B05688CUL;
+  c->state[6] = 0x1F83D9ABUL;
+  c->state[7] = 0x5BE0CD19UL;
 }
 
-void Sha256Update (Sha256Context *Context, void const *Buffer, uint32_t BufferSize) {
+void Sha256::Update (Sha256::Context *c, void const *Buffer, uint32_t BufferSize) {
   uint32_t n;
 
-  if (Context->curlen > sizeof (Context->buf)) {
+  if (c->curlen > sizeof (c->buf)) {
     return;
   }
 
   while (BufferSize > 0) {
-    if (Context->curlen == 0 && BufferSize >= BLOCK_SIZE) {
-      TransformFunction (Context, (uint8_t *)Buffer);
-      Context->length += BLOCK_SIZE * 8;
+    if (c->curlen == 0 && BufferSize >= BLOCK_SIZE) {
+      TransformFunction (c, (uint8_t *)Buffer);
+      c->length += BLOCK_SIZE * 8;
       Buffer = (uint8_t *)Buffer + BLOCK_SIZE;
       BufferSize -= BLOCK_SIZE;
     } else {
-      n = MIN (BufferSize, (BLOCK_SIZE - Context->curlen));
-      memcpy (Context->buf + Context->curlen, Buffer, (size_t)n);
-      Context->curlen += n;
+      n = MIN (BufferSize, (BLOCK_SIZE - c->curlen));
+      memcpy (c->buf + c->curlen, Buffer, (size_t)n);
+      c->curlen += n;
       Buffer = (uint8_t *)Buffer + n;
       BufferSize -= n;
-      if (Context->curlen == BLOCK_SIZE) {
-        TransformFunction (Context, Context->buf);
-        Context->length += 8 * BLOCK_SIZE;
-        Context->curlen = 0;
+      if (c->curlen == BLOCK_SIZE) {
+        TransformFunction (c, c->buf);
+        c->length += 8 * BLOCK_SIZE;
+        c->curlen = 0;
       }
     }
   }
 }
 
-void Sha256Finalise (Sha256Context *Context, uint8_t Digest[SHA256_HASH_SIZE]) {
+void Sha256::Finalise (Sha256::Context *c, uint8_t Digest[SHA256_HASH_SIZE]) {
   int i;
 
-  if (Context->curlen >= sizeof (Context->buf)) {
+  if (c->curlen >= sizeof (c->buf)) {
     return;
   }
 
   // Increase the length of the message
-  Context->length += Context->curlen * 8;
+  c->length += c->curlen * 8;
 
   // Append the '1' bit
-  Context->buf[Context->curlen++] = (uint8_t)0x80;
+  c->buf[c->curlen++] = (uint8_t)0x80;
 
   // if the length is currently above 56 bytes we append zeros
   // then compress.  Then we can fall back to padding zeros and length
   // encoding like normal.
-  if (Context->curlen > 56) {
-    while (Context->curlen < 64) {
-      Context->buf[Context->curlen++] = (uint8_t)0;
+  if (c->curlen > 56) {
+    while (c->curlen < 64) {
+      c->buf[c->curlen++] = (uint8_t)0;
     }
-    TransformFunction (Context, Context->buf);
-    Context->curlen = 0;
+    TransformFunction (c, c->buf);
+    c->curlen = 0;
   }
 
   // Pad up to 56 bytes of zeroes
-  while (Context->curlen < 56) {
-    Context->buf[Context->curlen++] = (uint8_t)0;
+  while (c->curlen < 56) {
+    c->buf[c->curlen++] = (uint8_t)0;
   }
 
   // Store length
-  Context->buf[56] = (uint8_t)((Context->length >> 56) & 255);
-  Context->buf[57] = (uint8_t)((Context->length >> 48) & 255);
-  Context->buf[58] = (uint8_t)((Context->length >> 40) & 255);
-  Context->buf[59] = (uint8_t)((Context->length >> 32) & 255);
-  Context->buf[60] = (uint8_t)((Context->length >> 24) & 255);
-  Context->buf[61] = (uint8_t)((Context->length >> 16) & 255);
-  Context->buf[62] = (uint8_t)((Context->length >>  8) & 255);
-  Context->buf[63] = (uint8_t)( Context->length        & 255);
-  TransformFunction (Context, Context->buf);
+  c->buf[56] = (uint8_t)((c->length >> 56) & 255);
+  c->buf[57] = (uint8_t)((c->length >> 48) & 255);
+  c->buf[58] = (uint8_t)((c->length >> 40) & 255);
+  c->buf[59] = (uint8_t)((c->length >> 32) & 255);
+  c->buf[60] = (uint8_t)((c->length >> 24) & 255);
+  c->buf[61] = (uint8_t)((c->length >> 16) & 255);
+  c->buf[62] = (uint8_t)((c->length >>  8) & 255);
+  c->buf[63] = (uint8_t)( c->length        & 255);
+  TransformFunction (c, c->buf);
 
   // Copy output
+  memcpy(Digest, c->state, 8*4);
+  /*
   for (i = 0; i < 8; ++i) {
-    *(Digest + (4 * i))     = (uint8_t)((Context->state[i] >> 24) & 255);
-    *(Digest + (4 * i) + 1) = (uint8_t)((Context->state[i] >> 16) & 255);
-    *(Digest + (4 * i) + 2) = (uint8_t)((Context->state[i] >> 8) & 255);
-    *(Digest + (4 * i) + 3) = (uint8_t)(Context->state[i] & 255);
+    *(Digest + (4 * i))     = (uint8_t)((c->state[i] >> 24) & 255);
+    *(Digest + (4 * i) + 1) = (uint8_t)((c->state[i] >> 16) & 255);
+    *(Digest + (4 * i) + 2) = (uint8_t)((c->state[i] >> 8) & 255);
+    *(Digest + (4 * i) + 3) = (uint8_t)(c->state[i] & 255);
   }
+  */
 }
 
-void Sha256Calculate (void const *Buffer, uint32_t BufferSize, uint8_t Digest[SHA256_HASH_SIZE]) {
-  Sha256Context *c = new Sha256Context;
-  Sha256Initialise (c);
-  Sha256Update (c, Buffer, BufferSize);
-  Sha256Finalise (c, Digest);
-  delete c;;
+void Sha256::Calculate (void const *Buffer, uint32_t BufferSize, uint8_t Digest[SHA256_HASH_SIZE]) {
+  Sha256::Context *c = new Sha256::Context;
+  Sha256::Initialise (c);
+  Sha256::Update (c, Buffer, BufferSize);
+  Sha256::Finalise (c, Digest);
 }

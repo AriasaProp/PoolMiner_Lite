@@ -100,10 +100,8 @@ std::ostream& operator<<(std::ostream &l, const hex_array r) {
 #define _rotl(value, bits) (((value) >> (bits)) | ((value) << (32 - (bits))))
 
 hashing::hashing () {
-	cntx = new Sha256Context;
 }
 hashing::~hashing () {
-	delete cntx;
 }
 void hashing::xorSalsa8(const size_t di, const size_t xi) {
   uint32_t x00 = (X[di +  0] ^= X[xi +  0]);
@@ -312,13 +310,13 @@ void hashing::hash (const uint8_t *header, const uint32_t nonce) {
   innerHash();
 }
 void hashing::innerHash() {
-  Sha256Initialise (cntx);
+  Sha256::Initialise (&cntx);
   memset (B + 80, 0, 3);
 
   for (i = 0; i < 4; i++) {
     B[83] = i + 1;
-    Sha256Update (cntx, B, 84);
-    Sha256Finalise (cntx, (uint8_t*)(X + (i * 8)));
+    Sha256::Update (&cntx, B, 84);
+    Sha256::Finalise (&cntx, (uint8_t*)(X + (i * 8)));
   }
 
   for (i = 0; i < 32768; i += 32) {
@@ -344,8 +342,8 @@ void hashing::innerHash() {
   memcpy (B, X, 128);
   memset (B+128, 0, 3);
   B[131] = 1;
-  Sha256Update (cntx, B, 132);
-  Sha256Finalise (cntx, H);
+  Sha256::Update (&cntx, B, 132);
+  Sha256::Finalise (&cntx, H);
 }
 
 hex_array hashN (const hex_array &header) {
@@ -355,16 +353,16 @@ hex_array hashN (const hex_array &header) {
   uint32_t V[32768];
   uint32_t xs[16];
 
-  Sha256Context *cntx = new Sha256Context;
+  Sha256::Context cntx;
   size_t i, j, k, l;
   memcpy (B, header.data(), 80);
-  Sha256Initialise (cntx);
+  Sha256::Initialise (&cntx);
   memset (B + 80, 0, 3);
 
   for (i = 0; i < 4; i++) {
     B[83] = i + 1;
-    Sha256Update (cntx, B, 84);
-    Sha256Finalise (cntx, H);
+    Sha256::Update (&cntx, B, 84);
+    Sha256::Finalise (&cntx, H);
     memcpy (X + (i * 8), H, 32);
   }
 
@@ -652,10 +650,9 @@ hex_array hashN (const hex_array &header) {
   }
   memcpy (B, X, 128);
   B[131] = 1;
-  Sha256Update (cntx, B, 132);
-  Sha256Finalise (cntx, H);
+  Sha256::Update (&cntx, B, 132);
+  Sha256::Finalise (&cntx, H);
   hex_array res((uint32_t*)H, (SHA256_HASH_SIZE/4));
   std::cout << "res! " << res << std::endl;
-  delete cntx;
   return res;
 }

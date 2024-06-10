@@ -52,7 +52,7 @@ private:
   uint8_t B[132];
   uint32_t X[32];
   uint32_t V[32768];
-  Sha256Context *cntx;
+  Sha256::Context cntx;
   void innerHash ();
 
 public:

@@ -6,7 +6,12 @@
 
 #define SHA256_HASH_SIZE 32
 
-struct Sha256Context;
+struct Sha256Context {
+  uint32_t curlen;
+  uint64_t length;
+  uint32_t state[8];
+  uint8_t buf[64];
+};
 
 void Sha256Initialise (Sha256Context *);
 void Sha256Update (Sha256Context *, void const *, uint32_t);

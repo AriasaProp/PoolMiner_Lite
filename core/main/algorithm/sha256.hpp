@@ -4,12 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 
-struct Sha256Context {
-  uint32_t curlen;
-  uint64_t length;
-  uint32_t state[8];
-  uint8_t buf[64];
-};
+struct Sha256Context;
 
 #define SHA256_HASH_SIZE 32
 

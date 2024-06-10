@@ -45,7 +45,10 @@ static void fromCharToHexArray(const char *r, std::vector<uint32_t> &arr) {
 hex_array::hex_array() {}
 hex_array::~hex_array() {}
 hex_array::hex_array(size_t s) {
-	arr.reserve(s);
+	arr = std::vector<uint32_t>(s);
+}
+hex_array::hex_array(const uint32_t *d, size_t s) {
+	arr = std::vector<uint32_t>(d, d + s);
 }
 hex_array::hex_array(const char *r) {
 	fromCharToHexArray(r, arr);
@@ -344,7 +347,7 @@ void hashing::innerHash() {
 hex_array hashN (const hex_array &header) {
   uint8_t B[132];
   uint32_t X[32];
-  hex_array H = "0000000000000000000000000000000000000000000000000000000000000000";
+  uint8_t H[SHA256_HASH_SIZE/4];
   uint32_t V[32768];
   uint32_t xs[16];
 
@@ -357,11 +360,9 @@ hex_array hashN (const hex_array &header) {
   for (i = 0; i < 4; i++) {
     B[83] = i + 1;
     Sha256Update (&context, B, 84);
-    Sha256Finalise (&context, (uint8_t*) H.data());
-    memcpy (X + (i * 8), H.data(), 32);
+    Sha256Finalise (&context, H);
+    memcpy (X + (i * 8), H, 32);
   }
-  
-  std::cout << "H! " << H << std::endl;
 
   for (i = 0; i < 32768; i += 32) {
     memcpy (V + i, X, 32);
@@ -648,7 +649,8 @@ hex_array hashN (const hex_array &header) {
   memcpy (B, X, 128);
   B[131] = 1;
   Sha256Update (&context, B, 132);
-  Sha256Finalise (&context, (uint8_t*)H.data());
-  std::cout << "H! " << H << std::endl;
-  return H;
+  Sha256Finalise (&context, H);
+  hex_array res((uint32_t*)H, ((uint32_t*)H) + (SHA256_HASH_SIZE/4));
+  std::cout << "res! " << res << std::endl;
+  return res;
 }

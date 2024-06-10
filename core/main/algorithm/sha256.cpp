@@ -1,4 +1,12 @@
 #include "sha256.hpp"
+
+struct Sha256Context {
+  uint32_t curlen;
+  uint64_t length;
+  uint32_t state[8];
+  uint8_t buf[64];
+};
+
 #include <memory.h>
 
 #define ror(value, bits) (((value) >> (bits)) | ((value) << (32 - (bits))))

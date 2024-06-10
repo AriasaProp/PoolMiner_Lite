@@ -27,7 +27,7 @@ static const uint32_t K[64] = {0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5d
   d += t0;                                          \
   h = t0 + t1;
 
-static void TransformFunction (Context *Context, uint8_t const *Buffer) {
+static void TransformFunction (Sha256::Context *c, uint8_t const *Buffer) {
   uint32_t S[8];
   uint32_t W[64];
   uint32_t t0;
@@ -37,7 +37,7 @@ static void TransformFunction (Context *Context, uint8_t const *Buffer) {
 
   // Copy state into S
   for (i = 0; i < 8; ++i) {
-    S[i] = Context->state[i];
+    S[i] = c->state[i];
   }
 
   // Copy the state into 512-bits into W[0..15]
@@ -72,7 +72,7 @@ static void TransformFunction (Context *Context, uint8_t const *Buffer) {
 
   // Feedback
   for (i = 0; i < 8; ++i) {
-    Context->state[i] = Context->state[i] + S[i];
+    c->state[i] = c->state[i] + S[i];
   }
 }
 

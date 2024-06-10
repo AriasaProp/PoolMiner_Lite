@@ -175,8 +175,9 @@ void Sha256Finalise (Sha256Context *Context, uint8_t Digest[SHA256_HASH_SIZE]) {
 }
 
 void Sha256Calculate (void const *Buffer, uint32_t BufferSize, uint8_t Digest[SHA256_HASH_SIZE]) {
-  Sha256Context context;
-  Sha256Initialise (&context);
-  Sha256Update (&context, Buffer, BufferSize);
-  Sha256Finalise (&context, Digest);
+  Sha256Context *c = new Sha256Context;
+  Sha256Initialise (c);
+  Sha256Update (c, Buffer, BufferSize);
+  Sha256Finalise (c, Digest);
+  delete c;;
 }

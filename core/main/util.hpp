@@ -25,6 +25,7 @@ public:
 	hex_array();
 	~hex_array();
 	hex_array(size_t);
+	hex_array(const uint32_t*,size_t);
 	hex_array(const char *);
 	hex_array(const std::string);
 	uint32_t *data();
@@ -51,7 +52,7 @@ private:
   uint8_t B[132];
   uint32_t X[32];
   uint32_t V[32768];
-  Sha256Context context;
+  Sha256Context *cntx;
   void innerHash ();
 
 public:

@@ -15,12 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.5.2
-      - name: Build Android APK
-        uses: gradle/gradle-build-action@v2.4.2
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.4
-          arguments: :android:build -P${{ inputs.build_type }}
-      - uses: actions/upload-artifact@v3.1.2
+          gradle-version: 8.7
+
+      - name: Android Build ${{ inputs.build_type }}
+        run: gradle :android:build -P${{ inputs.build_type }}
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4.3.3
         with:
-          name: android-${{ inputs.build_type }}
+          name: APK
           path: ${{ github.workspace }}/android/build/outputs/apk/${{ inputs.build_type }}/android-${{ inputs.build_type }}.apk
+

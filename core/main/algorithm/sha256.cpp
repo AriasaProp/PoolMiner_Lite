@@ -158,15 +158,12 @@ void Sha256::Finalise (Sha256::Context *c, uint8_t Digest[SHA256_HASH_SIZE]) {
   TransformFunction (c, c->buf);
 
   // Copy output
-  memcpy(Digest, c->state, 8*4);
-  /*
   for (i = 0; i < 8; ++i) {
     *(Digest + (4 * i))     = (uint8_t)((c->state[i] >> 24) & 255);
     *(Digest + (4 * i) + 1) = (uint8_t)((c->state[i] >> 16) & 255);
     *(Digest + (4 * i) + 2) = (uint8_t)((c->state[i] >> 8) & 255);
     *(Digest + (4 * i) + 3) = (uint8_t)(c->state[i] & 255);
   }
-  */
 }
 
 void Sha256::Calculate (void const *Buffer, uint32_t BufferSize, uint8_t Digest[SHA256_HASH_SIZE]) {

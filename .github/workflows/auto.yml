@@ -41,6 +41,13 @@ jobs:
           sudo apt-get install -y clang-format
           echo ${{ steps.changes.outputs.core-src_files }} | xargs -n 1 clang-format -i
 
+      - name: Setup Java 23
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+          cache: 'gradle'
+
       - uses: gradle/actions/setup-gradle@v3
         with:
           version: 8.10.2

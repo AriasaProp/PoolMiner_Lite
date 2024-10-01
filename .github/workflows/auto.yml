@@ -44,11 +44,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
 
       - name: Upgrade gradle
-        continue-on-error: true
         run: gradle wrapper --gradle-version 8.10.2
 
       - name: Push
-        continue-on-error: true
         run: |
           git config --global user.email "ikomangwidiadaariasa12@gmail.com"
           git config --global user.name "AriasaProp"
@@ -57,7 +55,7 @@ jobs:
           git push
 
       - run: gradle :core:check
-        if: ${{ steps.changes.outputs.core == 'true' }}
+        #if: ${{ steps.changes.outputs.core == 'true' }}
 
   android:
     runs-on: ubuntu-latest

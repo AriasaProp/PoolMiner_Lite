@@ -7,10 +7,6 @@ on:
       - 'core/**'
       - 'android/**'
 
-permissions:
-  actions: write
-  contents: write
-
 jobs:
   core:
     runs-on: ubuntu-latest
@@ -66,7 +62,7 @@ jobs:
   android:
     runs-on: ubuntu-latest
     needs: [core]
-    if: ${{ (needs.core.outputs.android == 'true')
+    if: ${{ needs.core.outputs.android == 'true' }}
     steps:
 
       - uses: actions/checkout@v4.1.1

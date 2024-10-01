@@ -44,20 +44,18 @@ static uint32_t active_worker = 0;
 static uint32_t thread_use;
 
 int MinerService_OnLoad (JNIEnv *env) {
-  jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
-  // consoleItem = env->FindClass("com/ariasaproject/poolminerlite/ConsoleItem");
-  if (!m_class /*|| !consoleItem*/) return false;
-  updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
-  updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
-  updateState = env->GetMethodID (m_class, "updateState", "(I)V");
-  sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V");
-  // consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
-  if (!updateSpeed || !updateResult || !updateState /* || !consoleItemConstructor*/) return false;
+  jclass m_class = (*env)->FindClass (env, "com/ariasaproject/poolminerlite/MinerService");
+  if (!m_class) return false;
+  updateSpeed = (*env)->GetMethodID (env, m_class, "updateSpeed", "(F)V");
+  updateResult = (*env)->GetMethodID (env, m_class, "updateResult", "(Z)V");
+  updateState = (*env)->GetMethodID (env, m_class, "updateState", "(I)V");
+  sendMessageConsole = (*env)->GetMethodID (env, m_class, "sendMessageConsole", "(ILjava/lang/String;)V");
+  if (!updateSpeed || !updateResult || !updateState) return false;
   status_flags &= ~STATUS_MINERUNNING;
   return 1;
 }
 void MinerService_OnUnload (JNIEnv *env) {
-  env->DeleteGlobalRef (local_globalRef);
+  (*env)->DeleteGlobalRef (env, local_globalRef);
   local_globalRef = NULL;
   updateSpeed = NULL;
   updateResult = NULL;
@@ -172,8 +170,8 @@ void *startConnect (void *p) {
     {
       JNIEnv *env;
       if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-        env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("subscribe & authorize success"));
+        (*env)->CallVoidMethod (env, local_globalRef, updateState, STATE_RUNNING);
+        (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 2, (*env)->NewStringUTF (env, "subscribe & authorize success"));
         global_jvm->DetachCurrentThread ();
       }
     }
@@ -189,7 +187,7 @@ void *startConnect (void *p) {
           if (++tries > MAX_ATTEMPTS_TRY) throw ("failed to receive message socket!.");
           JNIEnv *env;
           if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-            env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF ("Connection Failed, Try connect again after a sec!"));
+            (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, "Connection Failed, Try connect again after a sec!"));
             global_jvm->DetachCurrentThread ();
           }
           sleep (1);
@@ -197,7 +195,7 @@ void *startConnect (void *p) {
           if (tries) tries = 0;
           JNIEnv *env;
           if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-            env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (buffer));
+            (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 0, (*env)->NewStringUTF (env, buffer));
             global_jvm->DetachCurrentThread ();
           }
         }
@@ -209,7 +207,7 @@ void *startConnect (void *p) {
     	char _msg[MAX_MESSAGE];
     	strcpy(_msg, "Connection Failed, because ");
     	strcat(_msg, er);
-      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (_msg));
+      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, _msg));
       global_jvm->DetachCurrentThread ();
     }
   }
@@ -225,7 +223,7 @@ void *startConnect (void *p) {
   {
     JNIEnv *env;
 	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+	    (*env)->CallVoidMethod (env, local_globalRef, updateState, STATE_NONE);
 		  global_jvm->DetachCurrentThread ();
 	  }
   }
@@ -241,33 +239,33 @@ void *startConnect (void *p) {
 
 JNIF (void, nativeStart)
 (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
-  connectData *cd = malloc(sizeof connectData);
+  connectData *cd = malloc(sizeof(connectData));
   {
-    jint *integers = env->GetIntArrayElements (i, nullptr);
+    jint *integers = (*env)->GetIntArrayElements (env, i, nullptr);
     cd->port = integers[0];
     thread_use = integers[1];
-    env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
+    (*env)->ReleaseIntArrayElements (env, i, integers, JNI_ABORT);
 
-    jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
-    cd->server = malloc(env->GetStringUTFLength (jserverName));
-    const char *serverName = env->GetStringUTFChars (jserverName, JNI_FALSE);
+    jstring jserverName = (jstring)(*env)->GetObjectArrayElement (env, s, 0);
+    cd->server = malloc((*env)->GetStringUTFLength (env, jserverName));
+    const char *serverName = (*env)->GetStringUTFChars (env, jserverName, JNI_FALSE);
     strcpy (cd->server, serverName);
-    env->ReleaseStringUTFChars (jserverName, serverName);
+    (*env)->ReleaseStringUTFChars (env, jserverName, serverName);
 
-    jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
-    cd->auth_user = malloc(env->GetStringUTFLength (jauth_user));
-    const char *auth_user = env->GetStringUTFChars (jauth_user, JNI_FALSE);
+    jstring jauth_user = (jstring)(*env)->GetObjectArrayElement (env, s, 1);
+    cd->auth_user = malloc((*env)->GetStringUTFLength (env, jauth_user));
+    const char *auth_user = (*env)->GetStringUTFChars (env, jauth_user, JNI_FALSE);
     strcpy (cd->auth_user, auth_user);
-    env->ReleaseStringUTFChars (jauth_user, auth_user);
+    (*env)->ReleaseStringUTFChars (env, jauth_user, auth_user);
 
-    jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
-    cd->auth_pass = malloc(env->GetStringUTFLength (jauth_pass));
-    const char *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
+    jstring jauth_pass = (jstring)(*env)->GetObjectArrayElement (env, s, 2);
+    cd->auth_pass = malloc((*env)->GetStringUTFLength (env, jauth_pass));
+    const char *auth_pass = (*env)->GetStringUTFChars (env, jauth_pass, JNI_FALSE);
     strcpy (cd->auth_pass, auth_pass);
-    env->ReleaseStringUTFChars (jauth_pass, auth_pass);
+    (*env)->ReleaseStringUTFChars (env, jauth_pass, auth_pass);
   }
   if (!local_globalRef)
-    local_globalRef = env->NewGlobalRef (o);
+    local_globalRef = (*env)->NewGlobalRef (env, o);
   pthread_t starting;
   pthread_attr_t thread_attr;
   pthread_attr_init (&thread_attr);
@@ -276,7 +274,7 @@ JNIF (void, nativeStart)
   active_worker = 0;
   if (pthread_create (&starting, &thread_attr, startConnect, (void *)cd) != 0) {
     status_flags &= ~STATUS_DOINGJOB;
-    env->CallVoidMethod (o, updateState, STATE_NONE);
+    (*env)->CallVoidMethod (env, o, updateState, STATE_NONE);
   } else {
     status_flags = STATUS_MINERUNNING | STATUS_DOINGJOB;
   }

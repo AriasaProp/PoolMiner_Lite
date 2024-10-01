@@ -1,4 +1,4 @@
-#include "sha256.hpp"
+#include "sha256.h"
 #include <memory.h>
 
 #define ror(value, bits) (((value) >> (bits)) | ((value) << (32 - (bits))))

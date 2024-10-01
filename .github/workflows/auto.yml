@@ -23,7 +23,7 @@ jobs:
               - 'core/**'
             android:
               - 'android/**'
-            core-src:
+            c-src:
               - added|modified: 'core/**/*.cpp'
               - added|modified: 'core/**/*.hpp'
             android-java:
@@ -39,7 +39,7 @@ jobs:
       - if: ${{ steps.changes.outputs.core-src == 'true' }}
         run: |
           sudo apt-get install -y clang-format
-          echo ${{ steps.changes.outputs.core-src }} | xargs -n 1 clang-format -i
+          echo ${{ steps.changes.outputs.core-src_files }} | xargs -n 1 clang-format -i
 
       - uses: gradle/actions/setup-gradle@v3
 

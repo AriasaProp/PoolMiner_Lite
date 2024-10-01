@@ -24,8 +24,9 @@ jobs:
             android:
               - 'android/**'
             c-src:
-              - added|modified: 'core/**/*.cpp'
-              - added|modified: 'core/**/*.hpp'
+              - added|modified: 'core/**/*.c'
+              - added|modified: 'core/**/*.h'
+              - added|modified: 'android/src/main/c/**/*.c'
             android-java:
               - added|modified: 'android/src/**/*.java'
 
@@ -36,10 +37,10 @@ jobs:
           args: "-r -a"
           skipCommit: false
 
-      - if: ${{ steps.changes.outputs.core-src == 'true' }}
+      - if: ${{ steps.changes.outputs.c-src == 'true' }}
         run: |
           sudo apt-get install -y clang-format
-          echo ${{ steps.changes.outputs.core-src_files }} | xargs -n 1 clang-format -i
+          echo ${{ steps.changes.outputs.c-src_files }} | xargs -n 1 clang-format -i
 
       - name: Setup Java 23
         uses: actions/setup-java@v4.2.1
@@ -49,11 +50,6 @@ jobs:
           cache: 'gradle'
 
       - uses: gradle/actions/setup-gradle@v3
-        with:
-          version: 8.10.2
-
-      - name: Upgrade gradle
-        run: gradle wrapper --gradle-version 8.10.2
 
       - name: Push
         run: |
@@ -63,8 +59,7 @@ jobs:
           git commit -m "Update files"
           git push
 
-      - run: gradle :core:check
-        #if: ${{ steps.changes.outputs.core == 'true' }}
+      - run: gradle :core:test
 
   android:
     runs-on: ubuntu-latest

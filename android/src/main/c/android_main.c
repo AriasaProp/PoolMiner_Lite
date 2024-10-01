@@ -1,12 +1,11 @@
-#include <cstdint>
-#include <cstring>
+#include <stdint.h>
+#include <string.h>
 #include <endian.h>
 #include <jni.h>
-#include <string>
 
 JavaVM *global_jvm;
 
-extern bool MinerService_OnLoad (JNIEnv *);
+extern int MinerService_OnLoad (JNIEnv *);
 
 jint JNI_OnLoad (JavaVM *vm, void *) {
   JNIEnv *env;

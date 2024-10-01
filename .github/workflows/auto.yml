@@ -52,6 +52,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
 
       - name: Push
+        continue-on-error: true
         run: |
           git config --global user.email "ikomangwidiadaariasa12@gmail.com"
           git config --global user.name "AriasaProp"

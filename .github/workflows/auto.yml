@@ -33,24 +33,19 @@ jobs:
             android-java:
               - added|modified: 'android/src/**/*.java'
 
-      - name: Format Java Code
+      - uses: axel-op/googlejavaformat-action@v3.6.0
       	if: ${{ steps.changes.outputs.android-java == 'true' }}
-        uses: axel-op/googlejavaformat-action@v3.6.0
         with:
           files: "android/src/**/*.java"
           args: "-r -a"
           skipCommit: false
 
-      - name: Format Code C++
-        if: ${{ steps.changes.outputs.core-src == 'true' }}
+      - if: ${{ steps.changes.outputs.core-src == 'true' }}
         run: |
-          git config --global user.email "ikomangwidiadaariasa12@gmail.com"
-          git config --global user.name "AriasaProp"
           sudo apt-get install -y clang-format
           echo ${{ steps.changes.outputs.core-src }} | xargs -n 1 clang-format -i
 
       - uses: gradle/actions/setup-gradle@v3
-        if: ${{ steps.changes.outputs.core == 'true' }}
 
       - name: Upgrade gradle
         continue-on-error: true
@@ -59,8 +54,10 @@ jobs:
       - name: Push
         continue-on-error: true
         run: |
+          git config --global user.email "ikomangwidiadaariasa12@gmail.com"
+          git config --global user.name "AriasaProp"
           git add .
-          git commit -m "Core Reformatting Sources"
+          git commit -m "Update files"
           git push
 
       - run: gradle :core:check

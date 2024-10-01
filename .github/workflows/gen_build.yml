@@ -16,13 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3.5.2
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.7
+      - uses: gradle/actions/setup-gradle@v3
 
-      - name: Android Build ${{ inputs.build_type }}
-        run: gradle :android:build -P${{ inputs.build_type }}
+      - run: gradle :android:build -P${{ inputs.build_type }}
 
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v4.3.3

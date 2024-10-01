@@ -1,10 +1,10 @@
 #include <arpa/inet.h>
 #include <chrono>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <iomanip>
 #include <jni.h>
 #include <netdb.h>
@@ -78,7 +78,7 @@ void MinerService_OnUnload (JNIEnv *env) {
 struct mining_notify_data {
   std::string job_id;
   hex_array version;
-  hex_array *merkle_arr;
+  std::vector<hex_array> merkle_arr;
   hex_array ntime;
   hex_array nbit;
   bool clean;
@@ -97,7 +97,7 @@ private:
 	std::string version = "not set";
 	mining_notify_data mnd;
 public:
-  std::string *json_list_a;
+  std::vector<std::string> json_list_a;
 	bool subscribed = false;
 	bool authorized = false;
 	
@@ -409,7 +409,7 @@ void *startConnect (void *p) {
   pthread_exit (NULL);
 }
 
-#define JNIF(R, M) JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
+#define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
 
 JNIF (void, nativeStart)
 (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {

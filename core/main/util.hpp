@@ -43,7 +43,7 @@ public:
 std::ostream& operator<<(std::ostream&, const hex_array);
 
 //hashing
-#include "algorithm/sha256.h"
+#include "algorithm/sha256.hpp"
 
 struct hashing {
 private:

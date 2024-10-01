@@ -1,6 +1,6 @@
 plugins {
-    id 'c-library'
-    id 'c-unit-test'
+    id 'cpp-library'
+    id 'cpp-unit-test'
 }
 
 library {

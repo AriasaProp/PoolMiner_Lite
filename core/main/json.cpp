@@ -1,4 +1,4 @@
-#include "json.h"
+#include "json.hpp"
 
 // define constructor
 json::JSON::JSON () : Internal (), Type (json::JSON::Class::Null) {}

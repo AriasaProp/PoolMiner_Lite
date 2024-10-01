@@ -1,8 +1,8 @@
-#include "util.h"
+#include "util.hpp"
 
 #include <algorithm>
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
 #include <iomanip>
 #include <sstream>
 

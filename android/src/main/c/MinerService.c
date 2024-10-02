@@ -20,10 +20,10 @@
 
 extern JavaVM *global_jvm;
 
-static JavaVMAttachArgs attachArgs{
-    .version = JNI_VERSION_1_6,
-    .name = "CpuWorker",
-    .group = NULL};
+static struct JavaVMAttachArgs attachArgs;
+attachArgs.version = JNI_VERSION_1_6;
+attachArgs.name = "CpuWorker";
+attachArgs.group = NULL;
 
 // static jclass consoleItem;
 
@@ -214,7 +214,7 @@ JNIF (void, nativeStart)
 (JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   connectData *cd = malloc(sizeof(connectData));
   {
-    jint *integers = (*env)->GetIntArrayElements (env, i, nullptr);
+    jint *integers = (*env)->GetIntArrayElements (env, i, NULL);
     cd->port = integers[0];
     thread_use = integers[1];
     (*env)->ReleaseIntArrayElements (env, i, integers, JNI_ABORT);
@@ -254,13 +254,16 @@ JNIF (void, nativeStart)
   pthread_attr_destroy (&thread_attr);
 }
 JNIF (jboolean, nativeRunning)
-(JNIEnv *, jobject) {
+(JNIEnv *env, jobject o) {
+	(void)env;
+	(void)o;
   pthread_mutex_lock (&_mtx);
   int r = status_flags;
   pthread_mutex_unlock (&_mtx);
   return status_flags & STATUS_MINERUNNING;
 }
-void *toStopBackground (void *) {
+void *toStopBackground (void *n) {
+	(void)n;
   if (active_worker && (status_flags & STATUS_DOINGJOB)) {
     pthread_mutex_lock (&_mtx);
     status_flags &= ~STATUS_DOINGJOB;
@@ -272,7 +275,9 @@ void *toStopBackground (void *) {
   pthread_exit (NULL);
 }
 JNIF (void, nativeStop)
-(JNIEnv *, jobject) {
+(JNIEnv *env, jobject o) {
+	(void)env;
+	(void)o;
   // send state for mine was stop
   pthread_t stopping;
   pthread_attr_t thread_attr;

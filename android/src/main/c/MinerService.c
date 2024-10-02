@@ -20,11 +20,11 @@
 
 extern JavaVM *global_jvm;
 
-typedef struct JavaVMAttachArgs;
+//typedef struct JavaVMAttachArgs;
 static JavaVMAttachArgs attachArgs = {
-.version = JNI_VERSION_1_6,
-.name = "CpuWorker",
-.group = NULL
+	.version = JNI_VERSION_1_6,
+	.name = "CpuWorker",
+	.group = NULL
 };
 
 // static jclass consoleItem;
@@ -184,7 +184,7 @@ void *startConnect (void *p) {
 	    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
 	    	memmove(buffer + 27, buffer, strlen(buffer) + 1);
 	    	memcpy(buffer, "Connection Failed, because  ", 27);
-	      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, _msg));
+	      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, buffer));
 	      (*global_jvm)->DetachCurrentThread (global_jvm);
 	    }
   	}
@@ -262,7 +262,7 @@ JNIF (jboolean, nativeRunning)
   pthread_mutex_lock (&_mtx);
   int r = status_flags;
   pthread_mutex_unlock (&_mtx);
-  return status_flags & STATUS_MINERUNNING;
+  return r & STATUS_MINERUNNING;
 }
 void *toStopBackground (void *n) {
 	(void)n;

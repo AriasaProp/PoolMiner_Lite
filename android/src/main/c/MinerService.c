@@ -20,10 +20,12 @@
 
 extern JavaVM *global_jvm;
 
-static struct JavaVMAttachArgs attachArgs;
-attachArgs.version = JNI_VERSION_1_6;
-attachArgs.name = "CpuWorker";
-attachArgs.group = NULL;
+typedef struct JavaVMAttachArgs;
+static JavaVMAttachArgs attachArgs = {
+.version = JNI_VERSION_1_6;
+.name = "CpuWorker";
+.group = NULL;
+}!
 
 // static jclass consoleItem;
 
@@ -82,7 +84,7 @@ int startConnect_connect(connectData *dat) {
   	strcpy(buffer, "host name was invalid");
   	return 0;
   }
-  if(dat->sockfd = socket (AF_INET, SOCK_STREAM, 0) == -1) { 
+  if((dat->sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1) { 
   	strcpy(buffer, "socket has error!");
   	return 0;
   }

@@ -7,7 +7,8 @@ JavaVM *global_jvm;
 
 extern int MinerService_OnLoad (JNIEnv *);
 
-jint JNI_OnLoad (JavaVM *vm, void *) {
+jint JNI_OnLoad (JavaVM *vm, void *o) {
+	(void)o;
   JNIEnv *env;
   if (
       ((*vm)->GetEnv (vm, (void **)&env, JNI_VERSION_1_6) != JNI_OK) ||
@@ -19,7 +20,8 @@ jint JNI_OnLoad (JavaVM *vm, void *) {
 
 extern void MinerService_OnUnload (JNIEnv *);
 
-void JNI_OnUnload (JavaVM *vm, void *) {
+void JNI_OnUnload (JavaVM *vm, void *o) {
+	(void)o;
   JNIEnv *env;
   if ((*vm)->GetEnv (vm, (void **)&env, JNI_VERSION_1_6) != JNI_OK)
     return;

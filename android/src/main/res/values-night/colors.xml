@@ -12,13 +12,13 @@
     <color name="oposite">#FFFFFF</color>
     <color name="base">#000000</color>
     
-    <color name="colorPrimaryDark">#050A30</color>
-    <color name="colorPrimary">#000C66</color>
-    <color name="textColorPrimary">#FFFFFF</color>
-    <!-- 0000FF-->
-    <color name="textColor">#FFFFFF</color>
-    <color name="colorAccent">#7EC8E3</color>
-    
-    <color name="background_start">#0000FF</color>
-    <color name="background_end">#000000</color>
+    <color name="colorPrimaryDark">#001800</color>
+    <color name="colorPrimary">#1E5128</color>
+    <color name="textColorPrimary">#E0FFE6</color>
+
+    <color name="textColor">#F0FFF3</color>
+    <color name="colorAccent">#4E9F3D</color>
+
+    <color name="background">#191A19</color>
+
 </resources>

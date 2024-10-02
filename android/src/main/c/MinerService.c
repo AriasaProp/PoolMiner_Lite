@@ -110,7 +110,7 @@ int startConnect_subscribe_authorize(connectData *dat, int &sockfd) {
   strcat (buffer, "\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"");
   strcat (buffer, dat->auth);
   strcat (buffer, "\"]}");
-  for (int length = strlen(buffet), s; (tries < MAX_ATTEMPTS_TRY) && (length > 0);) {
+  for (int length = strlen(buffer), s; (tries < MAX_ATTEMPTS_TRY) && (length > 0);) {
     s = send (sockfd, buffer, length, 0);
     if (s <= 0) {
       ++tries;
@@ -174,13 +174,13 @@ void *startConnect (void *p) {
   int sockfd = -1;
   // try make an connection
   if (
-	  	!startConnect_connect(dat, &sockfd) ||
-  		!startConnect_subscribe_authorize(dat) ||
-  		!startConnect_loopRequest(dat)
+	  	!startConnect_connect(dat, sockfd) ||
+  		!startConnect_subscribe_authorize(dat, sockfd) ||
+  		!startConnect_loopRequest(dat, sockfd)
   	) {
 	    JNIEnv *env;
 	    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
-	    	memmove(buffer + 27, buffer, strlen(buffer) + 1)
+	    	memmove(buffer + 27, buffer, strlen(buffer) + 1);
 	    	memcpy(buffer, "Connection Failed, because  ", 27);
 	      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, _msg));
 	      (*global_jvm)->DetachCurrentThread (global_jvm);

@@ -44,6 +44,7 @@ jobs:
           echo ${{ steps.changes.outputs.cpp-src_files }} | xargs -n 1 clang-format -i
 
       - name: Push
+        continue-on-error: true
         if: ${{ steps.changes.outputs.android-java == 'true' }} || ${{ steps.changes.outputs.cpp-src == 'true' }}
         run: |
           git config --global user.email "ikomangwidiadaariasa12@gmail.com"

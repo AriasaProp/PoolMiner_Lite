@@ -22,10 +22,10 @@ extern JavaVM *global_jvm;
 
 typedef struct JavaVMAttachArgs;
 static JavaVMAttachArgs attachArgs = {
-.version = JNI_VERSION_1_6;
-.name = "CpuWorker";
-.group = NULL;
-}!
+.version = JNI_VERSION_1_6,
+.name = "CpuWorker",
+.group = NULL
+};
 
 // static jclass consoleItem;
 

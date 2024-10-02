@@ -26,7 +26,7 @@ jobs:
             cpp-src:
               - added|modified: 'core/**/*.cpp'
               - added|modified: 'core/**/*.hpp'
-              - added|modified: 'android/src/main/c/**/*.cpp'
+              - added|modified: 'android/src/main/c/**/*.c'
             android-java:
               - added|modified: 'android/src/**/*.java'
 

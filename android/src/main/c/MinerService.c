@@ -68,31 +68,31 @@ void MinerService_OnUnload (JNIEnv *env) {
 #define CONNECT_MACHINE "PoolMiner-Lite"
 
 typedef struct {
+	int sockfd;
   uint32_t port;
   char *server;
   char *auth;
 } connectData;
 
 static char buffer[MAX_MESSAGE];
-int startConnect_connect(connectData *dat, int &sockfd) {
+int startConnect_connect(connectData *dat) {
 	size_t tries = 0;
   struct hostent *host = gethostbyname (dat->server);
   if (!host) {
   	strcpy(buffer, "host name was invalid");
   	return 0;
   }
-  if(sockfd = socket (AF_INET, SOCK_STREAM, 0) == -1) { 
+  if(dat->sockfd = socket (AF_INET, SOCK_STREAM, 0) == -1) { 
   	strcpy(buffer, "socket has error!");
   	return 0;
   }
-  struct sockaddr_in server_addr {
-    .sin_family = AF_INET,
-    .sin_port = htons (dat->port),
-    .sin_addr = *((struct in_addr *)host->h_addr)
-  };
+  struct sockaddr_in server_addr;
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons (dat->port);
+  server_addr.sin_addr = *((struct in_addr *)host->h_addr);
   // try connect socket
   do {
-    if (connect (sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
+    if (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
     ++tries;
     sleep (1);
   } while (tries < MAX_ATTEMPTS_TRY);
@@ -103,7 +103,7 @@ int startConnect_connect(connectData *dat, int &sockfd) {
 	return 1;
 }
 // try subscribe & authorize
-int startConnect_subscribe_authorize(connectData *dat, int &sockfd) {
+int startConnect_subscribe_authorize(connectData *dat) {
   size_t tries = 0;
   strcpy (buffer, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"");
   strcat (buffer, CONNECT_MACHINE);
@@ -111,7 +111,7 @@ int startConnect_subscribe_authorize(connectData *dat, int &sockfd) {
   strcat (buffer, dat->auth);
   strcat (buffer, "\"]}");
   for (int length = strlen(buffer), s; (tries < MAX_ATTEMPTS_TRY) && (length > 0);) {
-    s = send (sockfd, buffer, length, 0);
+    s = send (dat->sockfd, buffer, length, 0);
     if (s <= 0) {
       ++tries;
       continue;
@@ -135,7 +135,7 @@ int startConnect_subscribe_authorize(connectData *dat, int &sockfd) {
   return 1;
 }
 // loop update data from server
-int startConnect_loopRequest(connectData *dat, int &sockfd) {
+int startConnect_loopRequest(connectData *dat) {
 	size_t tries = 0;
   int loop = STATUS_DOINGJOB;
   while (loop & STATUS_DOINGJOB) {
@@ -143,7 +143,7 @@ int startConnect_loopRequest(connectData *dat, int &sockfd) {
     loop = status_flags;
     pthread_mutex_unlock (&_mtx);
     JNIEnv *env;
-    if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
+    if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
       if (++tries > MAX_ATTEMPTS_TRY) {
       	strcpy(buffer, "failed to receive message socket!.");
       	return 0;
@@ -171,12 +171,12 @@ void *startConnect (void *p) {
   pthread_mutex_unlock (&_mtx);
 
   connectData *dat = (connectData *)p;
-  int sockfd = -1;
+  dat->sockfd = -1;
   // try make an connection
   if (
-	  	!startConnect_connect(dat, sockfd) ||
-  		!startConnect_subscribe_authorize(dat, sockfd) ||
-  		!startConnect_loopRequest(dat, sockfd)
+	  	!startConnect_connect(dat) ||
+  		!startConnect_subscribe_authorize(dat) ||
+  		!startConnect_loopRequest(dat)
   	) {
 	    JNIEnv *env;
 	    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
@@ -186,8 +186,8 @@ void *startConnect (void *p) {
 	      (*global_jvm)->DetachCurrentThread (global_jvm);
 	    }
   	}
-  if (sockfd != -1) {
-    close (sockfd);
+  if (dat->sockfd != -1) {
+    close (dat->sockfd);
   }
   free(dat->server);
   free(dat->auth);

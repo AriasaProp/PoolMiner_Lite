@@ -33,8 +33,10 @@
 				        android:id="@+id/tabLayout"
 				        app:tabMode="fixed"
 				        app:tabGravity="fill"
-				        app:tabRippleColor="@null"
-				        app:tabIndicatorColor="@color/colorPrimaryDark"
+				        app:tabIndicatorGravity="stretch"
+				        app:tabIndicator="@drawable/tab_indicator"
+				        app:tabSelectedTextColor="@color/textColor"
+				        app:tabIndicatorAnimationMode="elastic"
 				        android:layout_width="match_parent"
 				        android:layout_height="wrap_content" >
 

@@ -35,6 +35,7 @@
 				        app:tabGravity="fill"
 				        app:tabIndicatorGravity="stretch"
 				        app:tabIndicator="@drawable/tab_indicator"
+				        app:tabIndicatorColor="@color/background"
 				        app:tabSelectedTextColor="@color/textColor"
 				        app:tabIndicatorAnimationMode="elastic"
 				        android:layout_width="match_parent"

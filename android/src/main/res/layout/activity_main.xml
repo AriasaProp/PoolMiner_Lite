@@ -29,22 +29,25 @@
 		            android:layout_marginBottom="18dp"
 		            android:text="@string/app_name" />
 		            
-            <LinearLayout
+        		<androidx.appcompat.widget.AppCompatRadioGroup
 								android:orientation="horizontal"
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content">
             	
-            		<androidx.appcompat.widget.AppCompatToggleButton
+            		<androidx.appcompat.widget.AppCompatRadioButton
+            				android:id="@+id/radio_chat"
 				            android:layout_width="0dp"
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
 				            android:text="1" />
-            		<androidx.appcompat.widget.AppCompatToggleButton
+            		<androidx.appcompat.widget.AppCompatRadioButton
+            				android:id="@+id/radio_miner"
 				            android:layout_width="0dp"
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
 				            android:text="1" />
-            		<androidx.appcompat.widget.AppCompatToggleButton
+            		<androidx.appcompat.widget.AppCompatRadioButton
+            				android:id="@+id/radio_config"
 				            android:layout_width="0dp"
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"

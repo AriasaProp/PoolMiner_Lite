@@ -210,9 +210,9 @@ JNIF (void, nativeStart)
 
     jstring jserverName = (jstring)(*env)->GetObjectArrayElement (env, s, 0);
     const char *serverName = (*env)->GetStringUTFChars (env, jserverName, JNI_FALSE);
-    dat->host = gethostbyname (serverName);
+    cd->host = gethostbyname (serverName);
     (*env)->ReleaseStringUTFChars (env, jserverName, serverName);
-	  if (!dat->host) {
+	  if (!cd->host) {
       (*env)->CallVoidMethod (env, o, sendMessageConsole, 4, (*env)->NewStringUTF (env, "host name was invalid"));
     	(*env)->CallVoidMethod (env, o, updateState, STATE_NONE);
 	  	return;

@@ -177,7 +177,7 @@ void *startConnect (void *p) {
   	}
     close (dat->sockfd);
   }
-  free(dat->host);
+  //free(dat->host);
   free(dat->auth);
   free(dat);
   // set state mining to none
@@ -247,7 +247,7 @@ JNIF (jboolean, nativeRunning)
   pthread_mutex_lock (&_mtx);
   int r = active_worker;
   pthread_mutex_unlock (&_mtx);
-  return r;
+  return r > 0;
 }
 void *toStopBackground (void *n) {
 	(void)n;
@@ -264,6 +264,7 @@ JNIF (void, nativeStop)
 (JNIEnv *env, jobject o) {
 	(void)env;
 	(void)o;
+	if (active_worker == 0) return;
   // send state for mine was stop
   pthread_t stopping;
   pthread_attr_t thread_attr;

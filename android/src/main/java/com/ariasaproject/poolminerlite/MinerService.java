@@ -96,7 +96,6 @@ public class MinerService extends Service {
         }
 
         public void StopMine() {
-            if (!MinerService.this.nativeRunning()) return;
             MinerService.this.nativeStop();
             MinerService.this.stopSelf();
         }

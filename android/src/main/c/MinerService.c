@@ -35,10 +35,8 @@ static jmethodID updateState;
 static jmethodID sendMessageConsole;
 // static jmethodID consoleItemConstructor;
 
-// for mining data
-#define STATUS_MINERUNNING 1
-#define STATUS_DOINGJOB 2
-static int status_flags = 0;
+#define REQ_STOP_MINING 1
+static int queue_request = 0;
 
 static pthread_mutex_t _mtx = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
@@ -54,7 +52,6 @@ int MinerService_OnLoad (JNIEnv *env) {
   updateState = (*env)->GetMethodID (env, m_class, "updateState", "(I)V");
   sendMessageConsole = (*env)->GetMethodID (env, m_class, "sendMessageConsole", "(ILjava/lang/String;)V");
   if (!updateSpeed || !updateResult || !updateState) return 0;
-  status_flags &= ~STATUS_MINERUNNING;
   return 1;
 }
 void MinerService_OnUnload (JNIEnv *env) {
@@ -93,11 +90,9 @@ int startConnect_connecting(connectData *dat) {
   	strcpy(buffer, "Connection tries is always failed!");
   	return 0;
 	}
-  strcpy (buffer, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"");
-  strcat (buffer, CONNECT_MACHINE);
-  strcat (buffer, "\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"");
-  strcat (buffer, dat->auth);
-  strcat (buffer, "\"]}");
+	tries = 0;
+	snprintf(buffer, MAX_MESSAGE, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[%s]}"),
+	CONNECT_MACHINE, dat->auth);
   for (int length = strlen(buffer), s; (tries < MAX_ATTEMPTS_TRY) && (length > 0);) {
     s = send (dat->sockfd, buffer, length, 0);
     if (s <= 0) {
@@ -120,16 +115,10 @@ int startConnect_connecting(connectData *dat) {
   	strcpy(buffer, "Comunicate during subscribe & authorize is failed!");
   	return 0;
   }
-  return 1;
-}
+	tries = 0;
 // loop update data from server
-int startConnect_loopRequest(connectData *dat) {
-	size_t tries = 0;
-  int loop = STATUS_DOINGJOB;
-  while (loop & STATUS_DOINGJOB) {
-    pthread_mutex_lock (&_mtx);
-    loop = status_flags;
-    pthread_mutex_unlock (&_mtx);
+  int loop = 1;
+  do {
     JNIEnv *env;
     if (recv (dat->sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
       if (++tries > MAX_ATTEMPTS_TRY) {
@@ -148,7 +137,13 @@ int startConnect_loopRequest(connectData *dat) {
         (*global_jvm)->DetachCurrentThread (global_jvm);
       }
     }
-  }
+    pthread_mutex_lock (&_mtx);
+    if (queue_request & REQ_STOP_MINING) {
+    	queue_request = 0;
+    	loop = 0;
+    }
+    pthread_mutex_unlock (&_mtx);
+  } while (loop);
   return 1;
 }
 
@@ -161,7 +156,7 @@ void *startConnect (void *p) {
   connectData *dat = (connectData *)p;
   
   if((dat->sockfd = socket (AF_INET, SOCK_STREAM, 0)) != -1) {
-	  if (!startConnect_connecting(dat) || !startConnect_loopRequest(dat)) {
+	  if (!startConnect_connecting(dat)) {
 		    JNIEnv *env;
 		    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
 		    	memmove(buffer + 27, buffer, strlen(buffer) + 1);
@@ -220,12 +215,10 @@ JNIF (void, nativeStart)
 
     jstring jauth_user = (jstring)(*env)->GetObjectArrayElement (env, s, 1);
     jstring jauth_pass = (jstring)(*env)->GetObjectArrayElement (env, s, 2);
-    cd->auth = malloc((*env)->GetStringUTFLength (env, jauth_user) + 3 + (*env)->GetStringUTFLength (env, jauth_pass));
+    cd->auth = malloc((*env)->GetStringUTFLength (env, jauth_user) + 5 + (*env)->GetStringUTFLength (env, jauth_pass));
     const char *auth_user = (*env)->GetStringUTFChars (env, jauth_user, JNI_FALSE);
     const char *auth_pass = (*env)->GetStringUTFChars (env, jauth_pass, JNI_FALSE);
-    strcpy (cd->auth, auth_user);
-    strcat (cd->auth, "\",\"");
-    strcat (cd->auth, auth_pass);
+    sprintf(cd->auth, "\"%s\",\"%s\"", auth_user, auth_pass);
     (*env)->ReleaseStringUTFChars (env, jauth_user, auth_user);
     (*env)->ReleaseStringUTFChars (env, jauth_pass, auth_pass);
   }
@@ -238,10 +231,7 @@ JNIF (void, nativeStart)
   pthread_mutex_lock (&_mtx);
   active_worker = 0;
   if (pthread_create (&starting, &thread_attr, startConnect, (void *)cd) != 0) {
-    status_flags &= ~STATUS_DOINGJOB;
     (*env)->CallVoidMethod (env, o, updateState, STATE_NONE);
-  } else {
-    status_flags = STATUS_MINERUNNING | STATUS_DOINGJOB;
   }
   pthread_mutex_unlock (&_mtx);
   pthread_attr_destroy (&thread_attr);
@@ -251,18 +241,17 @@ JNIF (jboolean, nativeRunning)
 	(void)env;
 	(void)o;
   pthread_mutex_lock (&_mtx);
-  int r = status_flags;
+  int r = active_worker;
   pthread_mutex_unlock (&_mtx);
-  return r & STATUS_MINERUNNING;
+  return r;
 }
 void *toStopBackground (void *n) {
 	(void)n;
-  if (active_worker && (status_flags & STATUS_DOINGJOB)) {
+  if (active_worker) {
     pthread_mutex_lock (&_mtx);
-    status_flags &= ~STATUS_DOINGJOB;
-    while (active_worker > 0)
+    queue_request |= REQ_STOP_MINING;
+    while (active_worker)
       pthread_cond_wait (&_cond, &_mtx);
-    status_flags &= ~STATUS_MINERUNNING;
     pthread_mutex_unlock (&_mtx);
   }
   pthread_exit (NULL);

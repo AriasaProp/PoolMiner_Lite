@@ -1,11 +1,9 @@
 package com.ariasaproject.poolminerlite;
 
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Keep;
@@ -13,6 +11,7 @@ import androidx.core.app.NotificationCompat;
 
 public class MinerService extends Service {
     MinerViewModel mVM;
+    NotificationManager nfM;
     LocalBinder local = new LocalBinder();
     private static final int NOTIFICATION_ID = 1;
     private static final String NOTIFICATION_CHANNEL_ID = "notif_miner";
@@ -22,15 +21,7 @@ public class MinerService extends Service {
     public void onCreate() {
         super.onCreate();
         mVM = ((MainApplication) getApplication()).getMinerViewModel();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel =
-                    new NotificationChannel(
-                            NOTIFICATION_CHANNEL_ID,
-                            NOTIFICATION_TITLE,
-                            NotificationManager.IMPORTANCE_DEFAULT);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+        nfM = (NotificationManager) getSystemService(NotificationManager.class);
     }
 
     @Override

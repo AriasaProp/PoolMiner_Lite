@@ -72,26 +72,17 @@ void MinerService_OnUnload (JNIEnv *env) {
 typedef struct {
 	int sockfd;
   uint32_t port;
-  char *server;
+  struct hostent *host;
   char *auth;
 } connectData;
 
 static char buffer[MAX_MESSAGE];
-int startConnect_connect(connectData *dat) {
+int startConnect_connecting(connectData *dat) {
 	size_t tries = 0;
-  struct hostent *host = gethostbyname (dat->server);
-  if (!host) {
-  	strcpy(buffer, "host name was invalid");
-  	return 0;
-  }
-  if((dat->sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1) { 
-  	strcpy(buffer, "socket has error!");
-  	return 0;
-  }
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons (dat->port);
-  server_addr.sin_addr = *((struct in_addr *)host->h_addr);
+  server_addr.sin_addr = *((struct in_addr *)dat->host->h_addr);
   // try connect socket
   do {
     if (connect (dat->sockfd, (struct sockaddr *)&server_addr, sizeof (server_addr)) == 0) break;
@@ -102,11 +93,6 @@ int startConnect_connect(connectData *dat) {
   	strcpy(buffer, "Connection tries is always failed!");
   	return 0;
 	}
-	return 1;
-}
-// try subscribe & authorize
-int startConnect_subscribe_authorize(connectData *dat) {
-  size_t tries = 0;
   strcpy (buffer, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"");
   strcat (buffer, CONNECT_MACHINE);
   strcat (buffer, "\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"");
@@ -173,23 +159,24 @@ void *startConnect (void *p) {
   pthread_mutex_unlock (&_mtx);
 
   connectData *dat = (connectData *)p;
-  dat->sockfd = -1;
-  // try make an connection
-  if (
-	  	!startConnect_connect(dat) ||
-  		!startConnect_subscribe_authorize(dat) ||
-  		!startConnect_loopRequest(dat)
-  	) {
-	    JNIEnv *env;
-	    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
-	    	memmove(buffer + 27, buffer, strlen(buffer) + 1);
-	    	memcpy(buffer, "Connection Failed, because  ", 27);
-	      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, buffer));
-	      (*global_jvm)->DetachCurrentThread (global_jvm);
-	    }
-  	}
-  if (dat->sockfd != -1) {
+  
+  if((dat->sockfd = socket (AF_INET, SOCK_STREAM, 0)) != -1) {
+	  if (!startConnect_connecting(dat) || !startConnect_loopRequest(dat)) {
+		    JNIEnv *env;
+		    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
+		    	memmove(buffer + 27, buffer, strlen(buffer) + 1);
+		    	memcpy(buffer, "Connection Failed, because  ", 27);
+		      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, buffer));
+		      (*global_jvm)->DetachCurrentThread (global_jvm);
+		    }
+	  	}
     close (dat->sockfd);
+  } else {
+    JNIEnv *env;
+    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
+      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, "socket has error!"));
+      (*global_jvm)->DetachCurrentThread (global_jvm);
+    }
   }
   free(dat->server);
   free(dat->auth);
@@ -224,8 +211,13 @@ JNIF (void, nativeStart)
     jstring jserverName = (jstring)(*env)->GetObjectArrayElement (env, s, 0);
     cd->server = malloc((*env)->GetStringUTFLength (env, jserverName));
     const char *serverName = (*env)->GetStringUTFChars (env, jserverName, JNI_FALSE);
-    strcpy (cd->server, serverName);
+    dat->host = gethostbyname (serverName);
     (*env)->ReleaseStringUTFChars (env, jserverName, serverName);
+	  if (!dat->host) {
+      (*env)->CallVoidMethod (env, o, sendMessageConsole, 4, (*env)->NewStringUTF (env, "host name was invalid"));
+    	(*env)->CallVoidMethod (env, o, updateState, STATE_NONE);
+	  	return;
+	  }
 
     jstring jauth_user = (jstring)(*env)->GetObjectArrayElement (env, s, 1);
     jstring jauth_pass = (jstring)(*env)->GetObjectArrayElement (env, s, 2);

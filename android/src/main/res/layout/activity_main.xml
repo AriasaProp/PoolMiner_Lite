@@ -53,7 +53,7 @@
 				            android:layout_height="wrap_content"
 				            android:text="1" />
 								            	
-            </LinearLayout>
+            </androidx.appcompat.widget.AppCompatRadioGroup>
 
 				    <com.google.android.material.tabs.TabLayout
 				        android:id="@+id/tabLayout"

@@ -91,7 +91,7 @@ int startConnect_connecting(connectData *dat) {
   	return 0;
 	}
 	tries = 0;
-	snprintf(buffer, MAX_MESSAGE, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[%s]}"),
+	snprintf(buffer, MAX_MESSAGE, "{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[%s]}",
 	CONNECT_MACHINE, dat->auth);
   for (int length = strlen(buffer), s; (tries < MAX_ATTEMPTS_TRY) && (length > 0);) {
     s = send (dat->sockfd, buffer, length, 0);

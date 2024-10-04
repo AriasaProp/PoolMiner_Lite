@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat;
 public class MinerService extends Service {
     MinerViewModel mVM;
     NotificationManager nfM;
+    NotificationCompat.Builder notifBuild;
     LocalBinder local = new LocalBinder();
     private static final int NOTIFICATION_ID = 1;
     private static final String NOTIFICATION_CHANNEL_ID = "notif_miner";
@@ -22,6 +23,9 @@ public class MinerService extends Service {
         super.onCreate();
         mVM = ((MainApplication) getApplication()).getMinerViewModel();
         nfM = (NotificationManager) getSystemService(NotificationManager.class);
+        notifBuild = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+				notifBuild.setSmallIcon(R.mipmap.ic_launcher_foreground);
+				notifBuild.setContentTitle(NOTIFICATION_TITLE);
     }
 
     @Override
@@ -57,16 +61,11 @@ public class MinerService extends Service {
                 stopForeground(true);
                 break;
             case 2:
-                startForeground(
-                        NOTIFICATION_ID,
-                        new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                                .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                                .setContentTitle(NOTIFICATION_TITLE)
-                                .setContentText("Service is running in the foreground")
-                                .build());
+            		notifBuild.setContentText("Service is running in the foreground");
+                startForeground(NOTIFICATION_ID, notifBuild.build());
                 break;
             default:
-                ;
+                break;
         }
         mVM.postState(state);
     }

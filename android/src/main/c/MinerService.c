@@ -139,8 +139,12 @@ int startConnect_connecting(connectData *dat) {
     }
     pthread_mutex_lock (&_mtx);
     if (queue_request & REQ_STOP_MINING) {
-    	queue_request = 0;
+    	queue_request &= ~REQ_STOP_MINING;
     	loop = 0;
+      if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
+        (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 0, (*env)->NewStringUTF (env, "Request to close"));
+        (*global_jvm)->DetachCurrentThread (global_jvm);
+      }
     }
     pthread_mutex_unlock (&_mtx);
   } while (loop);
@@ -155,23 +159,23 @@ void *startConnect (void *p) {
 
   connectData *dat = (connectData *)p;
   
-  if((dat->sockfd = socket (AF_INET, SOCK_STREAM, 0)) != -1) {
-	  if (!startConnect_connecting(dat)) {
-		    JNIEnv *env;
-		    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
-		    	memmove(buffer + 27, buffer, strlen(buffer) + 1);
-		    	memcpy(buffer, "Connection Failed, because  ", 27);
-		      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, buffer));
-		      (*global_jvm)->DetachCurrentThread (global_jvm);
-		    }
-	  	}
-    close (dat->sockfd);
-  } else {
+  if((dat->sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1) {
     JNIEnv *env;
     if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
       (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, "socket has error!"));
       (*global_jvm)->DetachCurrentThread (global_jvm);
     }
+  } else {
+	  if (!startConnect_connecting(dat)) {
+	    JNIEnv *env;
+	    if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
+	    	memmove(buffer + 27, buffer, strlen(buffer) + 1);
+	    	memcpy(buffer, "Connection Failed, because  ", 27);
+	      (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 4, (*env)->NewStringUTF (env, buffer));
+	      (*global_jvm)->DetachCurrentThread (global_jvm);
+	    }
+  	}
+    close (dat->sockfd);
   }
   free(dat->host);
   free(dat->auth);

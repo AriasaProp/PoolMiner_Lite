@@ -178,7 +178,7 @@ void *startConnect (void *p) {
       (*global_jvm)->DetachCurrentThread (global_jvm);
     }
   }
-  free(dat->server);
+  free(dat->host);
   free(dat->auth);
   free(dat);
   // set state mining to none
@@ -209,7 +209,6 @@ JNIF (void, nativeStart)
     (*env)->ReleaseIntArrayElements (env, i, integers, JNI_ABORT);
 
     jstring jserverName = (jstring)(*env)->GetObjectArrayElement (env, s, 0);
-    cd->server = malloc((*env)->GetStringUTFLength (env, jserverName));
     const char *serverName = (*env)->GetStringUTFChars (env, jserverName, JNI_FALSE);
     dat->host = gethostbyname (serverName);
     (*env)->ReleaseStringUTFChars (env, jserverName, serverName);

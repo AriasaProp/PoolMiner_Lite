@@ -24,8 +24,8 @@ public class MinerService extends Service {
         mVM = ((MainApplication) getApplication()).getMinerViewModel();
         nfM = (NotificationManager) getSystemService(NotificationManager.class);
         notifBuild = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
-				notifBuild.setSmallIcon(R.mipmap.ic_launcher_foreground);
-				notifBuild.setContentTitle(NOTIFICATION_TITLE);
+        notifBuild.setSmallIcon(R.mipmap.ic_launcher_foreground);
+        notifBuild.setContentTitle(NOTIFICATION_TITLE);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class MinerService extends Service {
                 stopForeground(true);
                 break;
             case 2:
-            		notifBuild.setContentText("Service is running in the foreground");
+                notifBuild.setContentText("Service is running in the foreground");
                 startForeground(NOTIFICATION_ID, notifBuild.build());
                 break;
             default:

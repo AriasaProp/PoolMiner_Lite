@@ -1,8 +1,5 @@
 package com.ariasaproject.poolminerlite;
 
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING;
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE;
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +18,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
 import com.ariasaproject.poolminerlite.fragments.MinerFragment;
 import com.ariasaproject.poolminerlite.fragments.NewsFragment;
-import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
     static {
@@ -36,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // tabs and viewpager
-        //final TabLayout tabLayout = findViewById(R.id.tabLayout);
+        // final TabLayout tabLayout = findViewById(R.id.tabLayout);
         final ViewPager2 viewPager = findViewById(R.id.viewPager);
 
         pagerAdapter =

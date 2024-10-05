@@ -41,7 +41,7 @@
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
 				            android:button="@null"
-				            android:textColor="@color/tab_textColor"
+				            android:textColor="@color/tab_text_color"
 				            android:background="@drawable/tab_indicator"
 				            android:text="@string/tab_chat" />
 
@@ -51,7 +51,7 @@
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
 				            android:button="@null"
-				            android:textColor="@color/tab_textColor"
+				            android:textColor="@color/tab_text_color"
 				            android:background="@drawable/tab_indicator"
 				            android:text="@string/tab_miner" />
 
@@ -61,7 +61,7 @@
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
 				            android:button="@null"
-				            android:textColor="@color/tab_textColor"
+				            android:textColor="@color/tab_text_color"
 				            android:background="@drawable/tab_indicator"
 				            android:text="@string/tab_config" />
 

@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // tabs and viewpager
-        final TabLayout tabLayout = findViewById(R.id.tabLayout);
+        //final TabLayout tabLayout = findViewById(R.id.tabLayout);
         final ViewPager2 viewPager = findViewById(R.id.viewPager);
 
         pagerAdapter =
@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
         viewPager.setAdapter(pagerAdapter);
+        /*
         viewPager.registerOnPageChangeCallback(
                 new ViewPager2.OnPageChangeCallback() {
                     private int previousScrollState = SCROLL_STATE_IDLE;
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onTabReselected(TabLayout.Tab tab) {}
                 });
+        */
         viewPager.setCurrentItem(1, false);
         // check feature
         checkBatteryOptimizations();

@@ -30,6 +30,7 @@
 		            android:text="@string/app_name" />
 		            
         		<RadioGroup
+								android:id="@+id/tabLayout"
 								android:orientation="horizontal"
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content">
@@ -39,45 +40,32 @@
 				            android:layout_width="0dp"
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
-				            android:text="1" />
+				            android:button="@null"
+				            android:textColor="@color/tab_textColor"
+				            android:background="@drawable/tab_indicator"
+				            android:text="@string/tab_chat" />
+
             		<androidx.appcompat.widget.AppCompatRadioButton
             				android:id="@+id/radio_miner"
 				            android:layout_width="0dp"
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
-				            android:text="1" />
+				            android:button="@null"
+				            android:textColor="@color/tab_textColor"
+				            android:background="@drawable/tab_indicator"
+				            android:text="@string/tab_miner" />
+
             		<androidx.appcompat.widget.AppCompatRadioButton
             				android:id="@+id/radio_config"
 				            android:layout_width="0dp"
 				            android:layout_weight="1"
 				            android:layout_height="wrap_content"
-				            android:text="1" />
-								            	
+				            android:button="@null"
+				            android:textColor="@color/tab_textColor"
+				            android:background="@drawable/tab_indicator"
+				            android:text="@string/tab_config" />
+
             </RadioGroup>
-
-				    <com.google.android.material.tabs.TabLayout
-				        android:id="@+id/tabLayout"
-				        app:tabMode="fixed"
-				        app:tabGravity="fill"
-				        app:tabRippleColor="@null"
-				        app:tabIndicatorGravity="stretch"
-				        app:tabIndicator="@drawable/tab_indicator"
-				        app:tabIndicatorColor="@color/background"
-				        app:tabSelectedTextColor="@color/textColor"
-				        app:tabIndicatorAnimationMode="elastic"
-				        android:layout_width="match_parent"
-				        android:layout_height="wrap_content" >
-
-				    		<com.google.android.material.tabs.TabItem
-				        		android:text="Chat"/>
-
-				    		<com.google.android.material.tabs.TabItem
-				        		android:text="Miner"/>
-
-				    		<com.google.android.material.tabs.TabItem
-				        		android:text="Config"/>
-
-				    </com.google.android.material.tabs.TabLayout>
 
 				</LinearLayout>
 

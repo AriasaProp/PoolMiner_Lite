@@ -1,19 +1,14 @@
 package com.ariasaproject.poolminerlite;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.RadioGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -36,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // tabs and viewpager
-        //final RadioGroup tabs = findViewById(R.id.tabLayout);
+        // final RadioGroup tabs = findViewById(R.id.tabLayout);
         final ViewPager2 viewPager = findViewById(R.id.viewPager);
 
         pagerAdapter =

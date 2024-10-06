@@ -20,36 +20,36 @@ public class CustomTabLayout extends LinearLayout {
     private OnCheckedChangeListener mOnCheckedChangeListener;
     private PassThroughHierarchyChangeListener mPassThroughListener;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public CustomTabLayout(Context context) {
         super(context);
         setOrientation(VERTICAL);
         init();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public CustomTabLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         // retrieve selected radio button as requested by the user in the
         // XML layout file
-        //TODO: fix ignored attributes
-//        TypedArray attributes = context.obtainStyledAttributes(
-//                attrs, com.android.internal.R.styleable.RadioGroup, com.android.internal.R.attr.radioButtonStyle, 0);
+        // TODO: fix ignored attributes
+        //        TypedArray attributes = context.obtainStyledAttributes(
+        //                attrs, com.android.internal.R.styleable.RadioGroup,
+        // com.android.internal.R.attr.radioButtonStyle, 0);
 
-//        int value = attributes.getResourceId(com.android.internal.R.styleable.RadioGroup_checkedButton, View.NO_ID);
-//        if (value != View.NO_ID) {
-//            mCheckedId = value;
-//        }
+        //        int value =
+        // attributes.getResourceId(com.android.internal.R.styleable.RadioGroup_checkedButton,
+        // View.NO_ID);
+        //        if (value != View.NO_ID) {
+        //            mCheckedId = value;
+        //        }
 
-//        final int index = attributes.getInt(com.android.internal.R.styleable.RadioGroup_orientation, VERTICAL);
-//        setOrientation(index);
+        //        final int index =
+        // attributes.getInt(com.android.internal.R.styleable.RadioGroup_orientation, VERTICAL);
+        //        setOrientation(index);
 
-//        attributes.recycle();
+        //        attributes.recycle();
         init();
     }
 
@@ -59,18 +59,14 @@ public class CustomTabLayout extends LinearLayout {
         super.setOnHierarchyChangeListener(mPassThroughListener);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public void setOnHierarchyChangeListener(OnHierarchyChangeListener listener) {
         // the user listener is delegated to our pass-through listener
         mPassThroughListener.mOnHierarchyChangeListener = listener;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -102,9 +98,9 @@ public class CustomTabLayout extends LinearLayout {
     }
 
     /**
-     * <p>Sets the selection to the radio button whose identifier is passed in
-     * parameter. Using -1 as the selection identifier clears the selection;
-     * such an operation is equivalent to invoking {@link #clearCheck()}.</p>
+     * Sets the selection to the radio button whose identifier is passed in parameter. Using -1 as
+     * the selection identifier clears the selection; such an operation is equivalent to invoking
+     * {@link #clearCheck()}.
      *
      * @param id the unique id of the radio button to select in this group
      * @see #getCheckedRadioButtonId()
@@ -142,8 +138,8 @@ public class CustomTabLayout extends LinearLayout {
     }
 
     /**
-     * <p>Returns the identifier of the selected radio button in this group.
-     * Upon empty selection, the returned value is -1.</p>
+     * Returns the identifier of the selected radio button in this group. Upon empty selection, the
+     * returned value is -1.
      *
      * @return the unique id of the selected radio button in this group
      * @attr ref android.R.styleable#RadioGroup_checkedButton
@@ -156,9 +152,8 @@ public class CustomTabLayout extends LinearLayout {
     }
 
     /**
-     * <p>Clears the selection. When the selection is cleared, no radio button
-     * in this group is selected and {@link #getCheckedRadioButtonId()} returns
-     * null.</p>
+     * Clears the selection. When the selection is cleared, no radio button in this group is
+     * selected and {@link #getCheckedRadioButtonId()} returns null.
      *
      * @see #check(int)
      * @see #getCheckedRadioButtonId()
@@ -168,8 +163,7 @@ public class CustomTabLayout extends LinearLayout {
     }
 
     /**
-     * <p>Register a callback to be invoked when the checked radio button
-     * changes in this group.</p>
+     * Register a callback to be invoked when the checked radio button changes in this group.
      *
      * @param listener the callback to call on checked state change
      */
@@ -177,17 +171,13 @@ public class CustomTabLayout extends LinearLayout {
         mOnCheckedChangeListener = listener;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new CustomTabLayout.LayoutParams(getContext(), attrs);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof ViewGroup.LayoutParams;
@@ -204,63 +194,52 @@ public class CustomTabLayout extends LinearLayout {
     }
 
     /**
-     * <p>This set of layout parameters defaults the width and the height of
-     * the children to {@link #WRAP_CONTENT} when they are not specified in the
-     * XML file. Otherwise, this class ussed the value read from the XML file.</p>
-     * <p/>
-     * <p>See
-     * {@link com.android.internal.R.styleable#LinearLayout_Layout LinearLayout Attributes}
-     * for a list of all child view attributes that this class supports.</p>
+     * This set of layout parameters defaults the width and the height of the children to {@link
+     * #WRAP_CONTENT} when they are not specified in the XML file. Otherwise, this class ussed the
+     * value read from the XML file.
+     *
+     * <p>
+     *
+     * <p>See {@link com.android.internal.R.styleable#LinearLayout_Layout LinearLayout Attributes}
+     * for a list of all child view attributes that this class supports.
      */
     public static class LayoutParams extends LinearLayout.LayoutParams {
-        /**
-         * {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         public LayoutParams(int w, int h) {
             super(w, h);
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         public LayoutParams(int w, int h, float initWeight) {
             super(w, h, initWeight);
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         public LayoutParams(ViewGroup.LayoutParams p) {
             super(p);
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         public LayoutParams(MarginLayoutParams source) {
             super(source);
         }
 
         /**
-         * <p>Fixes the child's width to
-         * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} and the child's
-         * height to  {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
-         * when not specified in the XML file.</p>
+         * Fixes the child's width to {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} and
+         * the child's height to {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} when not
+         * specified in the XML file.
          *
-         * @param a          the styled attributes set
-         * @param widthAttr  the width attribute to fetch
+         * @param a the styled attributes set
+         * @param widthAttr the width attribute to fetch
          * @param heightAttr the height attribute to fetch
          */
         @Override
-        protected void setBaseAttributes(TypedArray a,
-                                         int widthAttr, int heightAttr) {
+        protected void setBaseAttributes(TypedArray a, int widthAttr, int heightAttr) {
 
             if (a.hasValue(widthAttr)) {
                 width = a.getLayoutDimension(widthAttr, "layout_width");
@@ -277,15 +256,15 @@ public class CustomTabLayout extends LinearLayout {
     }
 
     /**
-     * <p>Interface definition for a callback to be invoked when the checked
-     * radio button changed in this group.</p>
+     * Interface definition for a callback to be invoked when the checked radio button changed in
+     * this group.
      */
     public interface OnCheckedChangeListener {
         /**
-         * <p>Called when the checked radio button has changed. When the
-         * selection is cleared, checkedId is -1.</p>
+         * Called when the checked radio button has changed. When the selection is cleared,
+         * checkedId is -1.
          *
-         * @param group     the group in which the checked radio button has changed
+         * @param group the group in which the checked radio button has changed
          * @param checkedId the unique identifier of the newly checked radio button
          */
         public void onCheckedChanged(CustomTabLayout group, @IdRes int checkedId);
@@ -310,12 +289,12 @@ public class CustomTabLayout extends LinearLayout {
     }
 
     /**
-     * <p>A pass-through listener acts upon the events and dispatches them
-     * to another listener. This allows the table layout to set its own internal
-     * hierarchy change listener without preventing the user to setup his.</p>
+     * A pass-through listener acts upon the events and dispatches them to another listener. This
+     * allows the table layout to set its own internal hierarchy change listener without preventing
+     * the user to setup his.
      */
-    private class PassThroughHierarchyChangeListener implements
-            ViewGroup.OnHierarchyChangeListener {
+    private class PassThroughHierarchyChangeListener
+            implements ViewGroup.OnHierarchyChangeListener {
         private ViewGroup.OnHierarchyChangeListener mOnHierarchyChangeListener;
 
         public void traverseTree(View view) {
@@ -326,8 +305,7 @@ public class CustomTabLayout extends LinearLayout {
                     id = View.generateViewId();
                     view.setId(id);
                 }
-                ((RadioButton) view).setOnCheckedChangeListener(
-                        mChildOnCheckedChangeListener);
+                ((RadioButton) view).setOnCheckedChangeListener(mChildOnCheckedChangeListener);
             }
             if (!(view instanceof ViewGroup)) {
                 return;
@@ -341,9 +319,7 @@ public class CustomTabLayout extends LinearLayout {
             }
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         public void onChildViewAdded(View parent, View child) {
             traverseTree(child);
             if (parent == CustomTabLayout.this && child instanceof RadioButton) {
@@ -353,8 +329,7 @@ public class CustomTabLayout extends LinearLayout {
                     id = View.generateViewId();
                     child.setId(id);
                 }
-                ((RadioButton) child).setOnCheckedChangeListener(
-                        mChildOnCheckedChangeListener);
+                ((RadioButton) child).setOnCheckedChangeListener(mChildOnCheckedChangeListener);
             }
 
             if (mOnHierarchyChangeListener != null) {
@@ -362,9 +337,7 @@ public class CustomTabLayout extends LinearLayout {
             }
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        /** {@inheritDoc} */
         public void onChildViewRemoved(View parent, View child) {
             if (parent == CustomTabLayout.this && child instanceof RadioButton) {
                 ((RadioButton) child).setOnCheckedChangeListener(null);

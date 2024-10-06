@@ -34,12 +34,12 @@
 		        		android:layout_width="match_parent"
 								android:layout_height="wrap_content">
 		        	
-		        		<androidx.appcompat.widget.AppCompatImageView 
+		        		<View 
 		        				style="@style/AppTheme.Tab.Item"
 										android:id="@+id/tabIndicator"
 				        		android:layout_width="wrap_content"
 										android:layout_height="wrap_content"
-		        				android:src="@drawable/tab_indicator" />
+		        				android:background="@drawable/tab_indicator" />
 		        		
 		        		<RadioGroup
 										android:id="@+id/tabLayout"

@@ -1,8 +1,5 @@
 package com.ariasaproject.poolminerlite;
 
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING;
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE;
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,9 +11,9 @@ import android.widget.RadioGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -64,15 +61,17 @@ public class MainActivity extends AppCompatActivity {
                 };
         viewPager.setAdapter(pagerAdapter);
         final AppCompatImageView tab_indc = findViewById(R.id.tabIndicator);
-        tabs.setOnCheckedChangeListener((o, id) -> {
-        	AppCompatRadioButton vid = o.findViewById(id);
-	        int[] radioButtonLocation = new int[2];
-	        vid.getLocationOnScreen(radioButtonLocation);
-	        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(vid.getWidth(),vid.getHeight());
-	        layoutParams.leftMargin = radioButtonLocation[0] - frameLayout.getLeft();
-	        layoutParams.topMargin = radioButtonLocation[1] - frameLayout.getTop();
-	        tab_indc.setLayoutParams(layoutParams);
-        });
+        tabs.setOnCheckedChangeListener(
+                (o, id) -> {
+                    AppCompatRadioButton vid = o.findViewById(id);
+                    int[] radioButtonLocation = new int[2];
+                    vid.getLocationOnScreen(radioButtonLocation);
+                    ViewGroup.LayoutParams layoutParams =
+                            new ViewGroup.LayoutParams(vid.getWidth(), vid.getHeight());
+                    layoutParams.leftMargin = radioButtonLocation[0] - frameLayout.getLeft();
+                    layoutParams.topMargin = radioButtonLocation[1] - frameLayout.getTop();
+                    tab_indc.setLayoutParams(layoutParams);
+                });
         /*
         viewPager.registerOnPageChangeCallback(
                 new ViewPager2.OnPageChangeCallback() {

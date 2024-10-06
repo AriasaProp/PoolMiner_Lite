@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // tabs and viewpager
-        final RadioGroup tabs = findViewById(R.id.tabLayout);
+        //final RadioGroup tabs = findViewById(R.id.tabLayout);
         final ViewPager2 viewPager = findViewById(R.id.viewPager);
 
         pagerAdapter =
@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
         viewPager.setAdapter(pagerAdapter);
+        /*
         final View tab_indc = findViewById(R.id.tabIndicator);
         final FrameLayout rootTab = findViewById(R.id.rootTabLayout);
 
@@ -69,8 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     AppCompatRadioButton vid = o.findViewById(id);
                     int[] radioButtonLocation = new int[2];
                     vid.getLocationOnScreen(radioButtonLocation);
-                    FrameLayout.LayoutParams p =
-                            new FrameLayout.LayoutParams(vid.getWidth(), vid.getHeight());
+                    FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(vid.getWidth(), vid.getHeight());
                     p.leftMargin = radioButtonLocation[0] - rootTab.getLeft();
                     p.topMargin = radioButtonLocation[1] - rootTab.getTop();
                     tab_indc.setLayoutParams(p);
@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         // set default
         final AppCompatRadioButton def = findViewById(R.id.radio_miner);
         def.setChecked(true);
+                */
         /*
         viewPager.registerOnPageChangeCallback(
                 new ViewPager2.OnPageChangeCallback() {

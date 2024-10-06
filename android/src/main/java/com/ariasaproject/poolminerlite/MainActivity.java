@@ -1,5 +1,9 @@
 package com.ariasaproject.poolminerlite;
 
+import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING;
+import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE;
+import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -17,6 +21,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
 import com.ariasaproject.poolminerlite.fragments.MinerFragment;
 import com.ariasaproject.poolminerlite.fragments.NewsFragment;
+import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
     static {
@@ -31,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // tabs and viewpager
-        // final RadioGroup tabs = findViewById(R.id.tabLayout);
+        final TabLayout tabLayout = findViewById(R.id.tabLayout);
         final ViewPager2 viewPager = findViewById(R.id.viewPager);
 
         pagerAdapter =
@@ -56,25 +61,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
         viewPager.setAdapter(pagerAdapter);
-        /*
-        final View tab_indc = findViewById(R.id.tabIndicator);
-        final FrameLayout rootTab = findViewById(R.id.rootTabLayout);
-
-        tabs.setOnCheckedChangeListener(
-                (o, id) -> {
-                    AppCompatRadioButton vid = o.findViewById(id);
-                    int[] radioButtonLocation = new int[2];
-                    vid.getLocationOnScreen(radioButtonLocation);
-                    FrameLayout.LayoutParams p = new FrameLayout.LayoutParams(vid.getWidth(), vid.getHeight());
-                    p.leftMargin = radioButtonLocation[0] - rootTab.getLeft();
-                    p.topMargin = radioButtonLocation[1] - rootTab.getTop();
-                    tab_indc.setLayoutParams(p);
-                });
-        // set default
-        final AppCompatRadioButton def = findViewById(R.id.radio_miner);
-        def.setChecked(true);
-                */
-        /*
         viewPager.registerOnPageChangeCallback(
                 new ViewPager2.OnPageChangeCallback() {
                     private int previousScrollState = SCROLL_STATE_IDLE;
@@ -124,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onTabReselected(TabLayout.Tab tab) {}
                 });
-        */
         viewPager.setCurrentItem(1, false);
         // check feature
         checkBatteryOptimizations();

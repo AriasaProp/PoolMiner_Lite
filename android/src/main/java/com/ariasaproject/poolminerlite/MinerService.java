@@ -1,9 +1,11 @@
 package com.ariasaproject.poolminerlite;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Keep;
@@ -11,8 +13,6 @@ import androidx.core.app.NotificationCompat;
 
 public class MinerService extends Service {
     MinerViewModel mVM;
-    NotificationManager nfM;
-    NotificationCompat.Builder notifBuild;
     LocalBinder local = new LocalBinder();
     private static final int NOTIFICATION_ID = 1;
     private static final String NOTIFICATION_CHANNEL_ID = "notif_miner";
@@ -22,10 +22,15 @@ public class MinerService extends Service {
     public void onCreate() {
         super.onCreate();
         mVM = ((MainApplication) getApplication()).getMinerViewModel();
-        nfM = (NotificationManager) getSystemService(NotificationManager.class);
-        notifBuild = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
-        notifBuild.setSmallIcon(R.mipmap.ic_launcher_foreground);
-        notifBuild.setContentTitle(NOTIFICATION_TITLE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel =
+                    new NotificationChannel(
+                            NOTIFICATION_CHANNEL_ID,
+                            NOTIFICATION_TITLE,
+                            NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Override
@@ -61,11 +66,16 @@ public class MinerService extends Service {
                 stopForeground(true);
                 break;
             case 2:
-                notifBuild.setContentText("Service is running in the foreground");
-                startForeground(NOTIFICATION_ID, notifBuild.build());
+                startForeground(
+                        NOTIFICATION_ID,
+                        new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                                .setContentTitle(NOTIFICATION_TITLE)
+                                .setContentText("Service is running in the foreground")
+                                .build());
                 break;
             default:
-                break;
+                ;
         }
         mVM.postState(state);
     }
@@ -96,6 +106,7 @@ public class MinerService extends Service {
         }
 
         public void StopMine() {
+            if (!MinerService.this.nativeRunning()) return;
             MinerService.this.nativeStop();
             MinerService.this.stopSelf();
         }

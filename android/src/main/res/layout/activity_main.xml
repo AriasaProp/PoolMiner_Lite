@@ -28,40 +28,31 @@
 		            android:layout_marginTop="18dp"
 		            android:layout_marginBottom="18dp"
 		            android:text="@string/app_name" />
-	
-		        <com.ariasaproject.poolminerlite.views.CustomTabLayout
-								android:id="@+id/tabLayout"
-								android:orientation="horizontal"
-								android:checkedButton="@+id/radio_miner"
-								android:layout_width="match_parent"
-								android:layout_height="wrap_content">
-            	
-            		<androidx.appcompat.widget.AppCompatRadioButton
-            				style="@style/AppTheme.Tab.Item"
-            				android:id="@+id/radio_chat"
-				            android:layout_width="0dp"
-				            android:layout_weight="1"
-				            android:layout_height="wrap_content"
-				            android:text="@string/tab_chat" />
 
-            		<androidx.appcompat.widget.AppCompatRadioButton
-            				style="@style/AppTheme.Tab.Item"
-            				android:id="@+id/radio_miner"
-				            android:layout_width="0dp"
-				            android:layout_weight="1"
-				            android:layout_height="wrap_content"
-				            android:text="@string/tab_miner" />
+				    <com.google.android.material.tabs.TabLayout
+				        android:id="@+id/tabLayout"
+				        app:tabMode="fixed"
+				        app:tabGravity="fill"
+				        app:tabRippleColor="@null"
+				        app:tabIndicatorGravity="stretch"
+				        app:tabIndicator="@drawable/tab_indicator"
+				        app:tabIndicatorColor="@color/background"
+				        app:tabSelectedTextColor="@color/textColor"
+				        app:tabIndicatorAnimationMode="elastic"
+				        android:layout_width="match_parent"
+				        android:layout_height="wrap_content" >
 
-            		<androidx.appcompat.widget.AppCompatRadioButton
-            				style="@style/AppTheme.Tab.Item"
-            				android:id="@+id/radio_config"
-				            android:layout_width="0dp"
-				            android:layout_weight="1"
-				            android:layout_height="wrap_content"
-				            android:text="@string/tab_config" />
+				    		<com.google.android.material.tabs.TabItem
+				        		android:text="Chat"/>
 
-            </com.ariasaproject.poolminerlite.views.CustomTabLayout>
-        		
+				    		<com.google.android.material.tabs.TabItem
+				        		android:text="Miner"/>
+
+				    		<com.google.android.material.tabs.TabItem
+				        		android:text="Config"/>
+
+				    </com.google.android.material.tabs.TabLayout>
+
 				</LinearLayout>
 
 		</androidx.appcompat.widget.Toolbar>

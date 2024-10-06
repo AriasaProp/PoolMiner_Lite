@@ -28,39 +28,53 @@
 		            android:layout_marginTop="18dp"
 		            android:layout_marginBottom="18dp"
 		            android:text="@string/app_name" />
-		            
-        		<RadioGroup
-								android:id="@+id/tabLayout"
-								android:orientation="horizontal"
-								android:checkedButton="@+id/radio_miner"
-								android:layout_width="match_parent"
+
+		        <FrameLayout
+								android:id="@+id/rootTabLayout"
+		        		android:layout_width="match_parent"
 								android:layout_height="wrap_content">
-            	
-            		<androidx.appcompat.widget.AppCompatRadioButton
-            				style="@style/AppTheme.Tab.Item"
-            				android:id="@+id/radio_chat"
-				            android:layout_width="0dp"
-				            android:layout_weight="1"
-				            android:layout_height="wrap_content"
-				            android:text="@string/tab_chat" />
+		        	
+		        		<androidx.appcompat.widget.AppCompatImageView 
+		        				style="@style/AppTheme.Tab.Item"
+										android:id="@+id/tabIndicator"
+				        		android:layout_width="wrap_content"
+										android:layout_height="wrap_content"
+		        				android:src="@drawable/tab_indicator" />
+		        		
+		        		<RadioGroup
+										android:id="@+id/tabLayout"
+										android:orientation="horizontal"
+										android:checkedButton="@+id/radio_miner"
+										android:layout_width="match_parent"
+										android:layout_height="wrap_content">
+		            	
+		            		<androidx.appcompat.widget.AppCompatRadioButton
+		            				style="@style/AppTheme.Tab.Item"
+		            				android:id="@+id/radio_chat"
+						            android:layout_width="0dp"
+						            android:layout_weight="1"
+						            android:layout_height="wrap_content"
+						            android:text="@string/tab_chat" />
+		
+		            		<androidx.appcompat.widget.AppCompatRadioButton
+		            				style="@style/AppTheme.Tab.Item"
+		            				android:id="@+id/radio_miner"
+						            android:layout_width="0dp"
+						            android:layout_weight="1"
+						            android:layout_height="wrap_content"
+						            android:text="@string/tab_miner" />
+		
+		            		<androidx.appcompat.widget.AppCompatRadioButton
+		            				style="@style/AppTheme.Tab.Item"
+		            				android:id="@+id/radio_config"
+						            android:layout_width="0dp"
+						            android:layout_weight="1"
+						            android:layout_height="wrap_content"
+						            android:text="@string/tab_config" />
+		
+		            </RadioGroup>
+		        </FrameLayout>
 
-            		<androidx.appcompat.widget.AppCompatRadioButton
-            				style="@style/AppTheme.Tab.Item"
-            				android:id="@+id/radio_miner"
-				            android:layout_width="0dp"
-				            android:layout_weight="1"
-				            android:layout_height="wrap_content"
-				            android:text="@string/tab_miner" />
-
-            		<androidx.appcompat.widget.AppCompatRadioButton
-            				style="@style/AppTheme.Tab.Item"
-            				android:id="@+id/radio_config"
-				            android:layout_width="0dp"
-				            android:layout_weight="1"
-				            android:layout_height="wrap_content"
-				            android:text="@string/tab_config" />
-
-            </RadioGroup>
 
 				</LinearLayout>
 

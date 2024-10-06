@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.widget.RadioGroup;
+import android.widget.FrameLayout;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
 	        vid.getLocationOnScreen(radioButtonLocation);
 	        ViewGroup.LayoutParams p = new ViewGroup.LayoutParams(vid.getWidth(),vid.getHeight());
 	        p.leftMargin = radioButtonLocation[0];
-	        p.topMargin = radioButtonLocation[1]
+	        p.topMargin = radioButtonLocation[1];
 	        tab_indc.setLayoutParams(p);
         });
         /*

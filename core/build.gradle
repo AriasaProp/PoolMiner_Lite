@@ -38,3 +38,10 @@ model {
         }
     }
 }
+
+tasks.register('test') {
+    dependsOn 'testCUnitExec'
+    doLast {
+        println "Running CUnit tests..."
+    }
+}

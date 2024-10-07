@@ -35,6 +35,7 @@ static jmethodID updateState;
 static jmethodID sendMessageConsole;
 // static jmethodID consoleItemConstructor;
 
+
 #define REQ_STOP_MINING 1
 static int queue_request = 0;
 
@@ -141,10 +142,6 @@ int startConnect_connecting(connectData *dat) {
     if (queue_request & REQ_STOP_MINING) {
     	queue_request &= ~REQ_STOP_MINING;
     	loop = 0;
-      if ((*global_jvm)->AttachCurrentThread (global_jvm, &env, &attachArgs) == JNI_OK) {
-        (*env)->CallVoidMethod (env, local_globalRef, sendMessageConsole, 0, (*env)->NewStringUTF (env, "Request to close"));
-        (*global_jvm)->DetachCurrentThread (global_jvm);
-      }
     }
     pthread_mutex_unlock (&_mtx);
   } while (loop);
@@ -156,7 +153,7 @@ void *startConnect (void *p) {
   pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
-
+  
   connectData *dat = (connectData *)p;
   
   if((dat->sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1) {

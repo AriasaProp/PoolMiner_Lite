@@ -1,12 +1,6 @@
 plugins {
-    id 'cpp-library'
-    id 'cpp-unit-test'
-}
-
-library {
-    source.from file('main')
-    privateHeaders.from file('main')
-    publicHeaders.from file('main')
+    id 'c'
+    id 'cunit-test'
 }
 
 unitTest {

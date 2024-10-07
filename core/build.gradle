@@ -1,18 +1,40 @@
 plugins {
-    id 'cpp-library'
-    id 'cpp-unit-test'
+    id 'c'
+    id 'cunit-test-suite'
 }
 
-library {
-    source.from file('main')
-    privateHeaders.from file('main')
-    publicHeaders.from file('main')
-}
-
-unitTest {
-    source.from file('test')
-    privateHeaders.from file('test')
-    binaries.configureEach {
-				runTask.get().args "${projectDir}/data"
+model {
+    components {
+        main(NativeLibrarySpec) {
+            sources {
+                c {
+						        source {
+						            srcDir "main"
+						            include "**/*.c"
+						        }
+						        exportedHeaders {
+						            srcDir "main"
+						            include "**/*.h"
+						        }
+                }
+						}
+        }
+    }
+    testSuites {
+        test(CUnitTestSuiteSpec) {
+            testing $.components.main
+            sources {
+                c {
+						        source {
+						            srcDir "test"
+						            include "**/*.c"
+						        }
+						        headers {
+						            srcDir "test"
+						            include "**/*.h"
+						        }
+                }
+						}
+        }
     }
 }

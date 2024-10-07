@@ -1,8 +1,5 @@
 package com.ariasaproject.poolminerlite;
 
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_DRAGGING;
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE;
-import static androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_SETTLING;
 
 import android.content.Context;
 import android.content.Intent;
@@ -62,20 +59,26 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
         viewPager.setAdapter(pagerAdapter);
-        new TabLayoutMediator(tabLayout, viewPager, true, true, (t,i) -> {
-        	switch(i) {
-        		case 0:
-        			t.setText(R.string.tab_chat);
-        			break;
-        		default:
-        		case 1:
-        			t.setText(R.string.tab_miner);
-        			break;
-        		case 2:
-        			t.setText(R.string.tab_config);
-        			break;
-        	}
-        }).attach();
+        new TabLayoutMediator(
+                        tabLayout,
+                        viewPager,
+                        true,
+                        true,
+                        (t, i) -> {
+                            switch (i) {
+                                case 0:
+                                    t.setText(R.string.tab_chat);
+                                    break;
+                                default:
+                                case 1:
+                                    t.setText(R.string.tab_miner);
+                                    break;
+                                case 2:
+                                    t.setText(R.string.tab_config);
+                                    break;
+                            }
+                        })
+                .attach();
         viewPager.setCurrentItem(1, false);
         // check feature
         checkBatteryOptimizations();

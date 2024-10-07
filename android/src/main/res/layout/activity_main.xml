@@ -36,8 +36,9 @@
 				        app:tabRippleColor="@null"
 				        app:tabIndicatorGravity="stretch"
 				        app:tabIndicator="@drawable/tab_indicator"
-				        app:tabIndicatorColor="@color/background"
 				        app:tabSelectedTextColor="@color/textColor"
+				        app:tabPaddingStart="0dp"
+				        app:tabPaddingEnd="0dp"
 				        app:tabIndicatorAnimationMode="elastic"
 				        android:layout_width="match_parent"
 				        android:layout_height="wrap_content" >

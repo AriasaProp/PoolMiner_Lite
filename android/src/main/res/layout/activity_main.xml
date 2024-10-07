@@ -36,21 +36,35 @@
 				        app:tabRippleColor="@null"
 				        app:tabIndicatorGravity="stretch"
 				        app:tabIndicator="@drawable/tab_indicator"
+				        app:tabIndicatorColor="@color/background"
 				        app:tabSelectedTextColor="@color/textColor"
 				        app:tabPaddingStart="0dp"
 				        app:tabPaddingEnd="0dp"
 				        app:tabIndicatorAnimationMode="elastic"
+				        app:tabIndicatorFullWidth="true"
 				        android:layout_width="match_parent"
 				        android:layout_height="wrap_content" >
 
 				    		<com.google.android.material.tabs.TabItem
-				        		android:text="Chat"/>
+				        		android:padding="0dp"
+				        		android:layout_width="0dp"
+				        		android:layout_weight="1"
+				        		android:layout_height="wrap_content"
+				        		android:text="@string/tab_chat"/>
 
 				    		<com.google.android.material.tabs.TabItem
-				        		android:text="Miner"/>
+				        		android:padding="0dp"
+				        		android:layout_width="0dp"
+				        		android:layout_weight="1"
+				        		android:layout_height="wrap_content"
+				        		android:text="@string/tab_miner"/>
 
 				    		<com.google.android.material.tabs.TabItem
-				        		android:text="Config"/>
+				        		android:padding="0dp"
+				        		android:layout_width="0dp"
+				        		android:layout_weight="1"
+				        		android:layout_height="wrap_content"
+				        		android:text="@string/tab_config"/>
 
 				    </com.google.android.material.tabs.TabLayout>
 

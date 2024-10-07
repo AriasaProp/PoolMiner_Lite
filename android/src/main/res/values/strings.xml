@@ -9,4 +9,9 @@
     <string name="mtxt_labelspeed">Speed: </string>
     <string name="mtxt_labelkeepscreenawake">Keep screen awake</string>
     
+    <!-- main tab item-->
+    <string name="tab_chat">CHAT</string>
+    <string name="tab_miner">MINER</string>
+    <string name="tab_config">CONFIG</string>
+    
 </resources>

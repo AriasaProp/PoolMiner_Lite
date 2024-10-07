@@ -31,6 +31,7 @@
 
 				    <com.google.android.material.tabs.TabLayout
 				        android:id="@+id/tabLayout"
+		        		android:layout_margin="0dp"
 				        app:tabMode="fixed"
 				        app:tabGravity="fill"
 				        app:tabRippleColor="@null"
@@ -43,30 +44,7 @@
 				        app:tabIndicatorAnimationMode="elastic"
 				        app:tabIndicatorFullWidth="true"
 				        android:layout_width="match_parent"
-				        android:layout_height="wrap_content" >
-
-				    		<com.google.android.material.tabs.TabItem
-				        		android:padding="0dp"
-				        		android:layout_width="0dp"
-				        		android:layout_weight="1"
-				        		android:layout_height="wrap_content"
-				        		android:text="@string/tab_chat"/>
-
-				    		<com.google.android.material.tabs.TabItem
-				        		android:padding="0dp"
-				        		android:layout_width="0dp"
-				        		android:layout_weight="1"
-				        		android:layout_height="wrap_content"
-				        		android:text="@string/tab_miner"/>
-
-				    		<com.google.android.material.tabs.TabItem
-				        		android:padding="0dp"
-				        		android:layout_width="0dp"
-				        		android:layout_weight="1"
-				        		android:layout_height="wrap_content"
-				        		android:text="@string/tab_config"/>
-
-				    </com.google.android.material.tabs.TabLayout>
+				        android:layout_height="wrap_content" />
 
 				</LinearLayout>
 

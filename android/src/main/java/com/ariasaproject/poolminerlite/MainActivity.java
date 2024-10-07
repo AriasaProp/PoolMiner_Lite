@@ -22,6 +22,7 @@ import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
 import com.ariasaproject.poolminerlite.fragments.MinerFragment;
 import com.ariasaproject.poolminerlite.fragments.NewsFragment;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 public class MainActivity extends AppCompatActivity {
     static {
@@ -61,6 +62,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                 };
         viewPager.setAdapter(pagerAdapter);
+        new TabLayoutMediator(tabLayout, viewPager, true, true, (t,i) -> {
+        	switch(i) {
+        		case 0:
+        			t.setText(R.string.tab_chat);
+        			break;
+        		default:
+        		case 1:
+        			t.setText(R.string.tab_miner);
+        			break;
+        		case 2:
+        			t.setText(R.string.tab_config);
+        			break;
+        	}
+        }).attach();
+        /*
         viewPager.registerOnPageChangeCallback(
                 new ViewPager2.OnPageChangeCallback() {
                     private int previousScrollState = SCROLL_STATE_IDLE;
@@ -110,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onTabReselected(TabLayout.Tab tab) {}
                 });
+                */
         viewPager.setCurrentItem(1, false);
         // check feature
         checkBatteryOptimizations();

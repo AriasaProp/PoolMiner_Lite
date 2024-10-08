@@ -274,30 +274,23 @@ void *startConnect (void *p) {
 	  if (sockfd == -1) throw std::runtime_error ("socket has error!");
 	  try {
 	    // check inputs parameter for mining
-	    {
-	      JNIEnv *env;
-	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("start connect"));
-	        global_jvm->DetachCurrentThread ();
-	      }
-	    }
 	    size_t tries = 0;
       // try connect socket
       while (connect (sockfd, (struct sockaddr *)&dat->server_addr, sizeof (dat->server_addr)) != 0) {
       	if (++tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error ("Connection tries is always failed!");
         sleep (1);
       }
+	    // try subscribe & authorize
 	    {
 	      JNIEnv *env;
 	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("Connected"));
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("start sending"));
 	        global_jvm->DetachCurrentThread ();
 	      }
 	    }
-	    // try subscribe & authorize
     	snprintf(buffer, MAX_MESSAGE,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}", CONNECT_MACHINE, dat->auth_user, dat->auth_pass);
       tries = 0;
-      for (int length = strlen(buffer), s; length > 0;) {
+      for (size_t length = strlen(buffer), s; length > 0;) {
 		    s = send (sockfd, buffer, length, 0);
 		    if (s <= 0) {
       		if (++tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error ("Sending subscribe & authorize is always failed!");
@@ -306,6 +299,13 @@ void *startConnect (void *p) {
 		    length -= s;
 		    memmove(buffer, buffer + s, length);
       }
+	    {
+	      JNIEnv *env;
+	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("Sended"));
+	        global_jvm->DetachCurrentThread ();
+	      }
+	    }
 	    // recv subscribe & authorize prove
 	    tries = 0;
 	    do {
@@ -429,13 +429,13 @@ JNIF (void, nativeStart)
     jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
     cd->auth_user = new char[env->GetStringUTFLength (jauth_user)];
     const char *auth_user = env->GetStringUTFChars (jauth_user, JNI_FALSE);
-    strcpy(cd->auth_user, auth_user);
+    memcpy(cd->auth_user, auth_user, sizeof(auth_user));
     env->ReleaseStringUTFChars (jauth_user, auth_user);
     
     jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
     cd->auth_pass = new char[env->GetStringUTFLength (jauth_pass)];
     const char *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
-    strcpy(cd->auth_pass, auth_pass);
+    memcpy(cd->auth_pass, auth_pass, sizeof(auth_pass));
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
   if (!local_globalRef)

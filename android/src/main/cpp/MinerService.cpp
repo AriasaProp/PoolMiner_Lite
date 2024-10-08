@@ -89,6 +89,7 @@ void *startConnect (void *p) {
 
   connectData *dat = (connectData *)p;
 	//make socket
+	int end_with = 2;
   try {
 	  int sockfd = socket (AF_INET, SOCK_STREAM, 0);
 	  if (sockfd == -1) throw std::runtime_error ("socket has error!");

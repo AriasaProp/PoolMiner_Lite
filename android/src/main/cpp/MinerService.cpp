@@ -130,15 +130,15 @@ void *startConnect (void *p) {
 	    } while (!(mdh.subscribed && mdh.authorized) && (++tries < MAX_ATTEMPTS_TRY));
 	    if (!mdh.subscribed || !mdh.authorized) throw std::runtime_error ("Doesn't receive an subscribe or authorize message result!");
 	    // change state to state start running
+*/
 	    {
 	      JNIEnv *env;
 	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	        env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("subscribe & authorize success"));
+	        //env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("subscribe & authorize success"));
 	        global_jvm->DetachCurrentThread ();
 	      }
 	    }
-*/
 	    // loop update data from server
 	    tries = 0;
 	    {
@@ -170,14 +170,11 @@ void *startConnect (void *p) {
 	  	throw er;
 	  }
     close (sockfd);
+    strcpy(buffer, "ended succesfully");
   } catch (const std::exception &er) {
-    JNIEnv *env;
-    if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    	std::string _msg = "Connection Failed, because ";
-    	_msg += er.what();
-      env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF (_msg.c_str ()));
-      global_jvm->DetachCurrentThread ();
-    }
+  	strcpy(buffer, "Connection Failed, because ");
+  	strcat(buffer, er.what());
+  	end_with = 4;
   }
   
   delete[] dat->auth_user;
@@ -186,10 +183,10 @@ void *startConnect (void *p) {
   // set state mining to none
   {
     JNIEnv *env;
-	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-		  global_jvm->DetachCurrentThread ();
-	  }
+	  while (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) ;
+    env->CallVoidMethod (local_globalRef, sendMessageConsole, end_with, env->NewStringUTF (buffer));
+    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+	  global_jvm->DetachCurrentThread ();
   }
 
   pthread_mutex_lock (&_mtx);

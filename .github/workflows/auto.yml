@@ -64,7 +64,7 @@ jobs:
         if: always()
         #&& ${{ steps.changes.outputs.core == 'true' }}
 
-      - run: gradle :core:testCUnitExe
+      - run: gradle :core:test:cUnitExe
         if: always()
 
   android:

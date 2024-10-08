@@ -184,7 +184,9 @@ void *startConnect (void *p) {
   // set state mining to none
   {
     JNIEnv *env;
-	  while (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) ;
+	  while (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) {
+	  	(void)env;
+	  }
     env->CallVoidMethod (local_globalRef, sendMessageConsole, end_with, env->NewStringUTF (buffer));
     env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
 	  global_jvm->DetachCurrentThread ();

@@ -38,7 +38,3 @@ model {
     }
 }
 
-tasks.named('testCUnitExec') {
-    args '${projectDir}/data'
-}
-

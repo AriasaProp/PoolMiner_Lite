@@ -1,4 +1,5 @@
 plugins {
+    id 'native-components'
     id 'c'
     id 'cunit-test-suite'
 }
@@ -19,7 +20,6 @@ model {
             }
             binaries.all {
                 cCompiler.args '-std=c17', '-O3', '-Wall'
-                cLinker.args '-lm'
             }
         }
     }

@@ -172,7 +172,7 @@ public:
 		  		mnd.merkle_arr.clear();
 		  		mnd.merkle_arr.reserve(jm.size());
 		  		for (auto it = jm.ArrayRange().begin(); it < jm.ArrayRange().end(); ++it) {
-		  			mnd.merkle_arr.push_back(*it);
+		  			mnd.merkle_arr.push_back((const char *)*it);
 		  		}
 		    }
 		    mnd.version = params[5];

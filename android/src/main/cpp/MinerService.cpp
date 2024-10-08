@@ -285,8 +285,8 @@ void *startConnect (void *p) {
 	      JNIEnv *env;
 	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("start sending"));
-	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF (cd->auth_user));
-	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF (cd->auth_pass));
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF (dat->auth_user));
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF (dat->auth_pass));
 	        global_jvm->DetachCurrentThread ();
 	      }
 	    }

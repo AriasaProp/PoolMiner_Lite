@@ -5,57 +5,53 @@
 
 #include "json.h"
 
-const char *read_file(const char *path) {
-  FILE *file = fopen(path, "r");
-  if (file == NULL) {
-    fprintf(stderr, "Expected file \"%s\" not found", path);
-    return NULL;
-  }
-  fseek(file, 0, SEEK_END);
-  long len = ftell(file);
-  fseek(file, 0, SEEK_SET);
-  char *buffer = malloc(len + 1);
+#define MAX_PATH 2048
+char path[MAX_PATH];
+const char *paths[]{
+	"food",
+	"multidim_arr",
+	"random",
+	"reddit",
+	"rickandmorty",
+	"simple",
+};
 
-  if (buffer == NULL) {
-    fprintf(stderr, "Unable to allocate memory for file");
-    fclose(file);
-    return NULL;
-  }
-
-  fread(buffer, 1, len, file);
-  buffer[len] = '\0';
-
-  return (const char *)buffer;
-}
-
-int json_test() {
-	const char *paths[6] = {
-		"json/food.json",
-		"json/reddit.json",
-		"json/multidim_arr.json",
-		"json/random.json",
-		"json/simple.json",
-		"json/rickandmorty.json"
-	};
+int json_test(const char *data) {
 	for(const char *p : paths){
-	  const char *json = read_file(p);
-	  if (json == NULL) {
-	    return -1;
+	  snprintf(path, MAX_PATH, "%s/%s.json", data, p)
+	  FILE *file = fopen(path, "r");
+	  if (!file) {
+	    fprintf(stderr, "Expected file \"%s\" not found", path);
+	    continue;
 	  }
-	
+  	fseek(file, 0, SEEK_END);
+  	long len = ftell(file);
+  	fseek(file, 0, SEEK_SET);
+  	char *buffer = malloc(len + 1);
+
+	  if (!buffer) {
+	    fprintf(stderr, "Unable to allocate memory for file");
+	    fclose(file);
+	    return 1;
+	  }
+
+	  fread(buffer, 1, len, file);
+	  fclose(file);
+	  buffer[len] = '\0';
+
 	  clock_t start, end;
 	  start = clock();
-	  result(json_element) element_result = json_parse(json);
+	  result(json_element) element_result = json_parse(buffer);
 	  end = clock();
 	
 	  printf("Time taken %fs\n", (double)(end - start) / (double)CLOCKS_PER_SEC);
 	
-	  free((void *)json);
+	  free((void *)buffer);
 	
 	  if (result_is_err(json_element)(&element_result)) {
 	    typed(json_error) error = result_unwrap_err(json_element)(&element_result);
 	    fprintf(stderr, "Error parsing JSON: %s\n", json_error_to_string(error));
-	    return -1;
+	    return 1;
 	  }
 	  typed(json_element) element = result_unwrap(json_element)(&element_result);
 	

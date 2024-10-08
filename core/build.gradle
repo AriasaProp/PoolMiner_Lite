@@ -8,16 +8,19 @@ model {
         main(NativeLibrarySpec) {
             sources {
                 c {
-						        source {
-						            srcDir "main"
-						            include "**/*.c"
-						        }
-						        exportedHeaders {
-						            srcDir "main"
-						            include "**/*.h"
-						        }
+                    source {
+                        srcDirs 'main'
+                        include '**/*.c'
+                    }
+                    exportedHeaders {
+                        srcDirs 'main'
+                    }
                 }
-						}
+            }
+            binaries.all {
+                cCompiler.args '-std=c17', '-O3', '-Wall'
+                cLinker.args '-lm'
+            }
         }
     }
     testSuites {
@@ -25,23 +28,17 @@ model {
             testing $.components.main
             sources {
                 c {
-						        source {
-						            srcDir "test"
-						            include "**/*.c"
-						        }
-						        headers {
-						            srcDir "test"
-						            include "**/*.h"
-						        }
+                    source {
+                        srcDirs 'test'
+                        include '**/*.c'
+                    }
                 }
-						}
+            }
         }
     }
 }
 
-tasks.register('test') {
-    dependsOn 'testCUnitExe'
-    doLast {
-        println "Running CUnit tests..."
-    }
+tasks.named('testCUnitExec') {
+    args '${projectDir}/data'
 }
+

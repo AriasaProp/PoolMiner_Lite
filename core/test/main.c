@@ -8,7 +8,7 @@ int main(int argv, char **args) {
   
   printf("JSON test start!");
   
-  passed = json_test();
+  passed = json_test(args[1]);
   
   return passed;
 }

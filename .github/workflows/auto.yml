@@ -63,7 +63,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         if: always() && ${{ steps.changes.outputs.core == 'true' }}
 
-      - run: gradle :core:test
+      - run: gradle :core:testCUnitExec
         if: always() && ${{ steps.changes.outputs.core == 'true' }}
 
   android:

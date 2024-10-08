@@ -1,5 +1,5 @@
 plugins {
-    id 'native-components'
+    id 'native-component'
     id 'c'
     id 'cunit-test-suite'
 }

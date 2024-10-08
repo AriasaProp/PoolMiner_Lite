@@ -285,6 +285,8 @@ void *startConnect (void *p) {
 	      JNIEnv *env;
 	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("start sending"));
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF (cd->auth_user));
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF (cd->auth_pass));
 	        global_jvm->DetachCurrentThread ();
 	      }
 	    }
@@ -429,13 +431,13 @@ JNIF (void, nativeStart)
     jstring jauth_user = (jstring)env->GetObjectArrayElement (s, 1);
     cd->auth_user = new char[env->GetStringUTFLength (jauth_user)];
     const char *auth_user = env->GetStringUTFChars (jauth_user, JNI_FALSE);
-    memcpy(cd->auth_user, auth_user, sizeof(auth_user));
+    strcpy(cd->auth_user, auth_user);
     env->ReleaseStringUTFChars (jauth_user, auth_user);
     
     jstring jauth_pass = (jstring)env->GetObjectArrayElement (s, 2);
     cd->auth_pass = new char[env->GetStringUTFLength (jauth_pass)];
     const char *auth_pass = env->GetStringUTFChars (jauth_pass, JNI_FALSE);
-    memcpy(cd->auth_pass, auth_pass, sizeof(auth_pass));
+    strcpy(cd->auth_pass, auth_pass);
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
   if (!local_globalRef)

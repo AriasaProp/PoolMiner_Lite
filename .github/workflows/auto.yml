@@ -61,11 +61,10 @@ jobs:
           cache: 'gradle'
 
       - uses: gradle/actions/setup-gradle@v3
-        if: always()
-        #&& ${{ steps.changes.outputs.core == 'true' }}
+        if: always() && ${{ steps.changes.outputs.core == 'true' }}
 
-      - run: gradle :core:test:cUnitExe
-        if: always()
+      - run: gradle :core:test
+        if: always() && ${{ steps.changes.outputs.core == 'true' }}
 
   android:
     runs-on: ubuntu-latest

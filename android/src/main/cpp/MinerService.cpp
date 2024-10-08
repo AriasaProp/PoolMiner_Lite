@@ -274,13 +274,26 @@ void *startConnect (void *p) {
 	  if (sockfd == -1) throw std::runtime_error ("socket has error!");
 	  try {
 	    // check inputs parameter for mining
-	
+	    {
+	      JNIEnv *env;
+	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("start connect"));
+	        global_jvm->DetachCurrentThread ();
+	      }
+	    }
 	    size_t tries = 0;
       // try connect socket
       while (connect (sockfd, (struct sockaddr *)&dat->server_addr, sizeof (dat->server_addr)) != 0) {
       	if (++tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error ("Connection tries is always failed!");
         sleep (1);
       }
+	    {
+	      JNIEnv *env;
+	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+	        env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("Connected"));
+	        global_jvm->DetachCurrentThread ();
+	      }
+	    }
 	    // try subscribe & authorize
     	snprintf(buffer, MAX_MESSAGE,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}", CONNECT_MACHINE, dat->auth_user, dat->auth_pass);
       tries = 0;

@@ -281,3 +281,4 @@ JNIF (void, nativeStop)
   pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
   pthread_attr_destroy (&thread_attr);
 }
+

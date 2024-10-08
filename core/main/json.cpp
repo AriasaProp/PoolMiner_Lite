@@ -1,5 +1,5 @@
 #include "json.hpp"
-
+/*
 value_type json::value::getType() const { 
 	return value_type::Unknown;
 }
@@ -24,3 +24,4 @@ value_type json::json_object::getType() const {
 value_type json::json_array::getType() const { 
 	return value_type::Array;
 }
+*/

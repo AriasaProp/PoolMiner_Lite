@@ -1,5 +1,5 @@
 #include <string>
-
+/*
 namespace json {
 	enum value_type: char {
 		Unknown = 0,
@@ -26,3 +26,4 @@ namespace json {
 		value_type getType() override const;
 	};
 }
+*/

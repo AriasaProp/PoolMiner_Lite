@@ -192,7 +192,6 @@ public:
 			json_list_a.push_back(_h);
 		}
 	}
-	
 /*
 	void doJob() {
 		make header
@@ -224,8 +223,8 @@ public:
     std::string prev = mnd.prev_hash;
     header += prev;
 	}
-};
 		*/
+};
 
 // 5 kBytes ~> 40 kBit
 #define MAX_MESSAGE 5000
@@ -272,7 +271,7 @@ void *startConnect (void *p) {
 	//make socket
   try {
 	  int sockfd = socket (AF_INET, SOCK_STREAM, 0);
-	  if (sockfd != -1) throw std::runtime_error ("socket has error!");
+	  if (sockfd == -1) throw std::runtime_error ("socket has error!");
 	  try {
 	    // check inputs parameter for mining
 	
@@ -286,7 +285,7 @@ void *startConnect (void *p) {
     	snprintf(buffer, MAX_MESSAGE,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}", CONNECT_MACHINE, dat->auth_user, dat->auth_pass);
       tries = 0;
       for (int length = strlen(buffer), s; length > 0;) {
-		    s = send (dat->sockfd, buffer, length, 0);
+		    s = send (sockfd, buffer, length, 0);
 		    if (s <= 0) {
       		if (++tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error ("Sending subscribe & authorize is always failed!");
 		      continue;
@@ -372,12 +371,12 @@ void *startConnect (void *p) {
 	  if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
 			if (!mdh.json_list_a.empty()) {
-				_data_out = "";
+				strcpy(buffer, "Result: \n");
 				for (std::string erl : mdh.json_list_a) {
-					_data_out += erl;
-					_data_out += "\n";
+					strcat(buffer, erl.c_str());
+					strcat(buffer, "\n");
 				}
-				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(_data_out.c_str()));
+				env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF(buffer));
 	  		mdh.json_list_a.clear();
 			}
 		  global_jvm->DetachCurrentThread ();

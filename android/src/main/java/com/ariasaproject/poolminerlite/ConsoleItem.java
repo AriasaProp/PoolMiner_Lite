@@ -26,10 +26,12 @@ public class ConsoleItem {
     public static class Lists extends Object implements Parcelable {
         public static final int SIZE = 100;
         private final ConsoleItem[] logs = new ConsoleItem[SIZE];
+        private int indexCount = 0;
 
         public Lists() {}
 
         protected Lists(Parcel in) {
+            indexCount = in.readInt();
             String[] strings = new String[3 * SIZE];
             in.readStringArray(strings);
             for (int i = 0; i < SIZE; ++i) {
@@ -43,23 +45,18 @@ public class ConsoleItem {
         }
 
         public void add(int lvl, String msg) {
-            for (int i = SIZE - 1; i > 0; --i) {
-                if (logs[i - 1] == null) continue;
-                logs[i] = logs[i - 1];
-            }
-            logs[0] = new ConsoleItem(lvl, msg);
+            logs[indexCount++ % SIZE] = new ConsoleItem(lvl, msg);
         }
 
         public void add(ConsoleItem ci) {
-            for (int i = SIZE - 1; i > 0; --i) {
-                if (logs[i - 1] == null) continue;
-                logs[i] = logs[i - 1];
-            }
-            logs[0] = ci;
+            logs[indexCount++ % SIZE] = ci;
         }
 
         public ConsoleItem get(int index) {
-            return logs[index];
+            return logs[(indexCount + SIZE - (index % SIZE)) % SIZE];
+        }
+        public int getSize () {
+        	return logs[SIZE - 1] != null ? SIZE : indexCount;
         }
 
         public static final Parcelable.Creator<Lists> CREATOR =
@@ -82,6 +79,7 @@ public class ConsoleItem {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(indexCount);
             String[] strings = new String[3 * SIZE];
             for (int i = 0; i < SIZE; ++i) {
                 if (logs[i] == null) break;

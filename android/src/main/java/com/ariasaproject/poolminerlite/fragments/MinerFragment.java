@@ -201,7 +201,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
 
                     @Override
                     public int getItemCount() {
-                        return ConsoleItem.Lists.SIZE;
+                        return ConsoleItem.Lists.getSize();
                     }
                 };
         cv.setAdapter(adpt);

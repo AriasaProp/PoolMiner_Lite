@@ -36,7 +36,7 @@ public class ConsoleItem {
             in.readByteArray(c);
             String[] s = in.createStringArray();
             in.readStringArray(s);
-            
+
             for (int i = 0; i < SIZE; ++i) {
                 if (s[i * 2] == null) break;
                 logs[i] = new ConsoleItem(c[i], s[i * 2], s[i * 2 + 1]);
@@ -54,8 +54,9 @@ public class ConsoleItem {
         public ConsoleItem get(int index) {
             return logs[(indexCount + SIZE - (index % SIZE)) % SIZE];
         }
-        public int getSize () {
-        	return logs[SIZE - 1] != null ? SIZE : indexCount;
+
+        public int getSize() {
+            return logs[SIZE - 1] != null ? SIZE : indexCount;
         }
 
         public static final Parcelable.Creator<Lists> CREATOR =
@@ -86,7 +87,7 @@ public class ConsoleItem {
                 s[i * 2] = logs[i].time;
                 s[i * 2 + 1] = logs[i].msg;
             }
-            
+
             dest.writeInt(indexCount);
             dest.writeByteArray(c);
             dest.writeStringArray(s);

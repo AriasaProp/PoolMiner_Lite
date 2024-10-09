@@ -17,8 +17,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.ariasaproject.poolminerlite.fragments.ConfigFragment;
 import com.ariasaproject.poolminerlite.fragments.MinerFragment;
 import com.ariasaproject.poolminerlite.fragments.NewsFragment;
-import com.ariasaproject.poolminerlite.ConsoleItem;
-import com.ariasaproject.poolminerlite.MinerViewModel;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -37,13 +35,13 @@ public class MainActivity extends AppCompatActivity {
         } else {
             logList = new ConsoleItem.Lists();
         }
-        
+
         final MinerViewModel mvm = ((MainApplication) getApplication()).getMinerViewModel();
-        
-        mvm.registerMainObs(this,(log)->logList.add(log));
-        
+
+        mvm.registerMainObs(this, (log) -> logList.add(log));
+
         super.onCreate(savedInstanceState);
-        
+
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         // tabs and viewpager
@@ -129,19 +127,18 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
-    
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable(KEYBUNDLE_CONSOLE, logList);
     }
-    
+
     @Override
     protected void OnDestroy() {
-    		super.OnDestroy();
-    		mvm.unregisterMainObs();
+        super.OnDestroy();
+        mvm.unregisterMainObs();
     }
-    
-    
+
     private static final String KEYBUNDLE_CONSOLE = "bundle_console";
 }

@@ -169,7 +169,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         adpt =
                 new Adapter<ConsoleItemHolder>() {
-                		final MainActivity ma = ((MainActivity)getActivity());
+                    final MainActivity ma = ((MainActivity) getActivity());
                     final LayoutInflater inflater = LayoutInflater.from(getActivity());
                     final TypedArray colors =
                             getContext()
@@ -189,7 +189,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                             h.root.setVisibility(View.GONE);
                         } else {
                             h.root.setVisibility(View.VISIBLE);
-                            int color = colors.getColor((int)ci.color, 0);
+                            int color = colors.getColor((int) ci.color, 0);
                             h.time.setTextColor(color);
                             h.msg.setTextColor(color);
                             h.time.setText(ci.time);
@@ -411,7 +411,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     }
                 },
                 (state) -> updateState(state),
-                (log) -> adpt.notifyDataSetChanged() );
+                (log) -> adpt.notifyDataSetChanged());
     }
 
     @Override

@@ -17,12 +17,14 @@ public class MinerViewModel extends AndroidViewModel {
     public MinerViewModel(@NonNull Application application) {
         super(application);
     }
-    
+
     Observer<ConsoleItem> mainLogObs;
+
     public void registerMainObs(LifecycleOwner lo, Observer<ConsoleItem> _mainLogObs) {
-	      mainLogObs = _mainLogObs;
-	    	Miner_Log.observe(lo, mainLogObs);
+        mainLogObs = _mainLogObs;
+        Miner_Log.observe(lo, mainLogObs);
     }
+
     public void unregisterMainObs() {
         Miner_Log.removeObserver(mainLogObs);
     }

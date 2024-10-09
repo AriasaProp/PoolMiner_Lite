@@ -11,13 +11,13 @@ public class ConsoleItem {
     private static final DateFormat logDateFormat = new SimpleDateFormat("[HH:mm:ss] ");
 
     public final String time, msg;
-    public final int color;
+    public final byte color;
 
-    public ConsoleItem(int c, String m) {
+    public ConsoleItem(byte c, String m) {
         this(c, logDateFormat.format(new Date()), m);
     }
 
-    protected ConsoleItem(int c, String d, String m) {
+    protected ConsoleItem(byte c, String d, String m) {
         time = d;
         msg = m;
         color = c;
@@ -32,19 +32,18 @@ public class ConsoleItem {
 
         protected Lists(Parcel in) {
             indexCount = in.readInt();
-            String[] strings = new String[3 * SIZE];
-            in.readStringArray(strings);
+            byte[] c = in.createByteArray();
+            in.readByteArray(c);
+            String[] s = in.createStringArray();
+            in.readStringArray(s);
+            
             for (int i = 0; i < SIZE; ++i) {
-                if (strings[i * 3] == null) break;
-                logs[i] =
-                        new ConsoleItem(
-                                Integer.parseInt(strings[i * 3]),
-                                strings[i * 3 + 1],
-                                strings[i * 3 + 2]);
+                if (s[i * 2] == null) break;
+                logs[i] = new ConsoleItem(c[i], s[i * 2], s[i * 2 + 1]);
             }
         }
 
-        public void add(int lvl, String msg) {
+        public void add(byte lvl, String msg) {
             logs[indexCount++ % SIZE] = new ConsoleItem(lvl, msg);
         }
 
@@ -55,9 +54,8 @@ public class ConsoleItem {
         public ConsoleItem get(int index) {
             return logs[(indexCount + SIZE - (index % SIZE)) % SIZE];
         }
-
-        public int getSize() {
-            return logs[SIZE - 1] != null ? SIZE : indexCount;
+        public int getSize () {
+        	return logs[SIZE - 1] != null ? SIZE : indexCount;
         }
 
         public static final Parcelable.Creator<Lists> CREATOR =
@@ -80,15 +78,18 @@ public class ConsoleItem {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(indexCount);
-            String[] strings = new String[3 * SIZE];
+            String[] s = dest.createStringArray();
+            byte[] c = dest.createByteArray();
             for (int i = 0; i < SIZE; ++i) {
                 if (logs[i] == null) break;
-                strings[i * 3] = String.valueOf(logs[i].color);
-                strings[i * 3 + 1] = logs[i].time;
-                strings[i * 3 + 2] = logs[i].msg;
+                c[i] = logs[i].color;
+                s[i * 2] = logs[i].time;
+                s[i * 2 + 1] = logs[i].msg;
             }
-            dest.writeStringArray(strings);
+            
+            dest.writeInt(indexCount);
+            dest.writeByteArray(c);
+            dest.writeStringArray(s);
         }
     }
 }

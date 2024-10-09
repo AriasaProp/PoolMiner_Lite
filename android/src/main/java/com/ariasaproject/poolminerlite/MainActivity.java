@@ -37,9 +37,9 @@ public class MainActivity extends AppCompatActivity {
             logList = new ConsoleItem.Lists();
         }
         mvm = ((MainApplication) getApplication()).getMinerViewModel();
-        
-        mvm.registerMainObs(this,(log) -> logList.add(log));
-        
+
+        mvm.registerMainObs(this, (log) -> logList.add(log));
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
@@ -136,8 +136,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-    		super.onDestroy();
-    		mvm.unregisterMainObs();
+        super.onDestroy();
+        mvm.unregisterMainObs();
     }
 
     private static final String KEYBUNDLE_CONSOLE = "bundle_console";

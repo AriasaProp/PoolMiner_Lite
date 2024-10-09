@@ -79,7 +79,7 @@ public class ConsoleItem {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            String[] s = new String[SIZE * 2]
+            String[] s = new String[SIZE * 2];
             byte[] c = new byte[SIZE];
             for (int i = 0; i < SIZE; ++i) {
                 if (logs[i] == null) break;

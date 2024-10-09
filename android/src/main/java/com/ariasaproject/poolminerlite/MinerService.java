@@ -98,7 +98,7 @@ public class MinerService extends Service {
 
         public void StartMine(String[] dats, int[] dati) {
             if (MinerService.this.nativeRunning()) StopMine();
-        		MinerService.this.updateState(1);
+            MinerService.this.updateState(1);
             MinerService.this.nativeStart(dats, dati);
         }
 
@@ -108,7 +108,7 @@ public class MinerService extends Service {
 
         public void StopMine() {
             if (!MinerService.this.nativeRunning()) return;
-        		MinerService.this.updateState(3);
+            MinerService.this.updateState(3);
             MinerService.this.nativeStop();
             MinerService.this.stopSelf();
         }

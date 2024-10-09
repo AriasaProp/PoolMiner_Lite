@@ -30,9 +30,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.ariasaproject.poolminerlite.ConsoleItem;
+import com.ariasaproject.poolminerlite.MainActivity;
 import com.ariasaproject.poolminerlite.MainApplication;
 import com.ariasaproject.poolminerlite.MinerService;
-import com.ariasaproject.poolminerlite.MainActivity;
 import com.ariasaproject.poolminerlite.MinerViewModel;
 import com.ariasaproject.poolminerlite.R;
 
@@ -170,7 +170,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                 new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         adpt =
                 new Adapter<ConsoleItemHolder>() {
-                		final MainActivity ma = ((MainActivity)getActivity());
+                    final MainActivity ma = ((MainActivity) getActivity());
                     final LayoutInflater inflater = LayoutInflater.from(getActivity());
                     final TypedArray colors =
                             getContext()
@@ -190,7 +190,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                             h.root.setVisibility(View.GONE);
                         } else {
                             h.root.setVisibility(View.VISIBLE);
-                            int color = colors.getColor((int)ci.color, 0);
+                            int color = colors.getColor((int) ci.color, 0);
                             h.time.setTextColor(color);
                             h.msg.setTextColor(color);
                             h.time.setText(ci.time);
@@ -219,21 +219,21 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     default:
                     case MINE_STATE_NONE:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Wellcome User!, This is the first log message that youp should"
                                         + " receive.");
                         break;
                     case MINE_STATE_ONSTART:
-                        mvm.postLog((byte)1, "Failed to start.");
+                        mvm.postLog((byte) 1, "Failed to start.");
                         break;
                     case MINE_STATE_RUNNING:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Skipped State: This state was jumped from running to none state,"
                                         + " for now is imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
-                        mvm.postLog((byte)1, "Service mining successful to stop!");
+                        mvm.postLog((byte) 1, "Service mining successful to stop!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -250,18 +250,19 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     default:
                     case MINE_STATE_NONE:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Starting, Waiting for connecting, subscribing, authorizing and get"
                                         + " the first job.");
                         break;
                     case MINE_STATE_RUNNING:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Skipped State: Jumped from running to onStart, that imposible!");
                         break;
                     case MINE_STATE_ONSTOP:
                         mvm.postLog(
-                                (byte)1, "Skipped State: Jumped from onStop to onStart, that imposible!");
+                                (byte) 1,
+                                "Skipped State: Jumped from onStop to onStart, that imposible!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.GONE);
@@ -280,16 +281,16 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     default:
                     case MINE_STATE_NONE:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Skipped State: Jumped from none to running, is imposible from"
                                         + " now!");
                         break;
                     case MINE_STATE_ONSTART:
-                        mvm.postLog((byte)1, "Service mining successful to start!");
+                        mvm.postLog((byte) 1, "Service mining successful to start!");
                         break;
                     case MINE_STATE_ONSTOP:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Skipped State: Jumped from onStop to running, is imposible from"
                                         + " now!");
                         break;
@@ -310,17 +311,17 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     default:
                     case MINE_STATE_NONE:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Skipped State: Jumped from none to onStop, is imposible from now");
                         break;
                     case MINE_STATE_ONSTART:
                         mvm.postLog(
-                                (byte)1,
+                                (byte) 1,
                                 "Skipped State: Jumped from onStart to onStop state, for now is"
                                         + " imposible!");
                         break;
                     case MINE_STATE_RUNNING:
-                        mvm.postLog((byte)1, "Service mining try to stop!");
+                        mvm.postLog((byte) 1, "Service mining try to stop!");
                         break;
                 }
                 btn_stopmine.setVisibility(View.VISIBLE);
@@ -412,7 +413,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     }
                 },
                 (state) -> updateState(state),
-                (log) -> adpt.notifyDataSetChanged() );
+                (log) -> adpt.notifyDataSetChanged());
     }
 
     @Override

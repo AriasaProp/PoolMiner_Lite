@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     FragmentStateAdapter pagerAdapter;
+    MinerViewModel mvm
     public ConsoleItem.Lists logList;
 
     @Override
@@ -35,11 +36,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             logList = new ConsoleItem.Lists();
         }
-
-        final MinerViewModel mvm = ((MainApplication) getApplication()).getMinerViewModel();
-
-        mvm.registerMainObs(this, (log) -> logList.add(log));
-
+        mvm = ((MainApplication) getApplication()).getMinerViewModel();
+        
+        mvm.registerMainObs(this,(log) -> logList.add(log));
+        
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
@@ -135,9 +135,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void OnDestroy() {
-        super.OnDestroy();
-        mvm.unregisterMainObs();
+    protected void onDestroy() {
+    		super.onDestroy();
+    		mvm.unregisterMainObs();
     }
 
     private static final String KEYBUNDLE_CONSOLE = "bundle_console";

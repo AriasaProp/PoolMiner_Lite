@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter;
 import com.ariasaproject.poolminerlite.ConsoleItem;
 import com.ariasaproject.poolminerlite.MainApplication;
 import com.ariasaproject.poolminerlite.MinerService;
+import com.ariasaproject.poolminerlite.MainActivity;
 import com.ariasaproject.poolminerlite.MinerViewModel;
 import com.ariasaproject.poolminerlite.R;
 

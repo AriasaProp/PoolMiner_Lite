@@ -56,7 +56,7 @@ bool MinerService_OnLoad (JNIEnv *env) {
   updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
   updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
   updateState = env->GetMethodID (m_class, "updateState", "(I)V");
-  sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(ILjava/lang/String;)V");
+  sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(BLjava/lang/String;)V");
   // consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
   if (!updateSpeed || !updateResult || !updateState /* || !consoleItemConstructor*/) return false;
   mineRunning = false;
@@ -89,7 +89,7 @@ void *startConnect (void *p) {
 
   connectData *dat = (connectData *)p;
 	//make socket
-	int end_with = 2;
+	char end_with = 2;
   try {
 	  int sockfd = socket (AF_INET, SOCK_STREAM, 0);
 	  if (sockfd == -1) throw std::runtime_error ("socket has error!");

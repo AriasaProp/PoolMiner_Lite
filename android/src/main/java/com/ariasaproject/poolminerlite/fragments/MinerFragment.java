@@ -411,7 +411,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
                     }
                 },
                 (state) -> updateState(state),
-                (log) -> adpt.notifyDataSetChanged();} );
+                (log) -> adpt.notifyDataSetChanged() );
     }
 
     @Override

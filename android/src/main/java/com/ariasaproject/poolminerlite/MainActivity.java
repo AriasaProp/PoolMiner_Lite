@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     FragmentStateAdapter pagerAdapter;
-    MinerViewModel mvm
+    MinerViewModel mvm;
     public ConsoleItem.Lists logList;
 
     @Override

@@ -55,8 +55,9 @@ public class ConsoleItem {
         public ConsoleItem get(int index) {
             return logs[(indexCount + SIZE - (index % SIZE)) % SIZE];
         }
-        public int getSize () {
-        	return logs[SIZE - 1] != null ? SIZE : indexCount;
+
+        public int getSize() {
+            return logs[SIZE - 1] != null ? SIZE : indexCount;
         }
 
         public static final Parcelable.Creator<Lists> CREATOR =

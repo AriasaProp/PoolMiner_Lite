@@ -76,7 +76,6 @@ public class MinerFragment extends Fragment implements ServiceConnection {
         btn_startmine = (AppCompatButton) root.findViewById(R.id.button_startmine);
         btn_startmine.setOnClickListener(
                 v -> {
-                    updateState(MINE_STATE_ONSTART);
                     String[] dats = new String[4];
                     dats[0] = sb.append(et_serv.getText()).toString();
                     sb.setLength(0);
@@ -111,7 +110,6 @@ public class MinerFragment extends Fragment implements ServiceConnection {
         btn_stopmine = (AppCompatButton) root.findViewById(R.id.button_stopmine);
         btn_stopmine.setOnClickListener(
                 v -> {
-                    updateState(MINE_STATE_ONSTOP);
                     dataService.StopMine();
                 });
         // editable

@@ -41,7 +41,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     private int accepted_result, rejected_result;
     Adapter adpt;
     MinerViewModel mvm;
-    
+
     MinerService.LocalBinder dataService = null;
 
     @Override

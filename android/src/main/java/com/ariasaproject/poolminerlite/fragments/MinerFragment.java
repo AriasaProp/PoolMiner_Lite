@@ -40,7 +40,8 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     private final StringBuilder sb = new StringBuilder();
     private int accepted_result, rejected_result;
     Adapter adpt;
-
+    MinerViewModel mvm;
+    
     MinerService.LocalBinder dataService = null;
 
     @Override
@@ -53,6 +54,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mvm = ((MainApplication) getActivity().getApplication()).getMinerViewModel();
     }
 
     @Nullable
@@ -211,7 +213,6 @@ public class MinerFragment extends Fragment implements ServiceConnection {
 
     private void updateState(int state) {
         if (mainStateCurrent == state) return;
-        MinerViewModel mvm = ((MainApplication) getActivity().getApplication()).getMinerViewModel();
         switch (state) {
             default:
             case MINE_STATE_NONE:
@@ -384,17 +385,6 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     @Override
     public void onResume() {
         super.onResume();
-        MinerViewModel mvm = ((MainApplication) getActivity().getApplication()).getMinerViewModel();
-        float speedHash = mvm.getSpeed();
-        if (speedHash > 0.0f) {
-            int unit_step = 0;
-            while (unit_step < UnitHash.length && speedHash > 1000.0f) {
-                speedHash /= 1000.0f;
-                unit_step++;
-            }
-            tv_s.setText(String.format("%.3f %s/Sec", speedHash, UnitHash[unit_step]));
-        }
-        updateState(mvm.getState());
         mvm.registerObs(
                 getActivity(),
                 (speed) -> {
@@ -419,7 +409,7 @@ public class MinerFragment extends Fragment implements ServiceConnection {
     @Override
     public void onPause() {
         super.onPause();
-        ((MainApplication) getActivity().getApplication()).getMinerViewModel().unregisterObs();
+        mvm.unregisterObs();
     }
 
     @Override

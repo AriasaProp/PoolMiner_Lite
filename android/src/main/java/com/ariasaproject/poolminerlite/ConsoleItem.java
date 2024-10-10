@@ -32,9 +32,9 @@ public class ConsoleItem {
 
         protected Lists(Parcel in) {
             indexCount = in.readInt();
-            byte[] c = in.createByteArray();
+            byte[] c = new byte[SIZE];
+            String[] s = new String[SIZE * 2];
             in.readByteArray(c);
-            String[] s = in.createStringArray();
             in.readStringArray(s);
 
             for (int i = 0; i < SIZE; ++i) {
@@ -52,7 +52,7 @@ public class ConsoleItem {
         }
 
         public ConsoleItem get(int index) {
-            return logs[(indexCount + SIZE - (index % SIZE)) % SIZE];
+            return logs[(indexCount + SIZE - index) % SIZE];
         }
 
         public int getSize() {

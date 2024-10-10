@@ -1,9 +1,16 @@
-#include <cassert>
 #include <iostream>
+#include <filesystem>
+#include <cstdint>
+#include <cstdlib>
 
-int main () {
+namespace fs = std::filesystem;
 
-  std::cout << "Hello Test!" << std::endl;
+extern bool sample_json_parser (fs::path);
 
-  return 0;
+int main (int argc, char **argv) {
+  bool passed = true;
+  fs::path data_path = argv[1];
+  passed &= sample_json_parser(data_path / "sample_json.json");
+
+  return passed ? EXIT_SUCCESS : EXIT_FAILURE;
 }

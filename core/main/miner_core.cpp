@@ -39,7 +39,7 @@ void miner::parsing(const char *msg) {
 			if ((op_br - ed_br) < 4) throw "small object";
 			//branch validity
 			size_t valid = 0;
-			for (char *a = op_br, b = ed_br; a <= b; ++a) {
+			for (char *a = op_br, *b = ed_br; a <= b; ++a) {
 				if (*a == '{') valid++;
 				else if (*a == '}') valid--;
 			}

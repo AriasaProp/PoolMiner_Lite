@@ -11,7 +11,7 @@ char *msg_buffer = nullptr;
 char *msg_buffer_end = nullptr;
 
 
-miner::init () {
+void miner::init () {
 	msg_buffer = new char[MAX_MSG_BUFFER]{};
 	msg_buffer_end = msg_buffer + MAX_MSG_BUFFER;
 }
@@ -56,6 +56,6 @@ void miner::parsing(const char *msg) {
 	}
 }
 
-miner::clear() {
+void miner::clear() {
 	delete[] msg_buffer;
 }

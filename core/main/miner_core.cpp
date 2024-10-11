@@ -19,14 +19,14 @@ void miner::init () {
 void miner::parsing(const char *msg) {
 	strcat(msg_buffer,msg);
 	char *cur_msg = msg_buffer;
-	while (1) {
+	do {
 		//find each new line
 		char *finded = cur_msg;
 		do {
 			if (*finded == '\n' || *finded == 0) break;
 		} while (++finded < msg_buffer_end);
 		try {
-			if ((cur_msg - finded) < 5) throw "small object";
+			if ((finded - cur_msg) < 5) throw "small object";
 			//find bracket
 			char *op_br = cur_msg;
 			char *ed_br = finded - 1;
@@ -36,7 +36,7 @@ void miner::parsing(const char *msg) {
 			do {
 				if (*ed_br == '}') break;
 			} while (--ed_br > op_br);
-			if ((op_br - ed_br) < 4) throw "small object";
+			if ((ed_br - op_br) < 4) throw "small object";
 			//branch validity
 			size_t valid = 0;
 			for (char *a = op_br, *b = ed_br; a <= b; ++a) {
@@ -53,7 +53,7 @@ void miner::parsing(const char *msg) {
 			std::cout << er << std::endl;
 		}
 		cur_msg = finded + 1;
-	}
+	} while (*cur_msg)
 }
 
 void miner::clear() {

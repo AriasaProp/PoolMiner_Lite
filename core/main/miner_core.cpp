@@ -53,7 +53,7 @@ void miner::parsing(const char *msg) {
 			std::cout << er << std::endl;
 		}
 		cur_msg = finded + 1;
-	} while (*cur_msg)
+	} while (*cur_msg);
 }
 
 void miner::clear() {

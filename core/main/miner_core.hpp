@@ -3,12 +3,13 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 
 
 namespace miner {
 	void init();
 	
-	void parsing(const char *);
+	std::string parsing(const char *);
 	
 	
 	void clear();

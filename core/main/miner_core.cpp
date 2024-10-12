@@ -16,7 +16,8 @@ void miner::init () {
 	msg_buffer_end = msg_buffer + MAX_MSG_BUFFER;
 }
 
-void miner::parsing(const char *msg) {
+std::string miner::parsing(const char *msg) {
+	std::string reparser = "";
 	strcat(msg_buffer,msg);
 	char *cur_msg = msg_buffer;
 	do {
@@ -39,21 +40,21 @@ void miner::parsing(const char *msg) {
 			if ((ed_br - op_br) < 4) throw "small object";
 			//branch validity
 			size_t valid = 0;
-			for (char *a = op_br; ++a < ed_br;) {
+			char *a = ++op_br; 
+			do {
 				if (*a == '{') ++valid;
 				else if (*a == '}') --valid;
-			}
+			} while (++a < ed_br);
 			if (valid) throw "branches total invalid";
 			op_br++;
-			ed_br--;
-			
-			std::cout << std::string(op_br, ed_br-op_br) << std::endl;
+			reparser += std::string(op_br, ed_br-op_br);
+			reparser += "\n";
 		} catch (const char *er) {
 			//end
-			std::cout << er << std::endl;
 		}
 		cur_msg = finded + 1;
 	} while (*cur_msg);
+	return reparser;
 }
 
 void miner::clear() {

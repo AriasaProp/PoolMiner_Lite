@@ -17,6 +17,8 @@
 #include <utility>
 #include <vector>
 
+#include "miner_core.hpp"
+
 #define STATE_NONE 0
 #define STATE_ONSTART 1
 #define STATE_RUNNING 2
@@ -86,6 +88,8 @@ void *startConnect (void *p) {
   pthread_mutex_lock (&_mtx);
   ++active_worker;
   pthread_mutex_unlock (&_mtx);
+  
+  miner::init();
 
   connectData *dat = (connectData *)p;
 	//make socket
@@ -160,7 +164,8 @@ void *startConnect (void *p) {
 	          if (tries) tries = 0;
             JNIEnv *env;
 	          if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	            env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (buffer));
+	          	std::string rp = miner::parsing(buffer);
+	            env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (rp.c_str()));
 	            global_jvm->DetachCurrentThread ();
 	          }
 	        }
@@ -191,6 +196,8 @@ void *startConnect (void *p) {
     env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
 	  global_jvm->DetachCurrentThread ();
   }
+  
+  miner::clear();
 
   pthread_mutex_lock (&_mtx);
   --active_worker;

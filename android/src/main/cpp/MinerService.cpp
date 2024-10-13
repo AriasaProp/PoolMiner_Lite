@@ -14,7 +14,6 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <utility>
 #include <vector>
 
 #include "miner_core.hpp"
@@ -41,15 +40,7 @@ static jmethodID updateState;
 static jmethodID sendMessageConsole;
 // static jmethodID consoleItemConstructor;
 
-// for mining data
-static bool mineRunning;
-static pthread_mutex_t _mtx = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
 static jobject local_globalRef;
-static uint32_t active_worker = 0;
-static bool doingjob = false;
-static uint32_t thread_use;
-static pthread_t *workers = nullptr;
 
 bool MinerService_OnLoad (JNIEnv *env) {
   jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
@@ -61,7 +52,6 @@ bool MinerService_OnLoad (JNIEnv *env) {
   sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(BLjava/lang/String;)V");
   // consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
   if (!updateSpeed || !updateResult || !updateState /* || !consoleItemConstructor*/) return false;
-  mineRunning = false;
   return true;
 }
 void MinerService_OnUnload (JNIEnv *env) {
@@ -75,9 +65,17 @@ void MinerService_OnUnload (JNIEnv *env) {
 
 // 5 kBytes ~> 40 kBit
 #define MAX_MESSAGE 5000
-#define CONNECT_MACHINE "PoolMiner-Lite"
+
+// for mining global data
+static struct {
+	bool req_stop;
+	uint32_t active_worker;
+} gp;
+static pthread_mutex_t _mtx = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
 
 struct connectData {
+	uint32_t thread_use;
   struct sockaddr_in server_addr;
   char *auth_user;
   char *auth_pass;
@@ -86,7 +84,8 @@ struct connectData {
 char buffer[MAX_MESSAGE];
 void *startConnect (void *p) {
   pthread_mutex_lock (&_mtx);
-  ++active_worker;
+  gp.req_stop = false;
+  gp.active_worker = 1;
   pthread_mutex_unlock (&_mtx);
   
   miner::init();
@@ -96,27 +95,40 @@ void *startConnect (void *p) {
 	char end_with = 2;
   try {
 	  int sockfd = socket (AF_INET, SOCK_STREAM, 0);
-	  if (sockfd == -1) throw std::runtime_error ("socket has error!");
+	  if (sockfd == -1) throw "socket has error!";
 	  try {
 	    // check inputs parameter for mining
 	    size_t tries = 0;
       // try connect socket
       while (connect (sockfd, (struct sockaddr *)&dat->server_addr, sizeof (dat->server_addr)) != 0) {
-      	if (++tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error ("Connection tries is always failed!");
+      	if (tries++ >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
         sleep (1);
       }
-	    // try subscribe & authorize
-    	snprintf(buffer, MAX_MESSAGE,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}", CONNECT_MACHINE, dat->auth_user, dat->auth_pass);
-      tries = 0;
+	    // send subscribe
+    	tries = 0;
+    	miner::msg_send_subscribe(buffer);
       for (size_t length = strlen(buffer), s; length > 0;) {
 		    s = send (sockfd, buffer, length, 0);
 		    if (s <= 0) {
-      		if (++tries >= MAX_ATTEMPTS_TRY) throw std::runtime_error ("Sending subscribe & authorize is always failed!");
+      		if (++tries >= MAX_ATTEMPTS_TRY) throw "Sending subscribe & authorize is always failed!";
 		      continue;
 		    }
 		    length -= s;
 		    memmove(buffer, buffer + s, length);
       }
+      
+	    // rcv subscribe prove 
+	    /*
+	    tries = 0;
+	    do {
+	      if (recv (sockfd, buffer, MAX_MESSAGE, 0) > 0) {
+	      	
+	      }
+	      sleep (1);
+	    } while (!(mdh.subscribed && mdh.authorized) && (++tries < MAX_ATTEMPTS_TRY));
+	    if (!mdh.subscribed || !mdh.authorized) throw "Doesn't receive an subscribe or authorize message result!";
+	    */
+	    // try authorize
 /*
 	    // recv subscribe & authorize prove
 	    tries = 0;
@@ -133,7 +145,7 @@ void *startConnect (void *p) {
 	      }
 	      sleep (1);
 	    } while (!(mdh.subscribed && mdh.authorized) && (++tries < MAX_ATTEMPTS_TRY));
-	    if (!mdh.subscribed || !mdh.authorized) throw std::runtime_error ("Doesn't receive an subscribe or authorize message result!");
+	    if (!mdh.subscribed || !mdh.authorized) throw "Doesn't receive an subscribe or authorize message result!";
 	    // change state to state start running
 */
 	    {
@@ -150,15 +162,10 @@ void *startConnect (void *p) {
 	      bool loop = true;
 	      while (loop) {
 	        pthread_mutex_lock (&_mtx);
-	        loop = doingjob;
+	        loop = gp.req_stop;
 	        pthread_mutex_unlock (&_mtx);
 	        if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
-	          if (++tries > MAX_ATTEMPTS_TRY) throw std::runtime_error ("failed to receive message socket!.");
-	          JNIEnv *env;
-	          if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	            env->CallVoidMethod (local_globalRef, sendMessageConsole, 4, env->NewStringUTF ("Connection Failed, Try connect again after a sec!"));
-	            global_jvm->DetachCurrentThread ();
-	          }
+	          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
 	          sleep (1);
 	        } else {
 	          if (tries) tries = 0;
@@ -171,15 +178,15 @@ void *startConnect (void *p) {
 	        }
 	      }
 	    }
-	  } catch (const std::exception &er) {
+    	strcpy(buffer, "ended succesfully");
+    	close (sockfd);
+	  } catch (const char *er) {
     	close (sockfd);
 	  	throw er;
 	  }
-    close (sockfd);
-    strcpy(buffer, "ended succesfully");
-  } catch (const std::exception &er) {
+  } catch (const char *er) {
   	strcpy(buffer, "Connection Failed, because ");
-  	strcat(buffer, er.what());
+  	strcat(buffer, er);
   	end_with = 4;
   }
   
@@ -200,7 +207,7 @@ void *startConnect (void *p) {
   miner::clear();
 
   pthread_mutex_lock (&_mtx);
-  --active_worker;
+  --gp.active_worker;
   pthread_cond_broadcast (&_cond);
   pthread_mutex_unlock (&_mtx);
   pthread_exit (NULL);
@@ -215,7 +222,7 @@ JNIF (void, nativeStart)
   	cd->server_addr.sin_family = AF_INET;
     jint *integers = env->GetIntArrayElements (i, NULL);
 	  cd->server_addr.sin_port = htons (integers[0]);
-    thread_use = integers[1];
+    cd->thread_use = integers[1];
     env->ReleaseIntArrayElements (i, integers, JNI_ABORT);
 
     jstring jserverName = (jstring)env->GetObjectArrayElement (s, 0);
@@ -248,13 +255,8 @@ JNIF (void, nativeStart)
   pthread_attr_init (&thread_attr);
   pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
   pthread_mutex_lock (&_mtx);
-  active_worker = 0;
   if (pthread_create (&starting, &thread_attr, startConnect, (void *)cd) != 0) {
-    doingjob = false;
     env->CallVoidMethod (o, updateState, STATE_NONE);
-  } else {
-    mineRunning = true;
-    doingjob = true;
   }
   pthread_mutex_unlock (&_mtx);
   pthread_attr_destroy (&thread_attr);
@@ -262,20 +264,18 @@ JNIF (void, nativeStart)
 JNIF (jboolean, nativeRunning)
 (JNIEnv *, jobject) {
   pthread_mutex_lock (&_mtx);
-  bool r = mineRunning;
+  bool r = gp.active_worker > 0;
   pthread_mutex_unlock (&_mtx);
   return r;
 }
 void *toStopBackground (void *) {
-  if (active_worker && doingjob) {
-    pthread_mutex_lock (&_mtx);
-    doingjob = false;
-    while (active_worker > 0)
+  pthread_mutex_lock (&_mtx);
+  if (gp.active_worker) {
+    gp.req_stop = true;
+    while (gp.active_worker > 0)
       pthread_cond_wait (&_cond, &_mtx);
-    mineRunning = false;
-    pthread_mutex_unlock (&_mtx);
-    if (workers) delete[] workers, workers = nullptr;
   }
+  pthread_mutex_unlock (&_mtx);
   pthread_exit (NULL);
 }
 JNIF (void, nativeStop)

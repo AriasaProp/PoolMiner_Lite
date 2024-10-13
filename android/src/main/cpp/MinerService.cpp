@@ -139,7 +139,7 @@ void *startConnect (void *p) {
 	    // guest running state
 	    JNIEnv *env;
       if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    		env->CallVoidMethod (o, updateState, STATE_RUNNING);
+    		env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
         global_jvm->DetachCurrentThread ();
       }
 	    

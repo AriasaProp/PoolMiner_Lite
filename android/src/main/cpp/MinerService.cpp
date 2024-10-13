@@ -136,6 +136,12 @@ void *startConnect (void *p) {
 	    
 	    
 	    
+	    // guest running state
+	    JNIEnv *env;
+      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
+    		env->CallVoidMethod (o, updateState, STATE_RUNNING);
+        global_jvm->DetachCurrentThread ();
+      }
 	    
 	    // loop update data from server
 	    tries = 0;
@@ -238,8 +244,6 @@ JNIF (void, nativeStart)
   pthread_mutex_lock (&_mtx);
   if (pthread_create (&starting, &thread_attr, startConnect, (void *)cd) != 0) {
     env->CallVoidMethod (o, updateState, STATE_NONE);
-  } else {
-    env->CallVoidMethod (o, updateState, STATE_RUNNING);
   }
   pthread_mutex_unlock (&_mtx);
   pthread_attr_destroy (&thread_attr);

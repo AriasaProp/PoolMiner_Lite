@@ -162,7 +162,7 @@ void *startConnect (void *p) {
 	      bool loop = true;
 	      while (loop) {
 	        pthread_mutex_lock (&_mtx);
-	        loop = gp.req_stop;
+	        if (gp.req_stop) loop = false;
 	        pthread_mutex_unlock (&_mtx);
 	        if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
 	          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";

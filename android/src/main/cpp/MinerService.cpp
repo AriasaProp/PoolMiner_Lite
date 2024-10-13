@@ -110,7 +110,7 @@ void *startConnect (void *p) {
       for (size_t length = strlen(buffer), s; length > 0;) {
 		    s = send (sockfd, buffer, length, 0);
 		    if (s <= 0) {
-      		if (++tries >= MAX_ATTEMPTS_TRY) throw "Sending subscribe & authorize is always failed!";
+      		if (++tries > MAX_ATTEMPTS_TRY) throw "Sending subscribe & authorize is always failed!";
 		      continue;
 		    }
 		    length -= s;
@@ -118,44 +118,22 @@ void *startConnect (void *p) {
       }
       
 	    // rcv subscribe prove 
-	    /*
-	    tries = 0;
-	    do {
-	      if (recv (sockfd, buffer, MAX_MESSAGE, 0) > 0) {
-	      	
-	      }
-	      sleep (1);
-	    } while (!(mdh.subscribed && mdh.authorized) && (++tries < MAX_ATTEMPTS_TRY));
-	    if (!mdh.subscribed || !mdh.authorized) throw "Doesn't receive an subscribe or authorize message result!";
-	    */
+	    
 	    // try authorize
-/*
-	    // recv subscribe & authorize prove
 	    tries = 0;
-	    do {
-	      if (recv (sockfd, buffer, MAX_MESSAGE, 0) > 0) {
-	        std::string msgRcv (buffer);
-	        size_t pos = 0;
-	        while (((pos = msgRcv.find ("\n")) != std::string::npos) && !(mdh.subscribed && mdh.authorized)) {
-	          json::JSON rcv = json::Parse (msgRcv.substr (0, pos));
-	          msgRcv.erase (0, pos + 1);
-	          if (rcv.IsNull ()) continue;
-	          mdh.updateData (rcv);
-	        }
-	      }
-	      sleep (1);
-	    } while (!(mdh.subscribed && mdh.authorized) && (++tries < MAX_ATTEMPTS_TRY));
-	    if (!mdh.subscribed || !mdh.authorized) throw "Doesn't receive an subscribe or authorize message result!";
-	    // change state to state start running
-*/
-	    {
-	      JNIEnv *env;
-	      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	        env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-	        //env->CallVoidMethod (local_globalRef, sendMessageConsole, 2, env->NewStringUTF ("subscribe & authorize success"));
-	        global_jvm->DetachCurrentThread ();
-	      }
-	    }
+    	miner::msg_send_auth(buffer, dat->auth_user, dat->auth_pass);
+      for (size_t length = strlen(buffer), s; length > 0;) {
+		    s = send (sockfd, buffer, length, 0);
+		    if (s <= 0) {
+      		if (++tries > MAX_ATTEMPTS_TRY) throw "Sending subscribe & authorize is always failed!";
+		      continue;
+		    }
+		    length -= s;
+		    memmove(buffer, buffer + s, length);
+      }
+	    
+	    // rcv authorize prove 
+
 	    // loop update data from server
 	    tries = 0;
 	    {
@@ -168,7 +146,7 @@ void *startConnect (void *p) {
 	          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
 	          sleep (1);
 	        } else {
-	          if (tries) tries = 0;
+	        	tries = 0;
             JNIEnv *env;
 	          if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
 	          	std::string rp = miner::parsing(buffer);
@@ -257,6 +235,8 @@ JNIF (void, nativeStart)
   pthread_mutex_lock (&_mtx);
   if (pthread_create (&starting, &thread_attr, startConnect, (void *)cd) != 0) {
     env->CallVoidMethod (o, updateState, STATE_NONE);
+  } else {
+    env->CallVoidMethod (o, updateState, STATE_RUNNING);
   }
   pthread_mutex_unlock (&_mtx);
   pthread_attr_destroy (&thread_attr);

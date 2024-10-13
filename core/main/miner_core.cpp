@@ -19,10 +19,10 @@ void miner::init () {
 }
 
 void miner::msg_send_subscribe(char *buffer) {
-	sprintf(buffer,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}", CONNECT_MACHINE);
+	sprintf(buffer,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n", CONNECT_MACHINE);
 }
-void miner::msg_send_auth(char *buffer, char *user, char *pass) {
-	sprintf(buffer,"{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}", user, pass);
+void miner::msg_send_auth(char *buffer, const char *user, const char *pass) {
+	sprintf(buffer,"{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n", user, pass);
 }
 
 std::string miner::parsing(const char *msg) {

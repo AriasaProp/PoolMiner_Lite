@@ -110,7 +110,7 @@ void *startConnect (void *p) {
       for (size_t length = strlen(buffer), s; length > 0;) {
 		    s = send (sockfd, buffer, length, 0);
 		    if (s <= 0) {
-      		if (++tries > MAX_ATTEMPTS_TRY) throw "Sending subscribe & authorize is always failed!";
+      		if (++tries > MAX_ATTEMPTS_TRY) throw "Sending subscribe is always failed!";
 		      continue;
 		    }
 		    length -= s;
@@ -125,15 +125,18 @@ void *startConnect (void *p) {
       for (size_t length = strlen(buffer), s; length > 0;) {
 		    s = send (sockfd, buffer, length, 0);
 		    if (s <= 0) {
-      		if (++tries > MAX_ATTEMPTS_TRY) throw "Sending subscribe & authorize is always failed!";
+      		if (++tries > MAX_ATTEMPTS_TRY) throw "Sending authorize is always failed!";
 		      continue;
 		    }
 		    length -= s;
 		    memmove(buffer, buffer + s, length);
       }
 	    
-	    // rcv authorize prove 
-
+	    // rcv authorize prove
+	    
+	    
+	    
+	    
 	    // loop update data from server
 	    tries = 0;
 	    {

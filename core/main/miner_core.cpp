@@ -1,5 +1,5 @@
 #include "miner_core.hpp"
-#include "jannson.hpp"
+#include "jansson.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -11,8 +11,6 @@
 
 char *msg_buffer = nullptr;
 char *msg_buffer_end = nullptr;
-
-
 
 void miner::init () {
 	msg_buffer = new char[MAX_MSG_BUFFER]{};

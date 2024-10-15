@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <cerrno>
 
+
 /* hashtable */ 
 typedef unsigned int (*key_hash_fn)(const void *key);
 typedef int (*key_cmp_fn)(const void *key1, const void *key2);

@@ -17,4 +17,6 @@ SpacesInParentheses: false
 ColumnLimit: 0
 # empty line will not repeated
 MaxEmptyLinesToKeep: 1
+BraceWrapping:
+	AfterFunction: true
 

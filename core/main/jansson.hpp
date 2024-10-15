@@ -124,3 +124,4 @@ int json_dumpf(const json_t *, FILE *output, unsigned long flags);
 int json_dump_file(const json_t *, const char *path, unsigned long flags);
 
 #endif
+

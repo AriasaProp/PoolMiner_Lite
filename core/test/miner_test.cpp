@@ -1,16 +1,18 @@
+#include "json.hpp"
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include "miner_core.hpp"
+#include "json.hpp"
 
 namespace fs = std::filesystem;
 
-bool sample_json_parser (fs::path f) {
+bool miner_test (fs::path f) {
 	std::cout << "Sample Json Parser" << std::endl;
 	miner::init();
   std::ifstream file(f, std::ios::binary | std::ios::ate);
-  if (!file.is_open()) {
+  if (!file.is_open()) [[unlikely]] {
     std::cerr << "Gagal membuka file!" << std::endl;
     return false;
   }
@@ -24,8 +26,8 @@ bool sample_json_parser (fs::path f) {
 
   // Membaca isi file ke buffer
   if (file.read(buffer, size)) {
-  	miner::parsing(buffer);
-  } else {
+  	std::cout << miner::parsing(buffer) << std::endl;
+  } else [[unlikely]] {
     std::cerr << "Gagal membaca file!" << std::endl;
   }
 

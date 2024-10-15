@@ -9,8 +9,7 @@
 namespace miner {
 	void init();
 	
-	void msg_send_subscribe(char *);
-	void msg_send_auth(char*,const char*, const char*);
+	void msg_send_subs_auth(char*,const char*, const char*);
 	
 	std::string parsing(const char *);
 	

@@ -45,13 +45,13 @@ static jobject local_globalRef;
 bool MinerService_OnLoad (JNIEnv *env) {
   jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
   // consoleItem = env->FindClass("com/ariasaproject/poolminerlite/ConsoleItem");
-  if (!m_class /*|| !consoleItem*/) return false;
+  if (!m_class /*|| !consoleItem*/) [[unlikely]] return false;
   updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
   updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
   updateState = env->GetMethodID (m_class, "updateState", "(I)V");
   sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(BLjava/lang/String;)V");
   // consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
-  if (!updateSpeed || !updateResult || !updateState /* || !consoleItemConstructor*/) return false;
+  if (!updateSpeed || !updateResult || !updateState /* || !consoleItemConstructor*/) [[unlikely]] return false;
   return true;
 }
 void MinerService_OnUnload (JNIEnv *env) {
@@ -65,6 +65,12 @@ void MinerService_OnUnload (JNIEnv *env) {
 
 // 5 kBytes ~> 40 kBit
 #define MAX_MESSAGE 5000
+
+//java function bridge
+#define ATTACH_JAVA { JNIEnv *env;\
+while (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) [[unlikely]] { (void)env; }
+
+#define DETACH_JAVA global_jvm->DetachCurrentThread (); }
 
 // for mining global data
 static struct {
@@ -104,9 +110,9 @@ void *startConnect (void *p) {
       	if (tries++ >= MAX_ATTEMPTS_TRY) throw "Connection tries is always failed!";
         sleep (1);
       }
-	    // send subscribe
+	    // send subscribe & authorize
     	tries = 0;
-    	miner::msg_send_subscribe(buffer);
+    	miner::msg_send_subs_auth(buffer, dat->auth_user, dat->auth_pass);
       for (size_t length = strlen(buffer), s; length > 0;) {
 		    s = send (sockfd, buffer, length, 0);
 		    if (s <= 0) {
@@ -117,31 +123,18 @@ void *startConnect (void *p) {
 		    memmove(buffer, buffer + s, length);
       }
       
-	    // rcv subscribe prove 
-	    
-	    // try authorize
-	    tries = 0;
-    	miner::msg_send_auth(buffer, dat->auth_user, dat->auth_pass);
-      for (size_t length = strlen(buffer), s; length > 0;) {
-		    s = send (sockfd, buffer, length, 0);
-		    if (s <= 0) {
-      		if (++tries > MAX_ATTEMPTS_TRY) throw "Sending authorize is always failed!";
-		      continue;
-		    }
-		    length -= s;
-		    memmove(buffer, buffer + s, length);
-      }
-	    
-	    // rcv authorize prove
-	    
-	    
-	    
+	    // rcv subscribe & authorize prove 
+	    do {
+        if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
+          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
+          sleep (1);
+          continue;
+        }
+      } while ();
 	    // guest running state
-	    JNIEnv *env;
-      if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-    		env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-        global_jvm->DetachCurrentThread ();
-      }
+      ATTACH_JAVA
+  		env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
+      DETACH_JAVA
 	    
 	    // loop update data from server
 	    tries = 0;
@@ -156,12 +149,10 @@ void *startConnect (void *p) {
 	          sleep (1);
 	        } else {
 	        	tries = 0;
-            JNIEnv *env;
-	          if (global_jvm->AttachCurrentThread (&env, &attachArgs) == JNI_OK) {
-	          	std::string rp = miner::parsing(buffer);
-	            env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (rp.c_str()));
-	            global_jvm->DetachCurrentThread ();
-	          }
+	          ATTACH_JAVA
+          	std::string rp = miner::parsing(buffer);
+            env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (rp.c_str()));
+      			DETACH_JAVA
 	        }
 	      }
 	    }
@@ -181,15 +172,10 @@ void *startConnect (void *p) {
   delete[] dat->auth_pass;
   delete dat;
   // set state mining to none
-  {
-    JNIEnv *env;
-	  while (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) {
-	  	(void)env;
-	  }
-    env->CallVoidMethod (local_globalRef, sendMessageConsole, end_with, env->NewStringUTF (buffer));
-    env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-	  global_jvm->DetachCurrentThread ();
-  }
+  ATTACH_JAVA
+  env->CallVoidMethod (local_globalRef, sendMessageConsole, end_with, env->NewStringUTF (buffer));
+  env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
+  DETACH_JAVA
   
   miner::clear();
 

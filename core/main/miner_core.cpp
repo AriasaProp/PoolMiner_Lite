@@ -35,7 +35,9 @@ std::string miner::parsing(const char *msg) {
 			if ((newline - cur_msg) < 7) throw "small object";
 			char ln[newline - cur_msg + 1];
 			strncpy(ln, cur_msg, newline - cur_msg);
-			json_loads(ln, &jet);
+			json_t *o = json_loads(ln, &jet);
+			reparser += json_dumps(o, 0);
+			reparser += "\n";
 		} catch (const char *er) {
 			//end
 		}

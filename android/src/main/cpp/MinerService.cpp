@@ -42,10 +42,22 @@ static jmethodID sendMessageConsole;
 
 static jobject local_globalRef;
 
+void nativeStart(JNIEnv *, jobject , jobjectArray, jintArray);
+jboolean nativeRunning(JNIEnv *, jobject);
+void nativeStop(JNIEnv *, jobject);
+
 bool MinerService_OnLoad (JNIEnv *env) {
   jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
   // consoleItem = env->FindClass("com/ariasaproject/poolminerlite/ConsoleItem");
   if (!m_class /*|| !consoleItem*/) [[unlikely]] return false;
+
+  // Register your class' native methods.
+  static const JNINativeMethod methods[] = {
+    {"nativeStart", "([L[I)Z", reinterpret_cast<void*>(nativeStart)},
+    {"nativeRunning", "()Z", reinterpret_cast<void*>(nativeRunning)},
+    {"nativeStop", "()V", reinterpret_cast<void*>(nativeStop)},
+  };
+  if (env->RegisterNatives(m_class, methods, 3) != JNI_OK) [[unlikely]] return false;
   updateSpeed = env->GetMethodID (m_class, "updateSpeed", "(F)V");
   updateResult = env->GetMethodID (m_class, "updateResult", "(Z)V");
   updateState = env->GetMethodID (m_class, "updateState", "(I)V");
@@ -55,8 +67,14 @@ bool MinerService_OnLoad (JNIEnv *env) {
   return true;
 }
 void MinerService_OnUnload (JNIEnv *env) {
-  env->DeleteGlobalRef (local_globalRef);
-  local_globalRef = NULL;
+	jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
+  if (m_class) {
+  	env->UnregisterNatives(m_class);
+  }
+  if (local_globalRef) {
+  	env->DeleteGlobalRef (local_globalRef);
+  	local_globalRef = NULL;
+  }
   updateSpeed = NULL;
   updateResult = NULL;
   updateState = NULL;
@@ -186,10 +204,9 @@ void *startConnect (void *p) {
   pthread_exit (NULL);
 }
 
-#define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
+//#define JNIF(R, M) extern "C" JNIEXPORT R JNICALL Java_com_ariasaproject_poolminerlite_MinerService_##M
 
-JNIF (void, nativeStart)
-(JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
+void nativeStart(JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
   connectData *cd = new connectData;
   {
   	cd->server_addr.sin_family = AF_INET;
@@ -234,8 +251,7 @@ JNIF (void, nativeStart)
   pthread_mutex_unlock (&_mtx);
   pthread_attr_destroy (&thread_attr);
 }
-JNIF (jboolean, nativeRunning)
-(JNIEnv *, jobject) {
+jboolean nativeRunning(JNIEnv *, jobject) {
   pthread_mutex_lock (&_mtx);
   bool r = gp.active_worker > 0;
   pthread_mutex_unlock (&_mtx);
@@ -251,8 +267,7 @@ void *toStopBackground (void *) {
   pthread_mutex_unlock (&_mtx);
   pthread_exit (NULL);
 }
-JNIF (void, nativeStop)
-(JNIEnv *, jobject) {
+void nativeStop(JNIEnv *, jobject) {
   // send state for mine was stop
   pthread_t stopping;
   pthread_attr_t thread_attr;

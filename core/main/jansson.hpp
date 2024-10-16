@@ -62,36 +62,36 @@ void *json_object_iter_next(json_t *, void *);
 const char *json_object_iter_key(void *);
 json_t *json_object_iter_value(void *);
 int json_object_iter_set_new(json_t *, void *, json_t *);
-inline int json_object_set(json_t *object, const char *key, json_t *value);
-inline int json_object_set_nocheck(json_t *object, const char *key, json_t *value);
-inline int json_object_iter_set(json_t *object, void *iter, json_t *value);
+inline int json_object_set(json_t *object, const char *, json_t *);
+inline int json_object_set_nocheck(json_t *object, const char *, json_t *);
+inline int json_object_iter_set(json_t *object, void *iter, json_t *);
 unsigned int json_array_size(const json_t *);
 json_t *json_array_get(const json_t *, unsigned int);
-int json_array_set_new(json_t *, unsigned int, json_t *value);
-int json_array_append_new(json_t *, json_t *value);
-int json_array_insert_new(json_t *, unsigned int, json_t *value);
+int json_array_set_new(json_t *, unsigned int, json_t *);
+int json_array_append_new(json_t *, json_t *);
+int json_array_insert_new(json_t *, unsigned int, json_t *);
 int json_array_remove(json_t *, unsigned int);
 int json_array_clear(json_t *);
 int json_array_extend(json_t *, json_t *other);
 
-inline int json_array_set(json_t *, unsigned int, json_t *value);
-inline int json_array_append(json_t *, json_t *value);
-inline int json_array_insert(json_t *, unsigned int, json_t *value);
+inline int json_array_set(json_t *, unsigned int, json_t *);
+inline int json_array_append(json_t *, json_t *);
+inline int json_array_insert(json_t *, unsigned int, json_t *);
 
 const char *json_string_value(const json_t *string);
 int json_integer_value(const json_t *integer);
 double json_real_value(const json_t *real);
 double json_number_value(const json_t *);
 
-int json_string_set(json_t *string, const char *value);
-int json_string_set_nocheck(json_t *string, const char *value);
+int json_string_set(json_t *string, const char *);
+int json_string_set_nocheck(json_t *string, const char *);
 int json_integer_set(json_t *integer, int value);
 int json_real_set(json_t *real, double value);
 
 
 /* equality */
 
-int json_equal(json_t *value1, json_t *value2);
+int json_equal(json_t *1, json_t *2);
 
 
 /* copying */
@@ -119,9 +119,9 @@ json_t *json_load_file(const char *path, json_error_t *error);
 #define JSON_SORT_KEYS      0x400
 #define JSON_PRESERVE_ORDER 0x800
 
-char *json_dumps(const json_t *, unsigned long flags);
-int json_dumpf(const json_t *, FILE *output, unsigned long flags);
-int json_dump_file(const json_t *, const char *path, unsigned long flags);
+char *json_dumps(const json_t *, unsigned long);
+int json_dumpf(const json_t *, FILE *, unsigned long);
+int json_dump_file(const json_t *, const char *, unsigned long);
 
 #endif
 

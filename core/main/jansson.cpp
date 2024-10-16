@@ -16,27 +16,27 @@ typedef int (*key_cmp_fn)(const void *key1, const void *key2);
 typedef void (*free_fn)(void *key);
 
 struct hashtable_list {
-    struct hashtable_list *prev;
-    struct hashtable_list *next;
+    hashtable_list *prev;
+    hashtable_list *next;
 };
 
 struct hashtable_pair {
     void *key;
     void *value;
     unsigned int hash;
-    struct hashtable_list list;
+    hashtable_list list;
 };
 
 struct hashtable_bucket {
-    struct hashtable_list *first;
-    struct hashtable_list *last;
+    hashtable_list *first;
+    hashtable_list *last;
 };
 
 struct hashtable_t {
     unsigned int size;
-    struct hashtable_bucket *buckets;
+    hashtable_bucket *buckets;
     unsigned int num_buckets;  /* index to primes[] */
-    struct hashtable_list list;
+    hashtable_list list;
 
     key_hash_fn hash_key;
     key_cmp_fn cmp_keys;  /* returns non-zero for equal keys */
@@ -103,9 +103,7 @@ static inline unsigned int num_buckets(hashtable_t *hashtable)
 }
 
 
-static hashtable_pair *hashtable_find_pair(hashtable_t *hashtable, hashtable_bucket *bucket,
-                                   const void *key, unsigned int hash)
-{
+static hashtable_pair *hashtable_find_pair(hashtable_t *hashtable, hashtable_bucket *bucket, const void *key, unsigned int hash) {
     hashtable_list *list;
     hashtable_pair *pair;
 
@@ -188,12 +186,12 @@ static int hashtable_do_rehash(hashtable_t *hashtable)
     hashtable_pair *pair;
     unsigned int i, index, new_size;
 
-    free(hashtable->buckets);
+    delete[] hashtable->buckets;
 
     hashtable->num_buckets++;
     new_size = num_buckets(hashtable);
 
-    hashtable->buckets = malloc(new_size * sizeof(hashtable_bucket));
+    hashtable->buckets = new hashtable_bucket[new_size];
     if(!hashtable->buckets)
         return -1;
 
@@ -270,7 +268,7 @@ int hashtable_init(hashtable_t *hashtable,
 void hashtable_close(hashtable_t *hashtable)
 {
     hashtable_do_clear(hashtable);
-    free(hashtable->buckets);
+    delete[] hashtable->buckets;
 }
 
 int hashtable_set(hashtable_t *hashtable, void *key, void *value)

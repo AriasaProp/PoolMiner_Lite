@@ -91,7 +91,7 @@ int json_real_set(json_t *real, double value);
 
 /* equality */
 
-int json_equal(json_t *1, json_t *2);
+int json_equal(json_t *, json_t *);
 
 
 /* copying */

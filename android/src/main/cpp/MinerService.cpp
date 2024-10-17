@@ -153,8 +153,8 @@ static void *connect (void *p) {
 	    // guest running state
 	    pthread_mutex_lock (&thread_params.mtx_);
 		  thread_params.java_state_req = STATE_RUNNING;
-		  pthread_mutex_unlock (&thread_params.mtx_);
 		  pthread_cond_broadcast(&thread_params.cond_);
+		  pthread_mutex_unlock (&thread_params.mtx_);
   
 	    // loop update data from server
 	    tries = 0;
@@ -172,8 +172,8 @@ static void *connect (void *p) {
           	std::string rp = miner::parsing(buffer);
 	          pthread_mutex_lock (&thread_params.mtx_);
 					  thread_params.queued.push_back({end_with, rp});
-					  pthread_mutex_unlock (&thread_params.mtx_);
 					  pthread_cond_broadcast(&thread_params.cond_);
+					  pthread_mutex_unlock (&thread_params.mtx_);
   
 	        }
 	      }
@@ -197,8 +197,8 @@ static void *connect (void *p) {
   pthread_mutex_lock (&thread_params.mtx_);
   thread_params.queued.push_back({end_with, std::string(buffer)});
   thread_params.java_state_req = STATE_NONE;
-  pthread_mutex_unlock (&thread_params.mtx_);
   pthread_cond_broadcast(&thread_params.cond_);
+  pthread_mutex_unlock (&thread_params.mtx_);
   
   miner::clear();
 
@@ -215,27 +215,30 @@ static void *logger (void *o) {
 	std::vector<std::pair<jbyte, std::string>> proc;
   JNIEnv *env;
 	while (loop) {
-		pthread_cond_wait(&thread_params.cond_, &thread_params.mtx_);
     pthread_mutex_lock (&thread_params.mtx_);
+    while (thread_params.queued.empty() || (java_state_cur == thread_params.java_state_req)) {
+			pthread_cond_wait(&thread_params.cond_, &thread_params.mtx_);
+    }
 		proc.insert(proc.end(), thread_params.queued.begin(), thread_params.queued.end());
 		thread_params.queued.clear();
 		java_state_cur = thread_params.java_state_req;
+    loop = thread_params.active;
     pthread_mutex_unlock (&thread_params.mtx_);
+    
 		if (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) [[unlikely]] continue;
-
-    for (std::pair a : proc) {
-    	env->CallVoidMethod (gl, sendMessageConsole, a.first, env->NewStringUTF (a.second.c_str()));
-    }
-    proc.clear();
+		
+		if (!proc.empty()) {
+		  for (std::pair a : proc) {
+		  	env->CallVoidMethod (gl, sendMessageConsole, a.first, env->NewStringUTF (a.second.c_str()));
+		  }
+		  proc.clear();
+		}
     if (java_state_set != java_state_cur) {
     	java_state_set = java_state_cur;
   		env->CallVoidMethod (gl, updateState, java_state_cur);
     }
     
     global_jvm->DetachCurrentThread ();
-    pthread_mutex_lock (&thread_params.mtx_);
-    loop = thread_params.active;
-    pthread_mutex_unlock (&thread_params.mtx_);
 	}
 	
 	env->DeleteGlobalRef (gl);
@@ -294,7 +297,7 @@ void nativeStop(JNIEnv *, jobject) {
   // send state for mine was stop
   pthread_mutex_lock (&thread_params.mtx_);
   thread_params.active = false;
-  pthread_mutex_unlock (&thread_params.mtx_);
   pthread_cond_broadcast(&thread_params.cond_);
+  pthread_mutex_unlock (&thread_params.mtx_);
 }
 

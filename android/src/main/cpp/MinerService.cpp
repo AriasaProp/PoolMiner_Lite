@@ -49,7 +49,7 @@ static struct {
 	
 	volatile jint java_state_req = -1;
 	
-	volatile std::vector<std::pair<jbyte, std::string>> queued;
+	std::vector<std::pair<jbyte, std::string>> queued;
 	
 	pthread_t connection;
 	pthread_t logging;
@@ -223,12 +223,12 @@ static void *logger (void *o) {
 		if (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) [[unlikely]] continue;
 
     for (std::pair a : proc) {
-    	env->CallVoidMethod (local_globalRef, sendMessageConsole, a.first, env->NewStringUTF (a.second.c_str()));
+    	env->CallVoidMethod (gl, sendMessageConsole, a.first, env->NewStringUTF (a.second.c_str()));
     }
     proc.clear();
     if (java_state_set != java_state_cur) {
     	java_state_set = java_state_cur;
-  		env->CallVoidMethod (local_globalRef, updateState, java_state_cur);
+  		env->CallVoidMethod (gl, updateState, java_state_cur);
     }
     
     global_jvm->DetachCurrentThread ();
@@ -275,17 +275,17 @@ void nativeStart(JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     strcpy(cd->auth_pass, auth_pass);
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
-  
+  jobject jo = env->NewGlobalRef (o);
   pthread_mutex_lock (&thread_params.mtx_);
   thread_params.running = true;
   thread_params.active = true;
   pthread_create (&thread_params.connection, NULL, connect, (void *)cd);
-  pthread_create (&thread_params.logging, NULL, logger, (void*)&env->NewGlobalRef (o));
+  pthread_create (&thread_params.logging, NULL, logger, (void*)&jo);
   pthread_mutex_unlock (&thread_params.mtx_);
 }
 jboolean nativeRunning(JNIEnv *, jobject) {
   pthread_mutex_lock (&thread_params.mtx_);
-  bool r = thread_params.running 
+  bool r = thread_params.running; 
   pthread_mutex_unlock (&thread_params.mtx_);
   return r;
 }

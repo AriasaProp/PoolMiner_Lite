@@ -153,20 +153,20 @@ static void *connect (void *p) {
 	    // guest running state
 	    pthread_mutex_lock (&thread_params.mtx_);
 		  thread_params.java_state_req = STATE_RUNNING;
+		  bool loop = thread_params.active;
 		  pthread_cond_broadcast(&thread_params.cond_);
 		  pthread_mutex_unlock (&thread_params.mtx_);
   
 	    // loop update data from server
 	    tries = 0;
-      for (;;) {
+	    
+      while (loop) {
         pthread_mutex_lock (&thread_params.mtx_);
-      	if (!thread_params.active) {
-				  thread_params.queued.push_back({0, std::string("Trying to stop!")});
-				  pthread_cond_broadcast(&thread_params.cond_);
-				  pthread_mutex_unlock (&thread_params.mtx_);
-      		break;
-      	}
+      	loop = thread_params.active;
+			  thread_params.queued.push_back({0, std::string(loop?"continue loop!":"try to stop!")});
+			  pthread_cond_broadcast(&thread_params.cond_);
         pthread_mutex_unlock (&thread_params.mtx_);
+        if (!loop) continue;
         if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
           if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
           sleep (1);

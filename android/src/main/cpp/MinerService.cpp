@@ -40,16 +40,16 @@ static jmethodID updateState;
 static jmethodID sendMessageConsole;
 // static jmethodID consoleItemConstructor;
 
-static volatile struct {
-	bool running = false;
-	bool active = false;
+static struct {
+	volatile bool running = false;
+	volatile bool active = false;
 	
 	pthread_mutex_t mtx_;
 	pthread_cond_t cond_;
 	
-	jint java_state_req = -1;
+	volatile jint java_state_req = -1;
 	
-	std::vector<std::pair<jbyte, std::string>> queued;
+	volatile std::vector<std::pair<jbyte, std::string>> queued;
 	
 	pthread_t connection;
 	pthread_t logging;

@@ -208,6 +208,7 @@ static void *connect (void *p) {
   pthread_mutex_unlock (&thread_params.mtx_);
   pthread_exit (NULL);
 }
+static jobject lcl_glb;
 static void *logger (void *o) {
 	bool loop = true;;
 	jobject gl = *((jobject*)o);
@@ -229,19 +230,19 @@ static void *logger (void *o) {
 		
 		if (!proc.empty()) {
 		  for (std::pair a : proc) {
-		  	env->CallVoidMethod (gl, sendMessageConsole, a.first, env->NewStringUTF (a.second.c_str()));
+		  	env->CallVoidMethod (lcl_glb, sendMessageConsole, a.first, env->NewStringUTF (a.second.c_str()));
 		  }
 		  proc.clear();
 		}
     if (java_state_set != java_state_cur) {
     	java_state_set = java_state_cur;
-  		env->CallVoidMethod (gl, updateState, java_state_cur);
+  		env->CallVoidMethod (lcl_glb, updateState, java_state_cur);
     }
     
     global_jvm->DetachCurrentThread ();
 	}
 	
-	env->DeleteGlobalRef (gl);
+	env->DeleteGlobalRef (lcl_glb);
   pthread_exit (NULL);
 }
 
@@ -279,12 +280,12 @@ void nativeStart(JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     strcpy(cd->auth_pass, auth_pass);
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
-  jobject jo = env->NewGlobalRef (o);
+  lcl_glb = env->NewGlobalRef (o);
   pthread_mutex_lock (&thread_params.mtx_);
   thread_params.running = true;
   thread_params.active = true;
   pthread_create (&thread_params.connection, NULL, connect, (void *)cd);
-  pthread_create (&thread_params.logging, NULL, logger, (void*)&jo);
+  pthread_create (&thread_params.logging, NULL, logger, NULL);
   pthread_mutex_unlock (&thread_params.mtx_);
 }
 jboolean nativeRunning(JNIEnv *, jobject) {

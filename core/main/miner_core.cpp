@@ -23,7 +23,7 @@ void miner::init () {
 void miner::msg_send_subs_auth(char *buffer, const char *user, const char *pass) {
 	sprintf(buffer,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n", CONNECT_MACHINE, user, pass);
 }
-json_error_t jet;
+
 std::string miner::parsing(const char *msg) {
 	std::string reparser = "";
 	strcat(msg_buffer,msg);

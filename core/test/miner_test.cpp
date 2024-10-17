@@ -3,7 +3,6 @@
 #include <fstream>
 #include <string>
 #include "miner_core.hpp"
-#include "jansson.hpp"
 
 namespace fs = std::filesystem;
 

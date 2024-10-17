@@ -7,6 +7,11 @@
 
 
 namespace miner {
+struct data {
+	bool subscribed;
+	bool authorized;
+};
+
 	void init();
 	
 	void msg_send_subs_auth(char*,const char*, const char*);

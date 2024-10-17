@@ -1,5 +1,5 @@
 #include "miner_core.hpp"
-#include "jansson.hpp"
+#include "json.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -12,9 +12,12 @@
 char *msg_buffer = nullptr;
 char *msg_buffer_end = nullptr;
 
+miner::data *ld;
+
 void miner::init () {
 	msg_buffer = new char[MAX_MSG_BUFFER]{};
 	msg_buffer_end = msg_buffer + MAX_MSG_BUFFER;
+	ld = new miner::data;
 }
 
 void miner::msg_send_subs_auth(char *buffer, const char *user, const char *pass) {
@@ -31,16 +34,11 @@ std::string miner::parsing(const char *msg) {
 		do {
 			if (*newline == '\n' || *newline == 0) break;
 		} while (++newline < msg_buffer_end);
-		try {
-			if ((newline - cur_msg) < 7) throw "small object";
-			char ln[newline - cur_msg + 1];
-			strncpy(ln, cur_msg, newline - cur_msg);
-			json_t *o = json_loads(ln, &jet);
-			reparser += json_dumps(o, 0);
-			reparser += "\n";
-		} catch (const char *er) {
-			//end
-		}
+		if ((newline - cur_msg) < 7) goto end_part;
+		//json::JSON o = json::Parse(std::string(cur_msg, newline - cur_msg));
+		reparser += std::string(cur_msg, newline - cur_msg);
+		reparser += "\n";
+end_part:
 		cur_msg = newline + 1;
 	} while (*cur_msg);
 	return reparser;
@@ -48,4 +46,7 @@ std::string miner::parsing(const char *msg) {
 
 void miner::clear() {
 	delete[] msg_buffer;
+	delete ld;
 }
+
+

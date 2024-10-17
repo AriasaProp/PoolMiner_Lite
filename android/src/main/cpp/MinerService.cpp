@@ -40,7 +40,21 @@ static jmethodID updateState;
 static jmethodID sendMessageConsole;
 // static jmethodID consoleItemConstructor;
 
-static jobject local_globalRef;
+static volatile struct {
+	bool running = false;
+	bool active = false;
+	
+	pthread_mutex_t mtx_;
+	pthread_cond_t cond_;
+	
+	jint java_state_req = -1;
+	
+	std::vector<std::pair<jbyte, std::string>> queued;
+	
+	pthread_t connection;
+	pthread_t logging;
+} thread_params;
+
 
 void nativeStart(JNIEnv *, jobject , jobjectArray, jintArray);
 jboolean nativeRunning(JNIEnv *, jobject);
@@ -64,16 +78,21 @@ bool MinerService_OnLoad (JNIEnv *env) {
   sendMessageConsole = env->GetMethodID (m_class, "sendMessageConsole", "(BLjava/lang/String;)V");
   // consoleItemConstructor = env->GetMethodID(consoleItem, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
   if (!updateSpeed || !updateResult || !updateState /* || !consoleItemConstructor*/) [[unlikely]] return false;
+  
+  pthread_mutex_init(&thread_params.mtx_, NULL);
+  pthread_cond_init(&thread_params.cond_, NULL);
   return true;
 }
 void MinerService_OnUnload (JNIEnv *env) {
+	
+  
+  pthread_mutex_destroy(&thread_params.mtx_);
+  pthread_cond_destroy(&thread_params.cond_);
+	
+	
 	jclass m_class = env->FindClass ("com/ariasaproject/poolminerlite/MinerService");
   if (m_class) {
   	env->UnregisterNatives(m_class);
-  }
-  if (local_globalRef) {
-  	env->DeleteGlobalRef (local_globalRef);
-  	local_globalRef = NULL;
   }
   updateSpeed = NULL;
   updateResult = NULL;
@@ -84,20 +103,6 @@ void MinerService_OnUnload (JNIEnv *env) {
 // 5 kBytes ~> 40 kBit
 #define MAX_MESSAGE 5000
 
-//java function bridge
-#define ATTACH_JAVA { JNIEnv *env;\
-while (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) [[unlikely]] { (void)env; }
-
-#define DETACH_JAVA global_jvm->DetachCurrentThread (); }
-
-// for mining global data
-static struct {
-	bool req_stop;
-	uint32_t active_worker;
-} gp;
-static pthread_mutex_t _mtx = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t _cond = PTHREAD_COND_INITIALIZER;
-
 struct connectData {
 	uint32_t thread_use;
   struct sockaddr_in server_addr;
@@ -105,13 +110,8 @@ struct connectData {
   char *auth_pass;
 };
 
-char buffer[MAX_MESSAGE];
-void *startConnect (void *p) {
-  pthread_mutex_lock (&_mtx);
-  gp.req_stop = false;
-  gp.active_worker = 1;
-  pthread_mutex_unlock (&_mtx);
-  
+static char buffer[MAX_MESSAGE];
+static void *connect (void *p) {
   miner::init();
 
   connectData *dat = (connectData *)p;
@@ -150,27 +150,30 @@ void *startConnect (void *p) {
         }
       } while ();
 	    // guest running state
-      ATTACH_JAVA
-  		env->CallVoidMethod (local_globalRef, updateState, STATE_RUNNING);
-      DETACH_JAVA
-	    
+	    pthread_mutex_lock (&thread_params.mtx_);
+		  thread_params.java_state_req = STATE_RUNNING;
+		  pthread_mutex_unlock (&thread_params.mtx_);
+		  pthread_cond_broadcast(&thread_params.cond_);
+  
 	    // loop update data from server
 	    tries = 0;
 	    {
 	      bool loop = true;
 	      while (loop) {
-	        pthread_mutex_lock (&_mtx);
-	        if (gp.req_stop) loop = false;
-	        pthread_mutex_unlock (&_mtx);
+	        pthread_mutex_lock (&thread_params.mtx_);
+	        loop = thread_params.active;
+	        pthread_mutex_unlock (&thread_params.mtx_);
 	        if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
 	          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
 	          sleep (1);
 	        } else {
 	        	tries = 0;
-	          ATTACH_JAVA
           	std::string rp = miner::parsing(buffer);
-            env->CallVoidMethod (local_globalRef, sendMessageConsole, 0, env->NewStringUTF (rp.c_str()));
-      			DETACH_JAVA
+	          pthread_mutex_lock (&thread_params.mtx_);
+					  thread_params.queued.push_back({end_with, rp});
+					  pthread_mutex_unlock (&thread_params.mtx_);
+					  pthread_cond_broadcast(&thread_params.cond_);
+  
 	        }
 	      }
 	    }
@@ -190,17 +193,51 @@ void *startConnect (void *p) {
   delete[] dat->auth_pass;
   delete dat;
   // set state mining to none
-  ATTACH_JAVA
-  env->CallVoidMethod (local_globalRef, sendMessageConsole, end_with, env->NewStringUTF (buffer));
-  env->CallVoidMethod (local_globalRef, updateState, STATE_NONE);
-  DETACH_JAVA
+  pthread_mutex_lock (&thread_params.mtx_);
+  thread_params.queued.push_back({end_with, std::string(buffer)});
+  thread_params.java_state_req = STATE_NONE;
+  pthread_mutex_unlock (&thread_params.mtx_);
+  pthread_cond_broadcast(&thread_params.cond_);
   
   miner::clear();
 
-  pthread_mutex_lock (&_mtx);
-  --gp.active_worker;
-  pthread_cond_broadcast (&_cond);
-  pthread_mutex_unlock (&_mtx);
+  pthread_join(thread_params.logging, NULL);
+  pthread_mutex_lock (&thread_params.mtx_);
+  thread_params.running = false;
+  pthread_mutex_unlock (&thread_params.mtx_);
+  pthread_exit (NULL);
+}
+static void *logger (void *o) {
+	bool loop = true;;
+	jobject gl = *((jobject*)o);
+	jint java_state_cur = -1, java_state_set = -1;
+	std::vector<std::pair<jbyte, std::string>> proc;
+  JNIEnv *env;
+	while (loop) {
+		pthread_cond_wait(&thread_params.cond_, &thread_params.mtx_);
+    pthread_mutex_lock (&thread_params.mtx_);
+		proc.insert(proc.end(), thread_params.queued.begin(), thread_params.queued.end());
+		thread_params.queued.clear();
+		java_state_cur = thread_params.java_state_req;
+    pthread_mutex_unlock (&thread_params.mtx_);
+		if (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) [[unlikely]] continue;
+
+    for (std::pair a : proc) {
+    	env->CallVoidMethod (local_globalRef, sendMessageConsole, a.first, env->NewStringUTF (a.second.c_str()));
+    }
+    proc.clear();
+    if (java_state_set != java_state_cur) {
+    	java_state_set = java_state_cur;
+  		env->CallVoidMethod (local_globalRef, updateState, java_state_cur);
+    }
+    
+    global_jvm->DetachCurrentThread ();
+    pthread_mutex_lock (&thread_params.mtx_);
+    loop = thread_params.active;
+    pthread_mutex_unlock (&thread_params.mtx_);
+	}
+	
+	env->DeleteGlobalRef (gl);
   pthread_exit (NULL);
 }
 
@@ -238,42 +275,25 @@ void nativeStart(JNIEnv *env, jobject o, jobjectArray s, jintArray i) {
     strcpy(cd->auth_pass, auth_pass);
     env->ReleaseStringUTFChars (jauth_pass, auth_pass);
   }
-  if (!local_globalRef)
-    local_globalRef = env->NewGlobalRef (o);
-  pthread_t starting;
-  pthread_attr_t thread_attr;
-  pthread_attr_init (&thread_attr);
-  pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-  pthread_mutex_lock (&_mtx);
-  if (pthread_create (&starting, &thread_attr, startConnect, (void *)cd) != 0) {
-    env->CallVoidMethod (o, updateState, STATE_NONE);
-  }
-  pthread_mutex_unlock (&_mtx);
-  pthread_attr_destroy (&thread_attr);
+  
+  pthread_mutex_lock (&thread_params.mtx_);
+  thread_params.running = true;
+  thread_params.active = true;
+  pthread_create (&thread_params.connection, NULL, connect, (void *)cd);
+  pthread_create (&thread_params.logging, NULL, logger, (void*)&env->NewGlobalRef (o));
+  pthread_mutex_unlock (&thread_params.mtx_);
 }
 jboolean nativeRunning(JNIEnv *, jobject) {
-  pthread_mutex_lock (&_mtx);
-  bool r = gp.active_worker > 0;
-  pthread_mutex_unlock (&_mtx);
+  pthread_mutex_lock (&thread_params.mtx_);
+  bool r = thread_params.running 
+  pthread_mutex_unlock (&thread_params.mtx_);
   return r;
-}
-void *toStopBackground (void *) {
-  pthread_mutex_lock (&_mtx);
-  if (gp.active_worker) {
-    gp.req_stop = true;
-    while (gp.active_worker > 0)
-      pthread_cond_wait (&_cond, &_mtx);
-  }
-  pthread_mutex_unlock (&_mtx);
-  pthread_exit (NULL);
 }
 void nativeStop(JNIEnv *, jobject) {
   // send state for mine was stop
-  pthread_t stopping;
-  pthread_attr_t thread_attr;
-  pthread_attr_init (&thread_attr);
-  pthread_attr_setdetachstate (&thread_attr, PTHREAD_CREATE_DETACHED);
-  pthread_create (&stopping, &thread_attr, toStopBackground, NULL);
-  pthread_attr_destroy (&thread_attr);
+  pthread_mutex_lock (&thread_params.mtx_);
+  thread_params.active = false;
+  pthread_mutex_unlock (&thread_params.mtx_);
+  pthread_cond_broadcast(&thread_params.cond_);
 }
 

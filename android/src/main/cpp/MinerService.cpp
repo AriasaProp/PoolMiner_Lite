@@ -67,7 +67,7 @@ bool MinerService_OnLoad (JNIEnv *env) {
 
   // Register your class' native methods.
   static const JNINativeMethod methods[] = {
-    {"nativeStart", "([L[I)V", reinterpret_cast<void*>(nativeStart)},
+    {"nativeStart", "([Ljava/lang/String;[I)V", reinterpret_cast<void*>(nativeStart)},
     {"nativeRunning", "()Z", reinterpret_cast<void*>(nativeRunning)},
     {"nativeStop", "()V", reinterpret_cast<void*>(nativeStop)},
   };

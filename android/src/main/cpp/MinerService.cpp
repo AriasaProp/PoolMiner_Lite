@@ -209,9 +209,8 @@ static void *connect (void *p) {
   pthread_exit (NULL);
 }
 static jobject lcl_glb;
-static void *logger (void *o) {
+static void *logger (void *) {
 	bool loop = true;;
-	jobject gl = *((jobject*)o);
 	jint java_state_cur = -1, java_state_set = -1;
 	std::vector<std::pair<jbyte, std::string>> proc;
   JNIEnv *env;

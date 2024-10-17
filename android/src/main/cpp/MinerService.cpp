@@ -140,7 +140,7 @@ static void *connect (void *p) {
 		    length -= s;
 		    memmove(buffer, buffer + s, length);
       }
-      
+      /*
 	    // rcv subscribe & authorize prove 
 	    do {
         if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
@@ -149,6 +149,7 @@ static void *connect (void *p) {
           continue;
         }
       } while ();
+      */
 	    // guest running state
 	    pthread_mutex_lock (&thread_params.mtx_);
 		  thread_params.java_state_req = STATE_RUNNING;

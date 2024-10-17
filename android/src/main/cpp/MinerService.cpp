@@ -159,11 +159,11 @@ static void *connect (void *p) {
 	    // loop update data from server
 	    tries = 0;
 	    {
-	      bool loop = true;
-	      while (loop) {
+	      for (;;) {
 	        pthread_mutex_lock (&thread_params.mtx_);
-	        loop = thread_params.active;
+	      	bool loop = thread_params.active;
 	        pthread_mutex_unlock (&thread_params.mtx_);
+	        if (!loop) break;
 	        if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
 	          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
 	          sleep (1);
@@ -203,26 +203,29 @@ static void *connect (void *p) {
   miner::clear();
 
   pthread_join(thread_params.logging, NULL);
-  pthread_mutex_lock (&thread_params.mtx_);
   thread_params.running = false;
-  pthread_mutex_unlock (&thread_params.mtx_);
   pthread_exit (NULL);
 }
 static jobject lcl_glb;
 static void *logger (void *) {
-	bool loop = true;;
 	jint java_state_cur = -1, java_state_set = -1;
 	std::vector<std::pair<jbyte, std::string>> proc;
   JNIEnv *env;
+  bool loop = true;
 	while (loop) {
     pthread_mutex_lock (&thread_params.mtx_);
-    while (thread_params.queued.empty() || (java_state_cur == thread_params.java_state_req)) {
-			pthread_cond_wait(&thread_params.cond_, &thread_params.mtx_);
+    if (thread_params.queued.empty() && proc.empty() && (java_state_cur == thread_params.java_state_req)) {
+    	if (!thread_params.active)
+    		loop = false;
+    	else
+				pthread_cond_wait(&thread_params.cond_, &thread_params.mtx_);
+    	pthread_mutex_unlock (&thread_params.mtx_);
+    	continue;
     }
 		proc.insert(proc.end(), thread_params.queued.begin(), thread_params.queued.end());
 		thread_params.queued.clear();
 		java_state_cur = thread_params.java_state_req;
-    loop = thread_params.active;
+    
     pthread_mutex_unlock (&thread_params.mtx_);
     
 		if (global_jvm->AttachCurrentThread (&env, &attachArgs) != JNI_OK) [[unlikely]] continue;

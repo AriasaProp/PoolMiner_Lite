@@ -7,10 +7,10 @@
 
 
 namespace miner {
-struct data {
-	bool subscribed;
-	bool authorized;
-};
+	struct data {
+		bool subscribed;
+		bool authorized;
+	};
 
 	void init();
 	

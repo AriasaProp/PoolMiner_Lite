@@ -212,14 +212,10 @@ static void *logger (void *) {
 	jint java_state_cur = -1, java_state_set = -1;
 	std::vector<std::pair<jbyte, std::string>> proc;
   JNIEnv *env;
-  bool loop = true;
-	while (loop) {
+	do {
     pthread_mutex_lock (&thread_params.mtx_);
     if (thread_params.queued.empty() && proc.empty() && (java_state_cur == thread_params.java_state_req)) {
-    	if (!thread_params.active)
-    		loop = false;
-    	else
-				pthread_cond_wait(&thread_params.cond_, &thread_params.mtx_);
+			pthread_cond_wait(&thread_params.cond_, &thread_params.mtx_);
     	pthread_mutex_unlock (&thread_params.mtx_);
     	continue;
     }
@@ -243,7 +239,7 @@ static void *logger (void *) {
     }
     
     global_jvm->DetachCurrentThread ();
-	}
+	} while (java_state_set != STATE_NONE);
 	
 	env->DeleteGlobalRef (lcl_glb);
   pthread_exit (NULL);

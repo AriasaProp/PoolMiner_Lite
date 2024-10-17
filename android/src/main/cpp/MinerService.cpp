@@ -158,26 +158,25 @@ static void *connect (void *p) {
   
 	    // loop update data from server
 	    tries = 0;
-	    {
-	      for (;;) {
-	        pthread_mutex_lock (&thread_params.mtx_);
-	      	bool loop = thread_params.active;
-	        pthread_mutex_unlock (&thread_params.mtx_);
-	        if (!loop) break;
-	        if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
-	          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
-	          sleep (1);
-	        } else {
-	        	tries = 0;
-          	std::string rp = miner::parsing(buffer);
-	          pthread_mutex_lock (&thread_params.mtx_);
-					  thread_params.queued.push_back({end_with, rp});
-					  pthread_cond_broadcast(&thread_params.cond_);
-					  pthread_mutex_unlock (&thread_params.mtx_);
-  
-	        }
-	      }
-	    }
+      for (;;) {
+        pthread_mutex_lock (&thread_params.mtx_);
+      	if (!thread_params.active) {
+        	pthread_mutex_unlock (&thread_params.mtx_);
+      		break;
+      	}
+        pthread_mutex_unlock (&thread_params.mtx_);
+        if (recv (sockfd, buffer, MAX_MESSAGE, 0) <= 0) {
+          if (++tries > MAX_ATTEMPTS_TRY) throw "failed to receive message socket!.";
+          sleep (1);
+        } else {
+        	tries = 0;
+        	std::string rp = miner::parsing(buffer);
+          pthread_mutex_lock (&thread_params.mtx_);
+				  thread_params.queued.push_back({0, rp});
+				  pthread_cond_broadcast(&thread_params.cond_);
+				  pthread_mutex_unlock (&thread_params.mtx_);
+        }
+      }
     	strcpy(buffer, "ended succesfully");
     	close (sockfd);
 	  } catch (const char *er) {

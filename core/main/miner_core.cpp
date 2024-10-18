@@ -5,6 +5,7 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include <sstream>
 
 #define MAX_MSG_BUFFER 4096
 #define CONNECT_MACHINE "PoolMiner-Lite"
@@ -13,9 +14,7 @@ char *msg_buffer = nullptr;
 char *msg_buffer_end = nullptr;
 
 struct hex_ {
-private:
 	char *value;
-public:
 	hex_(const std::string &v) {
 		size_t l = v.size();
 		l = l/2 + (l&1);
@@ -25,8 +24,8 @@ public:
 		char *vl = value;
 		do {
 			vl = (c <= '9') ? c - '0' : c - 'a' + 10;
-			++c;
-			vl = ((c <= '9') ? c - '0' : c - 'a' + 10) << 4;
+			if (!*(++c)) break;
+			vl |= ((c <= '9') ? c - '0' : c - 'a' + 10) << 4;
 			++vl;
 		} while (*(++c));
 	}
@@ -70,7 +69,7 @@ void miner::msg_send_subs_auth(char *buffer, const char *user, const char *pass)
 
 
 std::string miner::parsing(const char *msg) {
-	std::string reparser = "";
+	std::stringstream reparser;
 	strcat(msg_buffer,msg);
 	char *cur_msg = msg_buffer;
 	do {
@@ -93,22 +92,22 @@ std::string miner::parsing(const char *msg) {
 				if (m == "mining.set_difficulty") {
 					data_mine.requipment[m] = p[0];
 				} else if (m == "mining.notify") {
-					reparser += "job:\n";
-					reparser += " " + p[0] + "\n"; 
-					reparser += " " + p[1] + "\n"; 
-					reparser += " " + p[2] + "\n"; 
-					reparser += " " + p[3] + "\n"; 
-					reparser += " merkle root:\n"; 
+					reparser << "job:\n";
+					reparser << " " << p[0] << "\n"; 
+					reparser << " " << p[1] << "\n"; 
+					reparser << " " << p[2] << "\n"; 
+					reparser << " " << p[3] << "\n"; 
+					reparser << " merkle root:\n"; 
 					for (size_t i = 0, j = p[4].size(); i < j; ++i) {
-						reparser += "   " + p[4][i] + "\n"; 
+						reparser << "   " << p[4][i] << "\n"; 
 					}
-					reparser += " " + p[5] + "\n"; 
-					reparser += " " + p[6] + "\n"; 
-					reparser += " " + p[7] + "\n"; 
-					reparser += " " + (p[8]?"true":"false") + "\n";
+					reparser << " " << p[5] << "\n"; 
+					reparser << " " << p[6] << "\n"; 
+					reparser << " " << p[7] << "\n"; 
+					reparser << " " << ((bool)p[8]?"true":"false") << "\n";
 				} else {
-					reparser += "method: " + m + "\n";
-					reparser += "params: " + (std::string)p + "\n";
+					reparser << "method: " << m << "\n";
+					reparser << "params: " << (std::string)p << "\n";
 				}
 			} else {
 				json::JSON er = o["error"];
@@ -116,9 +115,9 @@ std::string miner::parsing(const char *msg) {
 				switch ((int)id) {
 					case 1:
 						if (!er.IsNull()) {
-							reparser += "error on subs: ";
-							reparser += (std::string)er;
-							reparser += "\n";
+							reparser << "error on subs: ";
+							reparser << (std::string)er;
+							reparser << "\n";
 							break;
 						}
 						data_mine.subs = true;
@@ -129,13 +128,10 @@ std::string miner::parsing(const char *msg) {
 						break;
 					case 2:
 						if (!(bool)res) {
-							reparser += "auth is invalid";
-							reparser += "\n";
+							reparser << "auth is invalid" << "\n";
 						}
 						if (!er.IsNull()) {
-							reparser += "error on auth: ";
-							reparser += (std::string)er;
-							reparser += "\n";
+							reparser << "error on auth: " << (std::string)er << "\n";
 						}
 						data_mine.auth = (bool)res & er.IsNull();
 						break;
@@ -145,7 +141,7 @@ std::string miner::parsing(const char *msg) {
 		cur_msg = newline + 1;
 	} while (*cur_msg);
 	memcpy(msg_buffer, cur_msg, MAX_MSG_BUFFER - (cur_msg - msg_buffer));
-	return reparser;
+	return reparser.str();
 }
 
 bool miner::subs_auth() {

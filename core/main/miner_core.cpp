@@ -122,10 +122,10 @@ std::string miner::parsing(const char *msg) {
 							break;
 						}
 						data_mine.subs = true;
-						data_mine.session[(std::string)o[0][0][0]] = hex_((std::string)o[0][0][1]);
-						data_mine.session[(std::string)o[0][1][0]] = hex_((std::string)o[0][1][1]);
-						data_mine.session["job.id"] = hex_((std::string)o[1]);
-						data_mine.session["protocol"] = hex_((std::string)o[2]);
+						data_mine.session[(std::string)res[0][0][0]] = hex_((std::string)res[0][0][1]);
+						data_mine.session[(std::string)res[0][1][0]] = hex_((std::string)res[0][1][1]);
+						data_mine.session["job.id"] = hex_((std::string)res[1]);
+						data_mine.session["protocol"] = hex_((std::string)res[2]);
 						break;
 					case 2:
 						if (!(bool)res) {

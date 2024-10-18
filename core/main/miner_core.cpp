@@ -12,17 +12,62 @@
 char *msg_buffer = nullptr;
 char *msg_buffer_end = nullptr;
 
-miner::data *ld;
+struct hex_ {
+private:
+	char *value;
+public:
+	hex_(const std::string &v) {
+		size_t l = v.size();
+		l = l/2 + (l&1);
+		value = new char[l];
+		// big-endian i guest
+		const char *c = v.c_str();
+		char *vl = value;
+		do {
+			vl = (c <= '9') ? c - '0' : c - 'a' + 10;
+			++c;
+			vl = ((c <= '9') ? c - '0' : c - 'a' + 10) << 4;
+			++vl;
+		} while (*(++c));
+	}
+	~hex_() {
+		delete[] value;
+	}
+};
+
+static struct {
+	bool subs, auth;
+	
+	std::unordered_map<std::string, hex_> session;
+	std::unordered_map<std::string, hex_> requipment;
+	std::unordered_map<std::string, hex_> job;
+	
+	void init() {
+		subs = false, auth = false;
+		session.clear();
+		requipment.clear();
+		job.clear();
+	}
+	void clear() {
+		subs = false, auth = false;
+		session.clear();
+		requipment.clear();
+		job.clear();
+		
+	}
+} data_mine;
 
 void miner::init () {
 	msg_buffer = new char[MAX_MSG_BUFFER]{};
 	msg_buffer_end = msg_buffer + MAX_MSG_BUFFER;
-	ld = new miner::data;
+	data_mine.init();
 }
 
 void miner::msg_send_subs_auth(char *buffer, const char *user, const char *pass) {
 	sprintf(buffer,"{\"id\":1,\"method\":\"mining.subscribe\",\"params\":[\"%s\"]}\n{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\"%s\",\"%s\"]}\n", CONNECT_MACHINE, user, pass);
 }
+
+
 
 std::string miner::parsing(const char *msg) {
 	std::string reparser = "";
@@ -39,16 +84,60 @@ std::string miner::parsing(const char *msg) {
 			if (*a == '{') ++branch_t;
 			else if (*a == '}') --branch_t;
 		}
-		if ((branch_t == 0) && ((newline - cur_msg) >= 7)) {
+		if ((branch_t == 0) && ((newline - cur_msg) > 7)) {
 			json::JSON o = json::parse(std::string(cur_msg, newline - cur_msg));
 			json::JSON id = o["id"];
 			if (id.IsNull()) {
-				// nothing
+				std::string m = o["method"];
+				json::JSON p = o["params"];
+				if (m == "mining.set_difficulty") {
+					data_mine.requipment[m] = p[0];
+				} else if (m == "mining.notify") {
+					reparser += "job:\n";
+					reparser += " " + p[0] + "\n"; 
+					reparser += " " + p[1] + "\n"; 
+					reparser += " " + p[2] + "\n"; 
+					reparser += " " + p[3] + "\n"; 
+					reparser += " merkle root:\n"; 
+					for (size_t i = 0, j = p[4].size(); i < j; ++i) {
+						reparser += "   " + p[4][i] + "\n"; 
+					}
+					reparser += " " + p[5] + "\n"; 
+					reparser += " " + p[6] + "\n"; 
+					reparser += " " + p[7] + "\n"; 
+					reparser += " " + (p[8]?"true":"false") + "\n";
+				} else {
+					reparser += "method: " + m + "\n";
+					reparser += "params: " + (std::string)p + "\n";
+				}
 			} else {
+				json::JSON er = o["error"];
+				json::JSON res = o["result"];
 				switch ((int)id) {
 					case 1:
+						if (!er.IsNull()) {
+							reparser += "error on subs: ";
+							reparser += (std::string)er;
+							reparser += "\n";
+							break;
+						}
+						data_mine.subs = true;
+						data_mine.session[(std::string)o[0][0][0]] = hex_((std::string)o[0][0][1]);
+						data_mine.session[(std::string)o[0][1][0]] = hex_((std::string)o[0][1][1]);
+						data_mine.session["job.id"] = hex_((std::string)o[1]);
+						data_mine.session["protocol"] = hex_((std::string)o[2]);
 						break;
 					case 2:
+						if (!(bool)res) {
+							reparser += "auth is invalid";
+							reparser += "\n";
+						}
+						if (!er.IsNull()) {
+							reparser += "error on auth: ";
+							reparser += (std::string)er;
+							reparser += "\n";
+						}
+						data_mine.auth = (bool)res & er.IsNull();
 						break;
 				}
 			}
@@ -59,9 +148,14 @@ std::string miner::parsing(const char *msg) {
 	return reparser;
 }
 
+bool miner::subs_auth() {
+	return data_mine.subs & data_mine.auth;
+}
+
 void miner::clear() {
 	delete[] msg_buffer;
 	delete ld;
+	data_mine.clear();
 }
 
 

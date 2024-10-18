@@ -7,10 +7,6 @@
 
 
 namespace miner {
-	struct data {
-		bool subscribed;
-		bool authorized;
-	};
 
 	void init();
 	
@@ -18,6 +14,7 @@ namespace miner {
 	
 	std::string parsing(const char *);
 	
+	bool subs_auth();
 	
 	void clear();
 }

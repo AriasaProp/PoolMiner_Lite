@@ -257,7 +257,7 @@ struct JSON {
   friend std::ostream &operator<< (std::ostream &, const JSON &);
 };
 
-JSON Parse (const std::string &);
+JSON parse (const std::string &);
 
 JSON Array ();
 

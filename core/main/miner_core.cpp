@@ -35,12 +35,23 @@ std::string miner::parsing(const char *msg) {
 			if (*newline == '\n' || *newline == 0) break;
 		} while (++newline < msg_buffer_end);
 		if ((newline - cur_msg) < 7) goto end_part;
-		//json::JSON o = json::Parse(std::string(cur_msg, newline - cur_msg));
-		reparser += std::string(cur_msg, newline - cur_msg);
-		reparser += "\n";
+		json::JSON o = json::Parse(std::string(cur_msg, newline - cur_msg));
+		json::JSON id = o["id"];
+		if (id.IsNull()) {
+			
+		} else {
+			switch ((int)id) {
+				case 1:
+					break;
+				case 2:
+					break;
+			}
+		}
+		
 end_part:
 		cur_msg = newline + 1;
 	} while (*cur_msg);
+	memset(msg_buffer, 0, MAX_MSG_BUFFER);
 	return reparser;
 }
 

@@ -9,10 +9,10 @@ set(CMAKE_CXX_EXTENSION OFF)
 
 set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Werror -fexceptions -frtti")
 
-set(CORE_SRC "../../../../core/main")
+set(CORE_SRC "../core")
 file(GLOB_RECURSE Include_subDir LIST_DIRECTORIES true ${CORE_SRC})
-file(GLOB_RECURSE Include_Dir LIST_DIRECTORIES true ".")
-file(GLOB_RECURSE Src_Files "*.cpp")
+file(GLOB_RECURSE Include_Dir LIST_DIRECTORIES true "src/main/cpp")
+file(GLOB_RECURSE Src_Files "src/main/cpp/*.cpp")
 add_subdirectory(${CORE_SRC} bin/core)
 
 include_directories(${Include_Dir})

@@ -42,21 +42,20 @@ std::string miner::parsing(const char *msg) {
 			}
 			if (branch_t) break;
 		}
-		if ((newline - cur_msg) < 7) goto end_part;
-		json::JSON o = json::parse(std::string(cur_msg, newline - cur_msg));
-		json::JSON id = o["id"];
-		if (id.IsNull()) {
-			// nothing
-		} else {
-			switch ((int)id) {
-				case 1:
-					break;
-				case 2:
-					break;
+		if ((newline - cur_msg) >= 7) {
+			json::JSON o = json::parse(std::string(cur_msg, newline - cur_msg));
+			json::JSON id = o["id"];
+			if (id.IsNull()) {
+				// nothing
+			} else {
+				switch ((int)id) {
+					case 1:
+						break;
+					case 2:
+						break;
+				}
 			}
 		}
-		
-end_part:
 		cur_msg = newline + 1;
 	} while (*cur_msg);
 	memcpy(msg_buffer, cur_msg, MAX_MSG_BUFFER - (cur_msg - msg_buffer));

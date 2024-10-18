@@ -370,7 +370,7 @@ static json::JSON parse_next (const std::string &str, size_t &offset) {
   return json::JSON ();
 }
 
-json::JSON json::Parse (const std::string &str) {
+json::JSON json::parse (const std::string &str) {
   size_t offset = 0;
   return parse_next (str, offset);
 }

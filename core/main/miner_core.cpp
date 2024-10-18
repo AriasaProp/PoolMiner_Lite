@@ -34,12 +34,10 @@ std::string miner::parsing(const char *msg) {
 		do {
 			if (*newline == '\n' || *newline == 0) break;
 		} while (++newline < msg_buffer_end);
-		{
-			size_t branch_t = 0;
-			for (char *a; a < newline; ++a) {
-				if (*a == '{') ++branch_t;
-				else if (*a == '}') --branch_t;
-			}
+		size_t branch_t = 0;
+		for (char *a; a < newline; ++a) {
+			if (*a == '{') ++branch_t;
+			else if (*a == '}') --branch_t;
 		}
 		if ((branch_t == 0) && ((newline - cur_msg) >= 7)) {
 			json::JSON o = json::parse(std::string(cur_msg, newline - cur_msg));

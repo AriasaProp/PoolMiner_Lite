@@ -24,10 +24,10 @@ struct hex_ {
 		char *vl = value;
 		do {
 			char a = *c;
-			vl = (a <= '9') ? a - '0' : a - 'a' + 10;
+			*vl = (a <= '9') ? a - '0' : a - 'a' + 10;
 			if (!*(++c)) break;
 			char b = *c;
-			vl |= ((b <= '9') ? b - '0' : b - 'a' + 10) << 4;
+			*vl |= ((b <= '9') ? b - '0' : b - 'a' + 10) << 4;
 			++vl;
 		} while (*(++c));
 	}

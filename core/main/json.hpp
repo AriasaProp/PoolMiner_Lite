@@ -131,11 +131,11 @@ struct JSON {
     return *this;
   }
 
-  JSON &operator[] (const char *key);
-  JSON &operator[] (const std::string &key);
-  JSON &operator[] (size_t index);
+  JSON &operator[] (const char *);
+  JSON &operator[] (const std::string &);
+  JSON &operator[] (size_t);
   int length () const;
-  bool hasKey (const std::string &key) const;
+  bool hasKey (const std::string &) const;
   int size () const;
   Class JSONType () const;
   bool IsNull () const;
@@ -171,50 +171,8 @@ struct JSON {
   }
 
   std::string dump (int, std::string) const;
-
-  void SetType (Class type) {
-    if (type == Type) return;
-    ClearInternal ();
-    switch (type) {
-    case Class::Null:
-      Internal.Map = nullptr;
-      break;
-    case Class::Object:
-      Internal.Map = new std::unordered_map<std::string, JSON> ();
-      break;
-    case Class::Array:
-      Internal.List = new std::deque<JSON> ();
-      break;
-    case Class::String:
-      Internal.String = new std::string ();
-      break;
-    case Class::Floating:
-      Internal.Float = 0.0;
-      break;
-    case Class::Integral:
-      Internal.Int = 0;
-      break;
-    case Class::Boolean:
-      Internal.Bool = false;
-      break;
-    }
-
-    Type = type;
-  }
-  void ClearInternal () {
-    switch (Type) {
-    case Class::Object:
-      delete Internal.Map;
-      break;
-    case Class::Array:
-      delete Internal.List;
-      break;
-    case Class::String:
-      delete Internal.String;
-      break;
-    default:;
-    }
-  }
+  void SetType (Class);
+  void ClearInternal ();
 
   friend std::ostream &operator<< (std::ostream &, const JSON &);
 };

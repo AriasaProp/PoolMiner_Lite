@@ -192,6 +192,49 @@ std::string json::JSON::dump (int depth, std::string tab) const {
   }
   return "";
 }
+void json::JSON::SetType (json::JSON::Class type) {
+  if (type == Type) return;
+  ClearInternal ();
+  switch (type) {
+  case json::JSON::Class::Null:
+    Internal.Map = nullptr;
+    break;
+  case json::JSON::Class::Object:
+    Internal.Map = new std::unordered_map<std::string, JSON> ();
+    break;
+  case json::JSON::Class::Array:
+    Internal.List = new std::deque<JSON> ();
+    break;
+  case json::JSON::Class::String:
+    Internal.String = new std::string ();
+    break;
+  case json::JSON::Class::Floating:
+    Internal.Float = 0.0;
+    break;
+  case json::JSON::Class::Integral:
+    Internal.Int = 0;
+    break;
+  case json::JSON::Class::Boolean:
+    Internal.Bool = false;
+    break;
+  }
+
+  Type = type;
+}
+void json::JSON::ClearInternal () {
+  switch (Type) {
+  case json::JSON::Class::Object:
+    delete Internal.Map;
+    break;
+  case json::JSON::Class::Array:
+    delete Internal.List;
+    break;
+  case json::JSON::Class::String:
+    delete Internal.String;
+    break;
+  default:;
+  }
+}
 
 // extras
 static json::JSON parse_next (const std::string &, size_t &);

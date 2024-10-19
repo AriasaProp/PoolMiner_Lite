@@ -15,6 +15,7 @@ char *msg_buffer_end = nullptr;
 
 struct hex_ {
 	char *value;
+	hex_() {}
 	hex_(const int &v) {
 		value = new char[sizeof(v)];
 		memcpy(value, (void*)&v, sizeof(v));

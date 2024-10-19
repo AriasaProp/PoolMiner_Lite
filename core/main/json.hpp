@@ -139,12 +139,12 @@ struct JSON {
   int size () const;
   Class JSONType () const;
   bool IsNull () const;
-  operator std::string () const;
-  operator double () const;
-  operator float () const;
-  operator long () const;
-  operator int () const;
-  operator bool () const;
+  explicit operator std::string () const;
+  explicit operator double () const;
+  explicit operator float () const;
+  explicit operator long () const;
+  explicit operator int () const;
+  explicit operator bool () const;
 
   JSONWrapper<std::unordered_map<std::string, JSON>> ObjectRange () {
     if (Type == Class::Object)

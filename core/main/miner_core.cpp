@@ -17,7 +17,7 @@ struct hex_ {
 	char *value;
 	hex_(const int &v) {
 		value = new char[sizeof(v)];
-		memcpy(value, v, sizeof(v));
+		memcpy(value, (void*)&v, sizeof(v));
 	}
 	hex_(const std::string &v) {
 		size_t l = v.size();
@@ -96,10 +96,10 @@ std::string miner::parsing(const char *msg) {
 				std::string m = o["method"];
 				json::JSON p = o["params"];
 				if (m == "mining.set_difficulty") {
-					data_mine.requipment[m] = hex_((int)p[0]);
+					data_mine.requipment[m] = hex_((int)p[(size_t)0]);
 				} else if (m == "mining.notify") {
 					reparser << "job:\n";
-					reparser << " " << p[0] << "\n"; 
+					reparser << " " << p[(size_t)0] << "\n"; 
 					reparser << " " << p[1] << "\n"; 
 					reparser << " " << p[2] << "\n"; 
 					reparser << " " << p[3] << "\n"; 

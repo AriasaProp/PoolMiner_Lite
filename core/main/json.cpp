@@ -98,9 +98,42 @@ static std::string json_escape (const std::string &str) {
   }
   return output;
 }
-json::JSON::operator std::string () const {
-  return (Type == json::JSON::Class::String) ? json_escape (*Internal.String) : std::string ("");
+
+json::JSON &json::JSON::operator[] (const char *key) {
+  SetType (Class::Object);
+  return Internal.Map->operator[] (std::string (key));
 }
+json::JSON &json::JSON::operator[] (const std::string &key) {
+  SetType (Class::Object);
+  return Internal.Map->operator[] (key);
+}
+json::JSON &json::JSON::operator[] (size_t index) {
+  SetType (Class::Array);
+  if (index >= Internal.List->size ()) Internal.List->resize (index + 1);
+  return Internal.List->operator[] (index);
+}
+int json::JSON::length () const {
+  if (Type == Class::Array)
+    return Internal.List->size ();
+  else
+    return -1;
+}
+bool json::JSON::hasKey (const std::string &key) const {
+  if (Type == Class::Object)
+    return Internal.Map->find (key) != Internal.Map->end ();
+  return false;
+}
+int json::JSON::size () const {
+  if (Type == Class::Object)
+    return Internal.Map->size ();
+  else if (Type == Class::Array)
+    return Internal.List->size ();
+  else
+    return -1;
+}
+json::JSON::Class json::JSON::JSONType () const { return Type; }
+bool json::JSON::IsNull () const { return Type == Class::Null; }
+json::JSON::operator std::string () const { return (Type == json::JSON::Class::String) ? json_escape (*Internal.String) : std::string (""); }
 json::JSON::operator double () const {
   return (Type == json::JSON::Class::Floating) ? Internal.Float : 0.0;
 }

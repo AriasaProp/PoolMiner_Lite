@@ -131,52 +131,14 @@ struct JSON {
     return *this;
   }
 
-  JSON &operator[] (const char *key) {
-    SetType (Class::Object);
-    return Internal.Map->operator[] (std::string (key));
-  }
-  JSON &operator[] (const std::string &key) {
-    SetType (Class::Object);
-    return Internal.Map->operator[] (key);
-  }
-
-  JSON &operator[] (int index) {
-    SetType (Class::Array);
-    if ((unsigned)index >= Internal.List->size ()) Internal.List->resize (index + 1);
-    return Internal.List->operator[] ((unsigned)index);
-  }
-  JSON &operator[] (unsigned index) {
-    SetType (Class::Array);
-    if (index >= Internal.List->size ()) Internal.List->resize (index + 1);
-    return Internal.List->operator[] (index);
-  }
-
-  int length () const {
-    if (Type == Class::Array)
-      return Internal.List->size ();
-    else
-      return -1;
-  }
-
-  bool hasKey (const std::string &key) const {
-    if (Type == Class::Object)
-      return Internal.Map->find (key) != Internal.Map->end ();
-    return false;
-  }
-
-  int size () const {
-    if (Type == Class::Object)
-      return Internal.Map->size ();
-    else if (Type == Class::Array)
-      return Internal.List->size ();
-    else
-      return -1;
-  }
-
-  Class JSONType () const { return Type; }
-
-  /// Functions for getting primitives from the JSON object.
-  bool IsNull () const { return Type == Class::Null; }
+  JSON &operator[] (const char *key);
+  JSON &operator[] (const std::string &key);
+  JSON &operator[] (size_t index);
+  int length () const;
+  bool hasKey (const std::string &key) const;
+  int size () const;
+  Class JSONType () const;
+  bool IsNull () const;
   operator std::string () const;
   operator double () const;
   operator float () const;

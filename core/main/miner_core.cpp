@@ -152,7 +152,6 @@ bool miner::subs_auth() {
 
 void miner::clear() {
 	delete[] msg_buffer;
-	delete ld;
 	data_mine.clear();
 }
 

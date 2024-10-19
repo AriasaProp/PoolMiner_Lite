@@ -23,9 +23,11 @@ struct hex_ {
 		const char *c = v.c_str();
 		char *vl = value;
 		do {
-			vl = (c <= '9') ? c - '0' : c - 'a' + 10;
+			char a = *c;
+			vl = (a <= '9') ? a - '0' : a - 'a' + 10;
 			if (!*(++c)) break;
-			vl |= ((c <= '9') ? c - '0' : c - 'a' + 10) << 4;
+			char b = *c;
+			vl |= ((b <= '9') ? b - '0' : b - 'a' + 10) << 4;
 			++vl;
 		} while (*(++c));
 	}

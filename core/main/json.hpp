@@ -138,7 +138,7 @@ struct JSON {
   int size () const;
   Class JSONType () const;
   bool IsNull () const;
-  explicit operator std::string () const;
+  operator std::string () const;
   explicit operator double () const;
   explicit operator float () const;
   explicit operator long () const;

@@ -15,6 +15,9 @@ char *msg_buffer_end = nullptr;
 
 struct hex_ {
 	char *value;
+	hex_(const int &v) {
+		value = new int(v);
+	}
 	hex_(const std::string &v) {
 		size_t l = v.size();
 		l = l/2 + (l&1);

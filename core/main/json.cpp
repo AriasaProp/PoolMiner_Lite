@@ -107,10 +107,10 @@ json::JSON &json::JSON::operator[] (const std::string &key) {
   SetType (Class::Object);
   return Internal.Map->operator[] (key);
 }
-json::JSON &json::JSON::operator[] (size_t index) {
+json::JSON &json::JSON::operator[] (int index) {
   SetType (Class::Array);
   if (index >= Internal.List->size ()) Internal.List->resize (index + 1);
-  return Internal.List->operator[] (index);
+  return Internal.List->operator[] ((unsigned)index);
 }
 int json::JSON::length () const {
   if (Type == Class::Array)

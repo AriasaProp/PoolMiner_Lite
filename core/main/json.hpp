@@ -132,7 +132,7 @@ struct JSON {
   }
   JSON &operator[] (const char *);
   JSON &operator[] (const std::string &);
-  JSON &operator[] (size_t);
+  JSON &operator[] (int);
   int length () const;
   bool hasKey (const std::string &) const;
   int size () const;

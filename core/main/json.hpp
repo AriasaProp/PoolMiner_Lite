@@ -130,8 +130,7 @@ struct JSON {
     *Internal.String = std::string (s);
     return *this;
   }
-
-  explicit JSON &operator[] (const char *);
+  JSON &operator[] (const char *);
   JSON &operator[] (const std::string &);
   JSON &operator[] (size_t);
   int length () const;

@@ -92,7 +92,7 @@ std::string miner::parsing(const char *msg) {
 				std::string m = o["method"];
 				json::JSON p = o["params"];
 				if (m == "mining.set_difficulty") {
-					data_mine.requipment[m] = p[0];
+					data_mine.requipment[m] = hex_(p[0]);
 				} else if (m == "mining.notify") {
 					reparser << "job:\n";
 					reparser << " " << p[0] << "\n"; 

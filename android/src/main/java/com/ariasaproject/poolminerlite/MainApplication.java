@@ -1,8 +1,8 @@
 package com.ariasaproject.poolminerlite;
 
+import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.Application;
 import android.content.res.Configuration;
 
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory;
@@ -17,7 +17,11 @@ public class MainApplication extends Application {
         super.onCreate();
         minerViewModel = new AndroidViewModelFactory(this).create(MinerViewModel.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel =
+                    new NotificationChannel(
+                            NOTIFICATION_CHANNEL_ID,
+                            getString(R.string.app_name),
+                            NotificationManager.IMPORTANCE_DEFAULT);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }

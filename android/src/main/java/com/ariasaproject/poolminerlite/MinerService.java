@@ -1,22 +1,21 @@
 package com.ariasaproject.poolminerlite;
 
+import static com.ariasaproject.poolminerlite.MainApplication.NOTIFICATION_CHANNEL_ID;
+import static com.ariasaproject.poolminerlite.MainApplication.NOTIFICATION_ID;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Keep;
 import androidx.core.app.NotificationCompat;
 
-import static com.ariasaproject.poolminerlite.MainApplication.NOTIFICATION_ID;
-import static com.ariasaproject.poolminerlite.MainApplication.NOTIFICATION_CHANNEL_ID;
-
 public class MinerService extends Service {
     MinerViewModel mVM;
     LocalBinder local = new LocalBinder();
     NotificationCompat.Builder notifBuilder;
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -59,7 +58,9 @@ public class MinerService extends Service {
                 stopForeground(true);
                 break;
             case 2:
-                startForeground(NOTIFICATION_ID, notifBuilder
+                startForeground(
+                        NOTIFICATION_ID,
+                        notifBuilder
                                 .setContentText("Service is running in the foreground")
                                 .build());
                 break;

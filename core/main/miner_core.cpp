@@ -90,6 +90,7 @@ std::string miner::parsing(const char *msg) {
 			if (*a == '{') ++branch_t;
 			else if (*a == '}') --branch_t;
 		}
+		try {
 		if ((branch_t == 0) && ((newline - cur_msg) > 7)) {
 			json::JSON o = json::parse(std::string(cur_msg, newline - cur_msg));
 			json::JSON id = o["id"];
@@ -122,9 +123,7 @@ std::string miner::parsing(const char *msg) {
 				switch ((int)id) {
 					case 1:
 						if (!er.IsNull()) {
-							reparser << "error on subs: ";
-							reparser << (std::string)er;
-							reparser << "\n";
+							reparser << "error on subs: " << (std::string)er << "\n";
 							break;
 						}
 						data_mine.subs = true;
@@ -134,17 +133,16 @@ std::string miner::parsing(const char *msg) {
 						data_mine.session["protocol"] = hex_((std::string)res[2]);
 						break;
 					case 2:
-						if (!(bool)res) {
-							reparser << "auth is invalid" << "\n";
-						}
-						if (!er.IsNull()) {
+						if (!(bool)res)
+							reparser << "auth is invalid\n";
+						if (!er.IsNull())
 							reparser << "error on auth: " << (std::string)er << "\n";
-						}
 						data_mine.auth = (bool)res & er.IsNull();
 						break;
 				}
 			}
 		}
+		} catch (...) {}
 		cur_msg = newline + 1;
 	} while (*cur_msg);
 	memcpy(msg_buffer, cur_msg, MAX_MSG_BUFFER - (cur_msg - msg_buffer));
